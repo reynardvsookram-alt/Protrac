@@ -538,6 +538,85 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
   .side-foot button span{display:inline}.side-foot button span.lbl{display:none}
   .guide ol{font-size:12.5px}
 }
+
+/* ===== v3: purchasing + form fix ===== */
+.mbody{grid-template-columns:repeat(2,minmax(0,1fr))}
+.mbody>*{min-width:0}
+.field input,.field select,.field textarea{width:100%;min-width:0}
+.field.full,.mbody .full{grid-column:1/-1}
+.more{grid-column:1/-1;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:var(--card-alt)}
+.more summary{cursor:pointer;padding:10px 0;font-size:12.5px;font-weight:700;color:var(--ink-soft)}
+.more[open]{padding-bottom:12px}
+.moregrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.moregrid>*{min-width:0}
+.pricehint{grid-column:1/-1;font-size:12.5px;padding:9px 12px;border-radius:9px;background:var(--card-alt);border:1px dashed var(--line);color:var(--ink-soft)}
+.pricehint b{color:var(--ink)}
+.pricehint:empty{display:none}
+.stagecards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.stagecard{position:relative;text-align:left;border:1px solid var(--line);border-top:4px solid var(--line);border-radius:12px;padding:13px 15px;background:linear-gradient(180deg,var(--card),var(--card-alt));box-shadow:var(--raise);cursor:pointer;color:var(--ink);font:inherit}
+.stagecard:hover{border-color:var(--weld-dim)}
+.stagecard.on{outline:2px solid var(--weld);outline-offset:1px}
+.stagecard .n{font-size:28px;font-weight:800;font-family:var(--mono);line-height:1.1}
+.stagecard .l{font-size:11.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;margin-top:3px}
+.stagecard .s{font-size:12px;color:var(--ink-soft);margin-top:4px;min-height:16px}
+.stagecard .arr{position:absolute;right:-11px;top:50%;transform:translateY(-50%);z-index:1;color:var(--ink-soft);font-size:14px}
+.stagecard:last-child .arr{display:none}
+.st-toorder{border-top-color:var(--warn)} .st-waiting{border-top-color:var(--hold)} .st-ordered{border-top-color:var(--info)} .st-received{border-top-color:var(--ok)}
+.stagehelp{font-size:13px;color:var(--ink-soft);margin:-4px 0 12px}
+.pgroup{border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:12px;overflow:hidden}
+.pghead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:11px 14px;background:var(--card-alt);border-bottom:1px solid var(--line)}
+.pghead .t{font-weight:800;font-size:14px}
+.pghead .t button{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.pghead .t button:hover{color:var(--weld)}
+.pghead .m{font-size:12px;color:var(--ink-soft)}
+.pghead .sp{flex:1}
+.pline{display:grid;grid-template-columns:24px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.pline:first-of-type{border-top:0}
+.pline.nocb{grid-template-columns:minmax(0,1fr) auto auto}
+.pline .d{font-weight:700;font-size:13.5px}
+.pline .x{font-size:12px;color:var(--ink-soft);margin-top:2px}
+.pline .q{font-family:var(--mono);font-size:13px;white-space:nowrap;text-align:right}
+.pline .a{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.late{color:var(--bad);font-weight:700}
+.rfqc{border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:12px;overflow:hidden}
+.rfqc .hd{padding:12px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;border-bottom:1px solid var(--line);background:var(--card-alt)}
+.rfqc .no{font-family:var(--mono);font-weight:800;color:var(--weld)}
+.rfqc .jb{font-weight:700}
+.rfqc .jb button{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+.rfqc .meta{font-size:12px;color:var(--ink-soft)}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.srow:first-child{border-top:0}
+.srow .n{font-weight:700}
+.schip{font-size:11.5px;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap}
+.rfqc .ft{display:flex;gap:8px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--line);background:var(--card-alt);align-items:center}
+.rfqc details{padding:0 14px 10px}
+.rfqc details summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--ink-soft);padding:8px 0}
+.itemli{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:4px 0;border-top:1px dashed var(--line)}
+.itemli span{flex:1}
+.cmp td,.cmp th{white-space:nowrap}
+.cmp td.it{white-space:normal;min-width:160px}
+.cmp label{display:flex;gap:6px;align-items:center;cursor:pointer;font-family:var(--mono);font-size:12.5px}
+.cmp .cheap{color:var(--ok);font-weight:800}
+.cmp .na{color:var(--ink-soft);font-style:italic;font-family:var(--sans)}
+.qtab input,.qtab select{border:1px solid var(--line);border-radius:7px;padding:6px 8px;background:var(--card);color:var(--ink);font:inherit;font-size:13px;width:100%;min-width:0}
+.qtab td{vertical-align:middle}
+.qtab .pi{width:110px}
+.jobpick{display:flex;flex-direction:column;gap:6px;max-height:380px;overflow:auto}
+.jobpick button{text-align:left;border:1px solid var(--line);background:var(--card-alt);border-radius:9px;padding:10px 12px;font:inherit;color:var(--ink);cursor:pointer}
+.jobpick button:hover{border-color:var(--weld)}
+@media(max-width:760px){
+  .stagecards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .stagecard .arr{display:none}
+  .stagecard .n{font-size:24px}
+  .mbody{grid-template-columns:1fr}
+  .moregrid{grid-template-columns:1fr}
+  .pline{grid-template-columns:24px minmax(0,1fr);row-gap:6px}
+  .pline.nocb{grid-template-columns:minmax(0,1fr)}
+  .pline .q,.pline .a{grid-column:2/-1;text-align:left;justify-content:flex-start}
+  .pline.nocb .q,.pline.nocb .a{grid-column:1/-1}
+  .srow{grid-template-columns:minmax(0,1fr) auto}
+  .srow .a{grid-column:1/-1}
+}
 @media(max-width:760px){.dashrow,.dgrid2{grid-template-columns:1fr}.mbody{grid-template-columns:1fr}.field.full{grid-column:1}.side{width:62px}.brand h1,.brand .sub,.nav button span.lbl,.nav .cnt,.side-foot button span{display:none}}
 </style>
 </head>
@@ -572,7 +651,7 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 <div class="scrim" id="scrim"><div class="modal" id="mainmodal">
   <header><h3 id="mtitle">Add</h3><button class="x" onclick="closeForm()">×</button></header>
   <div class="mbody" id="mbody"></div>
-  <footer><button class="btn" onclick="closeForm()">Cancel</button><button class="btn primary" onclick="saveForm()">Save</button></footer>
+  <footer><button class="btn" onclick="closeForm()">Cancel</button><button class="btn primary" id="mainsave" onclick="saveForm()">Save</button></footer>
 </div></div>
 <div class="scrim" id="askscrim"><div class="modal small">
   <header><h3 id="asktitle">Confirm</h3></header>
@@ -661,7 +740,7 @@ const SCHEMA={
   materials:{ label:"Materials", icon:"🔩", primary:"description", views:["grid"],
     gridCols:["jobRef","lineNo","description","size","qtyReq","unit","_price","_mstatus"],
     fields:[
-      {k:"jobRef",l:"Job",t:"link",to:"jobs"},
+      {k:"jobRef",l:"Job",t:"link",to:"jobs",req:1,full:1},
       {k:"lineNo",l:"Item / mark",t:"text",mono:1},
       {k:"description",l:"Description",t:"text",req:1,full:1},
       {k:"size",l:"Size / dimensions",t:"text"},
@@ -703,7 +782,7 @@ const TABLES=Object.keys(SCHEMA);
 
 /* ============ STATE ============ */
 let DB=null, current="dashboard", currentView="dashboard", sortKey=null, sortDir=1, jobFilter=null;
-let matFilter="", matSel=new Set(), impCtx=null, priceQ="", priceCat="", priceVat=false, qcFilter="", phaseCtx=null, editingId=null, formTable=null, formMode="record", lineCtx=null, detailJob=null, detailTab="overview", calMonth=null;
+let purStage="", purQ="", purSel=new Set(), purCtx=null, matFilter="", matSel=new Set(), impCtx=null, priceQ="", priceCat="", priceVat=false, qcFilter="", phaseCtx=null, editingId=null, formTable=null, formMode="record", lineCtx=null, detailJob=null, detailTab="overview", calMonth=null;
 
 function load(){
   try{const r=localStorage.getItem(STORE);if(r){DB=JSON.parse(r);migrate();save();return;}}catch(e){}
@@ -1033,6 +1112,7 @@ function phaseStepper(j){
   return `<div class="stepper ${j.phase===PH.LOST?"lost":""}">`+steps.map((s,i)=>`<div class="step ${idx>=0&&i<idx?"done":i===idx?"cur":""}"><span class="sdot">${idx>=0&&i<idx?"✓":i+1}</span><span class="slbl">${s[1]}</span><span class="sdate">${s[2]&&(idx<0||i<=idx)?esc(fmtShort(s[2])):""}</span></div>`).join("")+`</div>`;
 }
 function openPhaseAction(jobId,action){
+  {const sb=document.getElementById("mainsave");if(sb)sb.textContent="Save";}
   const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;
   formMode="phase";phaseCtx={jobId,action};
   const title={quoted:"Quote submitted to "+managerLabel(),po:"Purchase order received",proc:"Start procurement",prod:"Start production",done:"Mark delivered",lost:"Mark lost / declined",reopen:"Reopen job"}[action];
@@ -1114,6 +1194,7 @@ function openModal(title,body,opts){
   document.getElementById("mbody").innerHTML=body;
   document.getElementById("mainmodal").className="modal"+(opts.wide?" wide":"");
   const ft=document.querySelector("#mainmodal footer");if(ft)ft.style.display=opts.noFooter?"none":"";
+  const sb=document.getElementById("mainsave");if(sb)sb.textContent=opts.ok||"Save";
   document.getElementById("scrim").classList.add("show");
 }
 function inspector(){return (DB.meta&&DB.meta.inspectorName)||"QC";}
@@ -1217,6 +1298,7 @@ function searchPrices(q,opts){
 function matQuery(m){return [m.description,m.size,m.length&&/\d/.test(m.length)?"":""].join(" ");}
 function matPrice(m){
   if(m.unitCost!==""&&m.unitCost!=null&&!isNaN(+m.unitCost)&&+m.unitCost>0)return{price:+m.unitCost,src:"manual",uom:m.unit||""};
+  if(m.quotedPrice!==""&&m.quotedPrice!=null&&!isNaN(+m.quotedPrice)&&+m.quotedPrice>0)return{price:+m.quotedPrice,src:(refName("suppliers",m.supplierRef)||"supplier")+" quote",uom:m.unit||"",item:m.priceItemRef?priceItem(m.priceItemRef):null};
   const it=m.priceItemRef&&priceItem(m.priceItemRef);if(!it)return null;
   const b=bestPrice(it);return b?{price:b.price,src:b.supplier,uom:it.uom,item:it,date:b.date}:{price:null,src:"",uom:it.uom,item:it};
 }
@@ -1330,10 +1412,11 @@ function savePriceForms(){
 }
 
 /* ============ v2: MATERIALS ============ */
-function matStatus(m){const q=+m.qtyReq||0,o=+m.qtyOrdered||0,r=+m.qtyReceived||0;
-  if(q&&r>=q)return"Received";if(r>0)return"Part received";if(q&&o>=q)return"Ordered";if(o>0)return"Part ordered";if(m.rfqRef&&(DB.procurement||[]).some(p=>p.id===m.rfqRef))return"RFQ sent";return"Required";}
-const MSTAT_TOK={Required:"idle","RFQ sent":"warn","Part ordered":"info",Ordered:"info","Part received":"prog",Received:"ok"};
-function matChip(m){const s=matStatus(m);return `<button class="mchip" style="${tokStyle(MSTAT_TOK[s])}" title="Tap to advance: ordered → received" onclick="event.stopPropagation();advanceMat('${m.id}')">${s}</button>`;}
+function matStatus(m){const st=matStage(m),q=+m.qtyReq||0,r=+m.qtyReceived||0;
+  if(st==="received")return"Received";if(st==="ordered")return r>0?"Part received":"Ordered";
+  if(st==="waiting")return matQuotes(m).length?"Quoted":"RFQ sent";return"To order";}
+const MSTAT_TOK={"To order":"warn","RFQ sent":"hold",Quoted:"hold",Ordered:"info","Part received":"prog",Received:"ok"};
+function matChip(m){const s=matStatus(m);return `<button class="mchip" style="${tokStyle(MSTAT_TOK[s])}" title="Tap for the next step" onclick="event.stopPropagation();matAction('${m.id}')">${s}</button>`;}
 function advanceMat(id){
   const m=(DB.materials||[]).find(x=>x.id===id);if(!m)return;const s=matStatus(m),q=+m.qtyReq||1;
   if(s==="Received"){toast("Already received — edit the line to change quantities");return;}
@@ -1370,13 +1453,13 @@ function renderJobMaterials(j){
   const sel=ms.filter(m=>matSel.has(m.id));
   const bulk=sel.length?`<div class="bulkbar"><b>${sel.length} selected</b><span class="grow" style="flex:1"></span>
     <button class="btn primary" onclick="openRfqFromMaterials('${j.id}')">✉️ Send supplier RFQ</button>
-    <button class="btn" onclick="bulkMat('ordered')">Mark ordered</button><button class="btn" onclick="bulkMat('received')">Mark received</button><button class="btn" onclick="bulkMat('delete')">🗑 Delete</button>
+    <button class="btn" onclick="purSel=new Set(matSel);openOrderModal()">Ordered direct</button><button class="btn" onclick="receiveMats(Array.from(matSel));matSel=new Set();">Mark received</button><button class="btn" onclick="bulkMat('delete')">🗑 Delete</button>
     <button class="btn" onclick="matSel=new Set();renderDetail()">✕</button></div>`:"";
   return `<div class="dsection"><h3><span class="ic">🔩</span> Material list</h3>${tb}
     <div class="msum"><div class="m"><b>${t.n}</b>lines</div><div class="m"><b>${money(t.cost)}</b>est. material cost excl. VAT${t.unpriced?` · ${t.unpriced} unpriced`:""}</div><div class="m"><b>${t.rec}/${t.n}</b>received</div><div class="m"><b>${ms.filter(m=>m.mtr).length}/${t.n}</b>MTRs on file</div></div>
     ${procReadyNudge(j)}
     <div class="tablewrap"><table class="mtab"><thead><tr><th><input type="checkbox" class="cbx" ${allSel?"checked":""} onchange="selAllMats('${j.id}',this.checked)"></th><th>#</th><th>Description</th><th>Qty</th><th>Price (best)</th><th>Status</th><th>MTR</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="impnote" style="margin-top:8px">Tap a status to advance it (→ ordered → received). Line totals assume qty is in the supplier's unit (sheet / length / each) — check the unit before costing a quote. Select lines to send a supplier RFQ.</div>
+    <div class="impnote" style="margin-top:8px">Tick lines to send a supplier RFQ. Tap a status for its next step. Line totals assume qty is in the supplier's unit (sheet / length / each). The <b>Purchasing</b> page shows every job's lines by stage.</div>
     ${bulk}</div>`;
 }
 function toggleMatSel(id,on){if(on)matSel.add(id);else matSel.delete(id);renderDetail();}
@@ -1394,12 +1477,13 @@ function priceAll(jobId){const r=autoPriceMaterials(jobMats(jobId));save();reren
 function nextRfqNo(){let n=0;(DB.procurement||[]).forEach(p=>{const m=/(\d+)\s*$/.exec(p.rfqNumber||"");if(m)n=Math.max(n,+m[1]);});return "S-RFQ-"+String(n+1).padStart(3,"0");}
 function openRfqFromMaterials(jobId){
   const sel=(DB.materials||[]).filter(m=>matSel.has(m.id));if(!sel.length)return;
+  const jset=new Set(sel.map(m=>m.jobRef));if(jset.size>1)jobId="";
   formMode="rfqmake";impCtx={jobId,ids:sel.map(m=>m.id)};
   const sups=(DB.suppliers||[]).slice().sort((a,b)=>a.company.localeCompare(b.company));
   openModal("Send supplier RFQ",`<div class="field"><label>RFQ number</label><input data-k="rfqNumber" value="${nextRfqNo()}"></div>
     <div class="field"><label>Reply needed by</label><input type="date" data-k="replyBy" value="${addWorkingDays(todayISO(),3)}"></div>
     <div class="field full"><label>${sel.length} line${sel.length>1?"s":""}</label><div class="impnote">${sel.slice(0,6).map(m=>esc([m.qtyReq,m.unit,m.description,m.size].filter(Boolean).join(" "))).join("<br>")}${sel.length>6?"<br>…":""}</div></div>
-    <div class="field full"><label>Send to</label><div class="suplist">${sups.map(s=>`<label><input type="checkbox" class="cbx" data-sup="${s.id}" ${(s.supplies||[]).includes("Steel")?"checked":""}> ${esc(s.company)} <span class="resp">${esc((s.supplies||[]).join(", "))}</span></label>`).join("")||'<div class="minimsg">Add suppliers first (Suppliers page).</div>'}</div></div>`);
+    <div class="field full"><label>Send to</label><div class="suplist">${sups.map(s=>`<label><input type="checkbox" class="cbx" data-sup="${s.id}" ${(s.supplies||[]).includes("Steel")?"checked":""}> ${esc(s.company)} <span class="resp">${esc((s.supplies||[]).join(", "))}</span></label>`).join("")||'<div class="minimsg">Add suppliers first (Suppliers page).</div>'}</div></div>`,{ok:"Create RFQ"});
 }
 function saveRfqFromMaterials(){
   const d={};document.querySelectorAll("#mbody [data-k]").forEach(el=>{d[el.dataset.k]=el.value;});
@@ -1411,12 +1495,12 @@ function saveRfqFromMaterials(){
   DB.procurement.push(rfq);mats.forEach(m=>{m.rfqRef=rfq.id;});
   const j=DB.jobs.find(x=>x.id===impCtx.jobId);
   if(j&&j.phase===PH.PO)setPhase(j,PH.PROC,{note:"supplier RFQ "+rfq.rfqNumber+" sent"});
-  matSel=new Set();save();closeForm();rerender();
+  matSel=new Set();purSel=new Set();if(current==="purchasing"&&!detailJob)purStage="waiting";save();closeForm();rerender();
   showRfqText(rfq.id);toast("RFQ "+rfq.rfqNumber+" created — copy the text into your email");
 }
 function rfqText(rfq){
   const mats=(rfq.materialRefs||[]).map(id=>(DB.materials||[]).find(m=>m.id===id)).filter(Boolean);
-  const job=refName("jobs",rfq.jobRef);
+  const job=rfq.jobRef?refName("jobs",rfq.jobRef):"";
   let lines;
   if(mats.length){
     const rows=[["#","Description","Size","Grade","Qty","Unit"]].concat(mats.map((m,i)=>[String(i+1),m.description||"",m.size||"",m.grade||"",String(m.qtyReq??""),m.unit||""]));
@@ -1731,6 +1815,245 @@ function importPriceWorkbook(){pickXl(async f=>{
   }catch(e){toast(e.message||"Couldn't read that workbook");}
 });}
 
+/* ============ v3: PURCHASING ============ */
+function formPriceHint(){
+  const el=document.getElementById("pricehint");if(!el)return;
+  const v=k=>((document.querySelector(`#mbody [data-k="${k}"]`)||{}).value||"");
+  const q=[v("description"),v("size")].join(" ").trim();
+  if(q.length<3||!(DB.priceItems||[]).length){el.innerHTML="";return;}
+  const r=searchPrices(q);
+  if(!r.length||r[0].s<5){el.innerHTML=`💲 No price-book match yet — you can pick one later with <b>Find price</b>.`;return;}
+  const it=r[0].it,b=bestPrice(it);
+  el.innerHTML=`💲 Price book: <b>${esc(it.description)}</b>${it.stockLength&&it.stockLength!=="-"?" ("+esc(it.stockLength)+")":""} — ${b?`<b>${money(b.price)}</b> per ${esc((it.uom||"unit").toLowerCase())} from ${esc(b.supplier)}`:"no price yet"}. It's linked automatically when you save.`;
+}
+function matRfq(m){return m.rfqRef?(DB.procurement||[]).find(p=>p.id===m.rfqRef):null;}
+function matStage(m){
+  const q=+m.qtyReq||0,o=+m.qtyOrdered||0,r=+m.qtyReceived||0;
+  if(r>0&&(!q||r>=q))return"received";
+  if(o>0||r>0)return"ordered";
+  if(matRfq(m))return"waiting";
+  return"toorder";
+}
+function matQuotes(m){const r=matRfq(m);if(!r)return[];return (r.suppliers||[]).filter(s=>s.prices&&s.prices[m.id]&&hasPrice(s.prices[m.id])).map(s=>({ln:s,price:+s.prices[m.id].price}));}
+function liveJob(m){const j=(DB.jobs||[]).find(x=>x.id===m.jobRef);return !j||j.phase!==PH.LOST;}
+function rfqOpen(r){
+  const mats=(r.materialRefs||[]).map(id=>(DB.materials||[]).find(m=>m.id===id)).filter(Boolean);
+  if((r.materialRefs||[]).length)return mats.some(m=>m.rfqRef===r.id&&matStage(m)==="waiting");
+  return !(r.suppliers||[]).some(s=>s.status==="Ordered"||s.status==="Received");
+}
+function purCounts(){
+  const ms=(DB.materials||[]).filter(liveJob);
+  const by=s=>ms.filter(m=>matStage(m)===s);
+  const recOpen=by("received").filter(m=>{const j=(DB.jobs||[]).find(x=>x.id===m.jobRef);return !j||!isClosed(j);});
+  return {toorder:by("toorder").length,waiting:(DB.procurement||[]).filter(rfqOpen).length,ordered:by("ordered").length,received:recOpen.length,_ms:ms,_rec:recOpen};
+}
+function purMatch(m){if(!purQ)return true;const q=purQ.toLowerCase();return [m.description,m.size,m.grade,refName("jobs",m.jobRef),refName("suppliers",m.supplierRef)].join(" ").toLowerCase().includes(q);}
+function jobHead(j,extra){
+  if(!j)return `<div class="pghead"><span class="t">No job</span><span class="sp"></span>${extra||""}</div>`;
+  const dm=jobDueMeta(j);
+  return `<div class="pghead"><span class="t"><button onclick="openJob('${j.id}','materials')">${esc(j.jobName)}</button></span><span class="m">${esc(j.client||"")}</span><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span><span class="m ${dm.cls}">${esc(dm.txt)}</span><span class="sp"></span>${extra||""}</div>`;
+}
+function renderPurchasing(c){
+  const C=purCounts();
+  if(!purStage)purStage=C.toorder?"toorder":C.waiting?"waiting":C.ordered?"ordered":"toorder";
+  const ms=C._ms,t=matTotals(ms.filter(m=>matStage(m)==="toorder"));
+  const open=(DB.procurement||[]).filter(rfqOpen),lines=open.flatMap(r=>r.suppliers||[]);
+  const replied=lines.filter(s=>s.status!=="RFQ Sent").length;
+  const oldest=Math.max(0,...lines.filter(s=>s.status==="RFQ Sent"&&s.dateSent).map(s=>workDaysBetween(s.dateSent,todayISO())));
+  const ord=ms.filter(m=>matStage(m)==="ordered"),late=ord.filter(m=>m.eta&&m.eta<todayISO()).length;
+  const noMtr=C._rec.filter(m=>!m.mtr).length;
+  const card=(k,l,n,s)=>`<button class="stagecard st-${k} ${purStage===k?"on":""}" onclick="purStage='${k}';purSel=new Set();render()"><div class="n">${n}</div><div class="l">${l}</div><div class="s">${s}</div><span class="arr">›</span></button>`;
+  const cards=`<div class="stagecards">
+    ${card("toorder","To order",C.toorder,C.toorder?`lines · est. ${money(t.cost)}`:"nothing waiting")}
+    ${card("waiting","Waiting on suppliers",C.waiting,C.waiting?`RFQs · ${replied}/${lines.length} replied${oldest?` · oldest ${oldest} wd`:""}`:"no open RFQs")}
+    ${card("ordered","Ordered",C.ordered,C.ordered?(late?`<span class="late">${late} past ETA</span>`:"lines on order"):"nothing on order")}
+    ${card("received","Received",C.received,C.received?(noMtr?`<span class="late">${noMtr} missing MTR</span>`:"all MTRs on file"):"open jobs only")}</div>`;
+  const help={toorder:"Lines from your job material lists that haven't gone to suppliers yet. Tick lines and send one RFQ, or mark them ordered if you're buying direct.",
+    waiting:"RFQs out to suppliers, oldest first. When a supplier replies, tap <b>Enter quote</b> and type their price per item — it goes into the price book. Then <b>Compare &amp; order</b>.",
+    ordered:"On order, grouped by supplier. Tap <b>Received</b> as deliveries arrive.",
+    received:"Received for jobs still open. Tap <b>MTR</b> when the mill cert is filed — DNV / certified work needs them."}[purStage];
+  const tools=`<div class="tbar"><div class="gsearch grow" style="margin:0"><input id="purq" value="${esc(purQ)}" placeholder="Filter by item, size, job or supplier…" oninput="purQ=this.value;renderPurBody()"></div>
+    <button class="btn" onclick="pickJobThen('add')">+ Add material</button><button class="btn" onclick="pickJobThen('import')">📋 Paste from Excel</button></div>`;
+  c.innerHTML=cards+`<div class="stagehelp">${help}</div>`+tools+`<div id="purbody"></div>`;
+  renderPurBody();
+}
+function renderPurBody(){
+  const el=document.getElementById("purbody");if(!el)return;
+  const ms=(DB.materials||[]).filter(liveJob).filter(purMatch);
+  const jobsOf=list=>{const g={};list.forEach(m=>{(g[m.jobRef||""]=g[m.jobRef||""]||[]).push(m);});return Object.keys(g).map(id=>({j:(DB.jobs||[]).find(x=>x.id===id),ms:g[id]})).sort((a,b)=>{const da=a.j?(jobState(a.j).due||"9999"):"9999",db=b.j?(jobState(b.j).due||"9999"):"9999";return da<db?-1:da>db?1:0;});};
+  const empty=t=>`<div class="empty"><div class="big">✓</div>${t}</div>`;
+  const desc=m=>`<div class="d">${esc(m.description||"")}${m.size?" "+esc(m.size):""}</div><div class="x">${esc([m.grade,m.length&&"L "+m.length,m.notes].filter(Boolean).join(" · "))}</div>`;
+  const qty=m=>`<b>${esc(m.qtyReq??"")}</b> ${esc(m.unit||"")}`;
+  let html="";
+  if(purStage==="toorder"){
+    const groups=jobsOf(ms.filter(m=>matStage(m)==="toorder"));
+    html=groups.length?groups.map(({j,ms})=>{
+      const all=ms.every(m=>purSel.has(m.id));
+      const cost=matTotals(ms);
+      return `<div class="pgroup">${jobHead(j,`<span class="m">${ms.length} line${ms.length>1?"s":""} · ${money(cost.cost)}</span><label class="m" style="display:flex;gap:6px;align-items:center"><input type="checkbox" class="cbx" ${all?"checked":""} onchange="purSelMany('${j?j.id:""}',this.checked)"> all</label>`)}
+        ${ms.map(m=>`<div class="pline"><input type="checkbox" class="cbx" ${purSel.has(m.id)?"checked":""} onchange="purToggle('${m.id}',this.checked)"><div>${desc(m)}</div><div class="q">${qty(m)}</div><div class="q">${priceCell(m)}</div></div>`).join("")}</div>`;}).join("")
+      :empty(purQ?"No lines match that filter.":"Nothing to order. Add a material list to a job (📋 Paste from Excel) and its lines appear here.");
+    const sel=ms.filter(m=>purSel.has(m.id)&&matStage(m)==="toorder");
+    if(sel.length)html+=`<div class="bulkbar"><b>${sel.length} selected</b><span style="flex:1"></span><button class="btn primary" onclick="purRfq()">✉️ Send RFQ to suppliers</button><button class="btn" onclick="openOrderModal()">Ordered direct (no RFQ)</button><button class="btn" onclick="purSel=new Set();renderPurBody()">✕</button></div>`;
+  }
+  else if(purStage==="waiting"){
+    const q=(purQ||"").toLowerCase();
+    const list=(DB.procurement||[]).filter(rfqOpen).filter(r=>!q||[r.rfqNumber,r.item,refName("jobs",r.jobRef),...(r.suppliers||[]).map(s=>refName("suppliers",s.supplierRef))].join(" ").toLowerCase().includes(q))
+      .sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+    html=list.length?list.map(r=>rfqCard2(r)).join(""):empty(q?"No RFQs match that filter.":"No RFQs waiting. Send one from <b>To order</b>.");
+  }
+  else if(purStage==="ordered"){
+    const list=ms.filter(m=>matStage(m)==="ordered");const g={};
+    list.forEach(m=>{(g[m.supplierRef||""]=g[m.supplierRef||""]||[]).push(m);});
+    const keys=Object.keys(g).sort((a,b)=>(refName("suppliers",a)||"~").localeCompare(refName("suppliers",b)||"~"));
+    html=keys.length?keys.map(k=>{const L=g[k];const late=L.filter(m=>m.eta&&m.eta<todayISO()).length;
+      return `<div class="pgroup"><div class="pghead"><span class="t">${esc(refName("suppliers",k)||"Supplier not set")}</span><span class="m">${L.length} line${L.length>1?"s":""}${late?` · <span class="late">${late} late</span>`:""}</span><span class="sp"></span><button class="btn sm primary" onclick="receiveMats(${esc(JSON.stringify(L.map(m=>m.id)))})">✓ All received</button></div>
+        ${L.map(m=>{const etaTxt=m.eta?`ETA ${fmtShort(m.eta)}`:"no ETA";return `<div class="pline nocb"><div>${desc(m)}<div class="x">🔗 ${esc(refName("jobs",m.jobRef)||"")}${m.orderedDate?" · ordered "+esc(fmtShort(m.orderedDate)):""}${m.poRef?" · "+esc(m.poRef):""}</div></div><div class="q">${qty(m)}<div class="x ${m.eta&&m.eta<todayISO()?"late":""}">${esc(etaTxt)}</div></div><div class="a"><button class="btn sm" onclick="setEta('${m.id}')">ETA</button><button class="btn sm primary" onclick="receiveMats(['${m.id}'])">✓ Received</button></div></div>`;}).join("")}</div>`;}).join("")
+      :empty(purQ?"No lines match that filter.":"Nothing on order.");
+  }
+  else{
+    const list=purCounts()._rec.filter(purMatch);
+    const groups=jobsOf(list);
+    html=groups.length?groups.map(({j,ms})=>`<div class="pgroup">${jobHead(j,`<span class="m">${ms.filter(m=>m.mtr).length}/${ms.length} MTRs</span>`)}
+      ${ms.map(m=>`<div class="pline nocb"><div>${desc(m)}<div class="x">${esc(refName("suppliers",m.supplierRef)||"")}${m.receivedDate?" · received "+esc(fmtShort(m.receivedDate)):""}${m.heatNo?" · heat "+esc(m.heatNo):""}</div></div><div class="q">${qty(m)}</div><div class="a"><button class="mchip" style="${tokStyle(m.mtr?"ok":"bad")}" onclick="toggleMTR('${m.id}')">${m.mtr?"MTR ✓":"MTR missing"}</button><button class="btn sm" onclick='openForm("${m.id}","materials")'>Heat no.</button></div></div>`).join("")}</div>`).join("")
+      :empty("Nothing received yet for open jobs.");
+  }
+  el.innerHTML=html;
+}
+function purToggle(id,on){if(on)purSel.add(id);else purSel.delete(id);renderPurBody();}
+function purSelMany(jobId,on){(DB.materials||[]).filter(m=>(m.jobRef||"")===jobId&&matStage(m)==="toorder").forEach(m=>on?purSel.add(m.id):purSel.delete(m.id));renderPurBody();}
+function purRfq(){matSel=new Set(Array.from(purSel));const first=(DB.materials||[]).find(m=>purSel.has(m.id));openRfqFromMaterials(first?first.jobRef:"");}
+function pickJobThen(what){
+  formMode="view";
+  const js=(DB.jobs||[]).filter(j=>!isClosed(j)).sort((a,b)=>a.jobName.localeCompare(b.jobName));
+  openModal(what==="add"?"Add material to which job?":"Paste material list into which job?",`<div class="imp"><div class="jobpick">${js.map(j=>`<button onclick="closeForm();${what==="add"?`openForm(null,'materials',{jobRef:'${j.id}'})`:`openImport('materials','${j.id}')`}"><b>${esc(j.jobName)}</b><div class="resp">${esc(j.client||"")} · ${esc(j.phase)}</div></button>`).join("")||'<div class="minimsg">No open jobs.</div>'}</div></div>`,{noFooter:true});
+}
+function matAction(id){
+  const m=(DB.materials||[]).find(x=>x.id===id);if(!m)return;const st=matStage(m);
+  if(st==="toorder"){matSel=new Set([m.id]);purSel=new Set([m.id]);openOrderModal();}
+  else if(st==="waiting"){const r=matRfq(m);if(r&&(r.suppliers||[]).some(s=>s.prices))openCompare(r.id);else{purStage="waiting";go("purchasing");}}
+  else if(st==="ordered")receiveMats([m.id]);
+  else toast("Already received — tap ✏️ to change quantities");
+}
+function supplierOptions(sel){return `<option value="">— choose —</option>`+(DB.suppliers||[]).slice().sort((a,b)=>a.company.localeCompare(b.company)).map(s=>`<option value="${s.id}" ${s.id===sel?"selected":""}>${esc(s.company)}</option>`).join("");}
+function openOrderModal(){
+  const ids=Array.from(purSel.size?purSel:matSel);if(!ids.length)return;
+  formMode="order";purCtx={ids};
+  openModal("Mark ordered — "+ids.length+" line"+(ids.length>1?"s":""),`
+    <div class="field"><label>Supplier</label><select data-k="supplierRef">${supplierOptions("")}</select></div>
+    <div class="field"><label>PO / reference</label><input data-k="poRef" placeholder="e.g. PO 1042"></div>
+    <div class="field"><label>Ordered on</label><input type="date" data-k="date" value="${todayISO()}"></div>
+    <div class="field"><label>Expected delivery (ETA)</label><input type="date" data-k="eta"></div>
+    <div class="hint">For buying direct without an RFQ. Prices stay as they are (price book or manual).</div>`,{ok:"Mark ordered"});
+}
+function saveOrder(){
+  const d={};document.querySelectorAll("#mbody [data-k]").forEach(el=>{d[el.dataset.k]=el.value;});
+  purCtx.ids.forEach(id=>{const m=DB.materials.find(x=>x.id===id);if(!m)return;m.qtyOrdered=+m.qtyReq||1;m.orderedDate=d.date||todayISO();if(d.supplierRef)m.supplierRef=d.supplierRef;if(d.eta)m.eta=d.eta;if(d.poRef)m.poRef=d.poRef;});
+  const n=purCtx.ids.length;purSel=new Set();matSel=new Set();save();closeForm();rerender();toast(n+" line"+(n>1?"s":"")+" marked ordered");
+}
+function setEta(id){const m=(DB.materials||[]).find(x=>x.id===id);if(!m)return;formMode="eta";purCtx={id};openModal("Expected delivery",`<div class="field"><label>ETA</label><input type="date" data-k="eta" value="${esc(m.eta||"")}"></div><div class="field"><label>PO / reference</label><input data-k="poRef" value="${esc(m.poRef||"")}"></div>`);}
+function receiveMats(ids){
+  const t=todayISO(),jobs=new Set();
+  ids.forEach(id=>{const m=DB.materials.find(x=>x.id===id);if(!m)return;const q=+m.qtyReq||+m.qtyOrdered||1;m.qtyOrdered=Math.max(+m.qtyOrdered||0,q);m.qtyReceived=q;m.receivedDate=t;jobs.add(m.jobRef);
+    const r=matRfq(m);if(r){(r.suppliers||[]).forEach(s=>{if(s.supplierRef===m.supplierRef&&s.status==="Ordered"){const mine=(r.materialRefs||[]).map(x=>DB.materials.find(y=>y.id===x)).filter(y=>y&&y.supplierRef===s.supplierRef);if(mine.every(y=>matStage(y)==="received"))s.status="Received";}});}});
+  save();rerender();
+  const ready=Array.from(jobs).map(id=>DB.jobs.find(j=>j.id===id)).filter(j=>j&&(j.phase===PH.PROC||j.phase===PH.PO)&&jobMats(j.id).every(m=>matStage(m)==="received"));
+  toast(ids.length+" line"+(ids.length>1?"s":"")+" received"+(ready.length?` — all materials in for ${ready[0].jobName}; move it to production from the job page`:""));
+}
+
+/* ---- RFQ card, quotes, compare ---- */
+function lineChip(s,r){
+  const tok={"RFQ Sent":"warn","Quote Received":"ok","Will Not Supply":"idle",Ordered:"info",Received:"ok"}[s.status]||"idle";
+  let txt=s.status;
+  if(s.status==="RFQ Sent"){const w=s.dateSent?workDaysBetween(s.dateSent,todayISO()):0;txt="Waiting "+w+" wd";}
+  if(s.status==="Quote Received"){const tot=rfqLineTotal(r,s);txt="Quoted"+(tot?" · "+money(tot):"");}
+  if(s.status==="Will Not Supply")txt="Can't supply";
+  return `<span class="schip" style="${tokStyle(tok)}">${esc(txt)}</span>`;
+}
+function rfqMats(r){return (r.materialRefs||[]).map(id=>(DB.materials||[]).find(m=>m.id===id)).filter(Boolean);}
+function rfqLineTotal(r,s){if(!s.prices)return s.total?+s.total:0;return rfqMats(r).reduce((a,m)=>{const p=s.prices[m.id];return a+(p&&hasPrice(p)?+p.price*(+m.qtyReq||1):0);},0);}
+function rfqCard2(r,inJob){
+  const mats=rfqMats(r),linked=mats.length>0,sups=r.suppliers||[];
+  const quoted=sups.filter(s=>s.status==="Quote Received"||s.prices).length;
+  const jobs=Array.from(new Set(mats.map(m=>m.jobRef).concat(r.jobRef?[r.jobRef]:[]))).filter(Boolean);
+  const jobTxt=jobs.length>1?"Multiple jobs":jobs.length?`<button onclick="openJob('${jobs[0]}','materials')">${esc(refName("jobs",jobs[0])||"")}</button>`:"";
+  const replyLate=r.replyBy&&r.replyBy<todayISO()&&sups.some(s=>s.status==="RFQ Sent");
+  const rows=sups.map(s=>`<div class="srow"><div><div class="n">${esc(refName("suppliers",s.supplierRef)||"(removed supplier)")}</div><div class="resp">${s.dateSent?"sent "+esc(fmtShort(s.dateSent)):""}${s.quoteDate?" · quoted "+esc(fmtShort(s.quoteDate)):""}${s.lead?" · "+esc(s.lead):""}${s.notes?" · "+esc(s.notes):""}</div></div>${lineChip(s,r)}<div class="a" style="display:flex;gap:6px">${
+      ["Ordered","Received"].includes(s.status)?"":`<button class="btn sm ${s.status==="RFQ Sent"?"primary":""}" onclick="openQuote('${r.id}','${s.id}')">${s.prices||s.status==="Quote Received"?"Edit quote":"Enter quote"}</button>`}<button class="icobtn del" title="Remove supplier from RFQ" onclick="delLine('${r.id}','${s.id}')">🗑</button></div></div>`).join("")||`<div class="srow"><div class="resp">No suppliers on this RFQ yet.</div></div>`;
+  const items=linked?`<details><summary>${mats.length} item${mats.length>1?"s":""}</summary>${mats.map(m=>`<div class="itemli"><span>${esc([m.qtyReq,m.unit,m.description,m.size].filter(Boolean).join(" "))}</span><span class="resp" style="flex:0">${esc(matStatus(m))}</span>${matStage(m)==="waiting"?`<button class="icobtn" title="Take off this RFQ (back to To order)" onclick="unlinkMat('${r.id}','${m.id}')">↩</button>`:""}</div>`).join("")}</details>`
+    :`<details><summary>Items</summary><div class="itemli"><span style="white-space:pre-wrap">${esc(r.item||"")}</span></div></details>`;
+  const cmp=linked&&quoted?`<button class="btn sm primary" onclick="openCompare('${r.id}')">⚖ Compare &amp; order</button>`:"";
+  return `<div class="rfqc"><div class="hd"><span class="no">${esc(r.rfqNumber||"RFQ")}</span>${inJob?"":`<span class="jb">${jobTxt}</span>`}<span class="meta">sent ${esc(fmtShort(r.date))}${r.replyBy?` · reply by <span class="${replyLate?"late":""}">${esc(fmtShort(r.replyBy))}</span>`:""} · ${quoted}/${sups.length} replied</span></div>
+    ${rows}${items}
+    <div class="ft">${cmp}<button class="btn sm" onclick="showRfqText('${r.id}')">✉️ RFQ text</button><button class="btn sm" onclick="openLine('${r.id}')">+ Supplier</button><span style="flex:1"></span><button class="icobtn del" title="Delete RFQ" onclick="delRfq('${r.id}')">🗑</button></div></div>`;
+}
+function delRfq(id){const r=(DB.procurement||[]).find(x=>x.id===id);if(!r)return;uiConfirm(`Delete RFQ ${r.rfqNumber||""}? Its material lines go back to “To order” unless already ordered.`,()=>{DB.procurement=DB.procurement.filter(x=>x.id!==id);(DB.materials||[]).forEach(m=>{if(m.rfqRef===id&&matStage(m)!=="ordered"&&matStage(m)!=="received")m.rfqRef="";});save();rerender();toast("RFQ deleted");});}
+function unlinkMat(rid,mid){const r=DB.procurement.find(x=>x.id===rid),m=DB.materials.find(x=>x.id===mid);if(!r||!m)return;r.materialRefs=(r.materialRefs||[]).filter(x=>x!==mid);m.rfqRef="";save();rerender();toast("Line moved back to To order");}
+function openQuote(rid,lid){
+  const r=DB.procurement.find(x=>x.id===rid),s=r&&r.suppliers.find(x=>x.id===lid);if(!s)return;
+  formMode="quote2";purCtx={rid,lid};
+  const mats=rfqMats(r),P=s.prices||{};
+  const resp=v=>["Quoted","No stock","Substitute offered"].map(o=>`<option ${v===o?"selected":""}>${o}</option>`).join("");
+  const body=mats.length?`<div class="full tablewrap"><table class="qtab"><thead><tr><th>Item</th><th>Qty</th><th>Unit price excl. VAT</th><th>Reply</th><th>Note (e.g. 5mm wall offered)</th></tr></thead><tbody>${mats.map(m=>{const p=P[m.id]||{};return `<tr><td><b>${esc(m.description||"")}</b> ${esc(m.size||"")}</td><td style="white-space:nowrap">${esc(m.qtyReq??"")} ${esc(m.unit||"")}</td><td><input class="pi" type="number" step="any" data-mp="${m.id}" value="${hasPrice(p)?p.price:""}"></td><td><select data-mr="${m.id}">${resp(p.response||"Quoted")}</select></td><td><input data-mn="${m.id}" value="${esc(p.note||"")}"></td></tr>`;}).join("")}</tbody></table></div><div class="hint">Leave a price blank if they didn't price that item. Prices for items linked to the price book are logged there automatically.</div>`
+    :`<div class="field"><label>Quoted total excl. VAT</label><input type="number" step="any" data-k="total" value="${s.total||""}"></div>`;
+  openModal("Quote from "+(refName("suppliers",s.supplierRef)||"supplier")+" — "+(r.rfqNumber||""),
+    `<div class="field"><label>Quote date</label><input type="date" data-k="quoteDate" value="${esc(s.quoteDate||todayISO())}"></div><div class="field"><label>Lead time / availability</label><input data-k="lead" value="${esc(s.lead||"")}" placeholder="e.g. ex stock, 2 weeks"></div>${body}
+     <div class="field full"><label>Note</label><input data-k="notes" value="${esc(s.notes||"")}"></div>
+     <div class="full"><button class="btn" onclick="cantSupply()">✕ Supplier can't supply any of it</button></div>`,{wide:mats.length>0,ok:"Save quote"});
+}
+function cantSupply(){const r=DB.procurement.find(x=>x.id===purCtx.rid),s=r.suppliers.find(x=>x.id===purCtx.lid);s.status="Will Not Supply";s.quoteDate=todayISO();save();closeForm();rerender();toast("Marked as can't supply");}
+function saveQuote2(){
+  const r=DB.procurement.find(x=>x.id===purCtx.rid),s=r.suppliers.find(x=>x.id===purCtx.lid);
+  const d={};document.querySelectorAll("#mbody [data-k]").forEach(el=>{d[el.dataset.k]=el.value;});
+  s.quoteDate=d.quoteDate||todayISO();s.lead=d.lead||"";s.notes=d.notes||"";
+  const mats=rfqMats(r),sup=refName("suppliers",s.supplierRef)||"Supplier";
+  if(mats.length){
+    const P={};let any=false;
+    mats.forEach(m=>{const pe=document.querySelector(`#mbody [data-mp="${m.id}"]`),re=document.querySelector(`#mbody [data-mr="${m.id}"]`),ne=document.querySelector(`#mbody [data-mn="${m.id}"]`);
+      const pv=pe&&pe.value!==""?+pe.value:"";const resp=re?re.value:"Quoted";
+      if(pv!==""||resp!=="Quoted"||(ne&&ne.value)){P[m.id]={price:pv,response:pv===""&&resp==="Quoted"?"No price given":resp,note:ne?ne.value:""};any=true;}});
+    s.prices=P;
+    if(!any){toast("Enter at least one price, or tap “can't supply”");return;}
+    // log into the price book (replace this supplier-line's earlier entries)
+    DB.priceQuotes=(DB.priceQuotes||[]).filter(q=>q.srcLine!==s.id);
+    let seq=(DB.priceQuotes||[]).reduce((a,q)=>Math.max(a,q.seq||0),0),logged=0;
+    mats.forEach(m=>{const p=P[m.id];if(!p||!m.priceItemRef||!priceItem(m.priceItemRef))return;DB.priceQuotes.push({id:uid(),itemRef:m.priceItemRef,supplier:sup,date:s.quoteDate,price:p.price,response:p.response,note:[p.note,"via "+(r.rfqNumber||"RFQ")].filter(Boolean).join(" · "),srcLine:s.id,seq:++seq});logged++;});
+    s.status="Quote Received";save();closeForm();rerender();toast("Quote saved"+(logged?` · ${logged} price${logged>1?"s":""} logged in the price book`:""));
+  }else{s.total=d.total===""?"":+d.total;s.status="Quote Received";save();closeForm();rerender();toast("Quote saved");}
+}
+function openCompare(rid){
+  const r=DB.procurement.find(x=>x.id===rid);if(!r)return;
+  formMode="compare";purCtx={rid};
+  const mats=rfqMats(r).filter(m=>matStage(m)==="waiting");
+  const sups=(r.suppliers||[]).filter(s=>s.prices&&s.status!=="Will Not Supply");
+  if(!mats.length){toast("All items on this RFQ are already ordered");return;}
+  const rows=mats.map(m=>{
+    const offers=sups.map(s=>({s,p:s.prices[m.id]})).filter(o=>o.p&&hasPrice(o.p));
+    const best=offers.length?offers.reduce((a,b)=>+b.p.price<+a.p.price?b:a):null;
+    return `<tr><td class="it"><b>${esc(m.description||"")}</b> ${esc(m.size||"")}<div class="resp">${esc(m.qtyReq??"")} ${esc(m.unit||"")}</div></td>${sups.map(s=>{const p=s.prices[m.id];
+      if(!p||!hasPrice(p))return `<td><span class="na">${esc(p?p.response:"—")}</span></td>`;
+      const q=+m.qtyReq||1;return `<td><label><input type="radio" name="c_${m.id}" value="${s.id}" ${best&&best.s===s?"checked":""} onchange="cmpTotals()"><span class="${best&&best.s===s?"cheap":""}">${money(p.price)}</span></label><div class="resp">= ${money(+p.price*q)}${p.response&&p.response!=="Quoted"?" · "+esc(p.response):""}${p.note?" · "+esc(p.note):""}</div></td>`;}).join("")}
+      <td><label><input type="radio" name="c_${m.id}" value="" ${best?"":"checked"} onchange="cmpTotals()"><span class="na">not yet</span></label></td></tr>`;}).join("");
+  openModal("Compare & order — "+(r.rfqNumber||""),`<div class="full impnote">Cheapest price per item is pre-selected. Change any pick, then order. Items left on “not yet” stay waiting.</div>
+    <div class="full tablewrap"><table class="cmp"><thead><tr><th>Item</th>${sups.map(s=>`<th>${esc(refName("suppliers",s.supplierRef)||"")}${s.lead?`<div class="resp">${esc(s.lead)}</div>`:""}</th>`).join("")}<th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="full" id="cmptot"></div>
+    <div class="field"><label>PO / reference</label><input data-k="poRef"></div><div class="field"><label>Expected delivery (ETA)</label><input type="date" data-k="eta"></div>`,{wide:true,ok:"Order selected"});
+  cmpTotals();
+}
+function cmpPicks(){const r=DB.procurement.find(x=>x.id===purCtx.rid);const out=[];rfqMats(r).forEach(m=>{const el=document.querySelector(`#mbody input[name="c_${m.id}"]:checked`);if(el&&el.value)out.push({m,s:r.suppliers.find(x=>x.id===el.value)});});return out;}
+function cmpTotals(){const el=document.getElementById("cmptot");if(!el)return;const by={};let tot=0;cmpPicks().forEach(({m,s})=>{const v=+s.prices[m.id].price*(+m.qtyReq||1);const n=refName("suppliers",s.supplierRef);by[n]=(by[n]||0)+v;tot+=v;});
+  el.innerHTML=Object.keys(by).length?`<div class="msum">${Object.keys(by).map(n=>`<div class="m"><b>${money(by[n])}</b>${esc(n)}</div>`).join("")}<div class="m"><b>${money(tot)}</b>total excl. VAT</div></div>`:`<div class="impnote">Nothing selected.</div>`;}
+function saveCompare(){
+  const r=DB.procurement.find(x=>x.id===purCtx.rid);const picks=cmpPicks();
+  if(!picks.length){toast("Pick at least one supplier price");return;}
+  const d={};document.querySelectorAll("#mbody [data-k]").forEach(el=>{d[el.dataset.k]=el.value;});
+  const used=new Set();
+  picks.forEach(({m,s})=>{m.supplierRef=s.supplierRef;m.quotedPrice=+s.prices[m.id].price;m.qtyOrdered=+m.qtyReq||1;m.orderedDate=todayISO();if(d.eta)m.eta=d.eta;if(d.poRef)m.poRef=d.poRef;used.add(s);});
+  used.forEach(s=>{s.status="Ordered";s.awarded=true;});
+  const jobs=new Set(picks.map(p=>p.m.jobRef));jobs.forEach(id=>{const j=DB.jobs.find(x=>x.id===id);if(j&&j.phase===PH.PO)setPhase(j,PH.PROC,{note:"materials ordered"});});
+  save();closeForm();purStage=current==="purchasing"?"ordered":purStage;rerender();toast(picks.length+" line"+(picks.length>1?"s":"")+" ordered from "+Array.from(used).map(s=>refName("suppliers",s.supplierRef)).join(" & "));
+}
+
 /* ============ THEME ============ */
 function initTheme(){ let t=null; try{t=localStorage.getItem(THEMEKEY)||localStorage.getItem(LEGACY_THEME);}catch(e){} if(t!=="dark"&&t!=="light"){const a=document.documentElement.getAttribute("data-theme");t=(a==="dark"||a==="light")?a:((window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light");} document.documentElement.setAttribute("data-theme",t); updThemeBtn(t); }
 function toggleTheme(){ const cur=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark"; document.documentElement.setAttribute("data-theme",cur); try{localStorage.setItem(THEMEKEY,cur);}catch(e){} updThemeBtn(cur); }
@@ -1739,20 +2062,21 @@ function updThemeBtn(t){ const ic=document.getElementById("themeic"),lb=document
 /* ============ NAV ============ */
 function buildNav(){
   const nav=document.getElementById("nav");
-  const items=[["dashboard","Dashboard","🏠"],["jobs","Jobs","📋"],["materials","Materials","🔩"],["procurement","Supplier RFQs","📦"],["prices","Price Book","💲"],["qc","QC","✅"],["suppliers","Suppliers","🏭"],["reminders","Reminders","📌"],["settings","Settings","⚙️"]];
+  const items=[["dashboard","Dashboard","🏠"],["jobs","Jobs","📋"],["purchasing","Purchasing","📦"],["prices","Price Book","💲"],["qc","QC","✅"],["suppliers","Suppliers","🏭"],["reminders","Reminders","📌"],["settings","Settings","⚙️"]];
   nav.innerHTML=items.map(([id,label,ic])=>{
     let cnt="";
     if(id==="reminders"){const oc=openReminderCount();cnt=oc?`<span class="cnt">${oc}</span>`:"";}
     else if(id==="qc"){const f=qcOpenFails();cnt=f?`<span class="cnt" style="background:var(--bad);color:#fff">${f}</span>`:"";}
     else if(id==="prices")cnt=`<span class="cnt">${(DB.priceItems||[]).length}</span>`;
+    else if(id==="purchasing"){const n=purCounts().toorder;cnt=n?`<span class="cnt">${n}</span>`:"";}
     else if(SCHEMA[id])cnt=`<span class="cnt">${(DB[id]||[]).length}</span>`;
     const active=(!detailJob&&id===current)||(detailJob&&id==="jobs");
     return `<button class="${active?'active':''}" onclick="go('${id}')"><span class="ic">${ic}</span><span class="lbl">${label}</span>${cnt}</button>`;
   }).join("");
 }
-function go(id){ detailJob=null; current=id; sortKey=null; jobFilter=null; currentView=SCHEMA[id]?SCHEMA[id].views[0]:id; matFilter=""; window.scrollTo&&window.scrollTo(0,0); document.getElementById("search").value=""; render(); buildNav(); }
+function go(id){ if(id==="materials"||id==="procurement"){if(id==="procurement")purStage="waiting";id="purchasing";} if(id!=="purchasing"){purQ="";} detailJob=null; current=id; sortKey=null; jobFilter=null; currentView=SCHEMA[id]?SCHEMA[id].views[0]:id; matFilter=""; window.scrollTo&&window.scrollTo(0,0); document.getElementById("search").value=""; render(); buildNav(); }
 function dashFilter(kind){ detailJob=null; current="jobs"; currentView="grid"; sortKey=null; jobFilter=kind; document.getElementById("search").value=""; render(); buildNav(); }
-function dashGo(page){ go(page); }
+function dashGo(page){ if(page==="procurement")purStage="waiting"; go(page); }
 function clearJobFilter(){ jobFilter=null; render(); }
 const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Jobs overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active jobs (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded"};
 function rerender(){ if(detailJob)renderDetail(); else render(); buildNav(); }
@@ -1761,7 +2085,7 @@ function rerender(){ if(detailJob)renderDetail(); else render(); buildNav(); }
 function render(){
   if(detailJob)return renderDetail();
   const c=document.getElementById("content");
-  const PAGES={dashboard:["Dashboard",renderDashboard],settings:["Settings",renderSettings],reminders:["Reminders & Notes",renderReminders],prices:["Price Book",renderPrices],qc:["QC Register",renderQC]};
+  const PAGES={purchasing:["Purchasing",renderPurchasing],dashboard:["Dashboard",renderDashboard],settings:["Settings",renderSettings],reminders:["Reminders & Notes",renderReminders],prices:["Price Book",renderPrices],qc:["QC Register",renderQC]};
   const vt=document.getElementById("viewtabs");
   if(PAGES[current]){
     document.getElementById("viewtitle").textContent=PAGES[current][0];
@@ -2263,7 +2587,7 @@ function renderProcurement(c){
   c.innerHTML=`<div class="cards">${cards}</div>${waitPanel}${list}`;
 }
 function rfqCard(rfq){
-  const job=refName("jobs",rfq.jobRef);
+  const job=rfq.jobRef?refName("jobs",rfq.jobRef):"";
   const lines=rfq.suppliers||[];
   const body=lines.length?lines.map(ln=>{
     const wait=lineWait(ln);
@@ -2406,7 +2730,7 @@ function renderDetail(){
     ${tree}<button class="miniadd" onclick="addTask('${j.id}')">+ Add task</button>
     ${miniGantt?`<div style="margin-top:14px"><div class="gantt mini">${miniGantt}</div>${GANTT_LEGEND}</div>`:`<div class="minimsg" style="margin-top:8px">Add start &amp; end dates to tasks to see them on the timeline.</div>`}</div>`;
 
-  const procurement=`<div class="dsection"><h3><span class="ic">📦</span> Procurement / RFQs <button class="btn sm add" onclick='openForm(null,"procurement",${presetJob})'>+ New RFQ</button></h3>${procRfqs.length?procRfqs.map(rfqCard).join(""):`<div class="minimsg">No RFQs for this job yet.</div>`}</div>`;
+  const procurement=`<div class="dsection"><h3><span class="ic">📦</span> Procurement / RFQs <button class="btn sm add" onclick="setDetailTab('materials')">+ RFQ from material lines</button></h3>${procRfqs.length?procRfqs.map(r=>rfqCard2(r,true)).join(""):`<div class="minimsg">No RFQs for this job yet.</div>`}</div>`;
 
   const materials=renderJobMaterials(j);
   const checklist=renderJobQC(j);
@@ -2498,14 +2822,23 @@ function importMaterialsCSV(e,jobId){
 
 /* ============ FORM ============ */
 function openForm(id,table,preset){
-  formMode="record";document.getElementById("mainmodal").className="modal";{const ft=document.querySelector("#mainmodal footer");if(ft)ft.style.display="";} formTable=table||current; editingId=id||null;
+  formMode="record";{const sb=document.getElementById("mainsave");if(sb)sb.textContent="Save";}document.getElementById("mainmodal").className="modal";{const ft=document.querySelector("#mainmodal footer");if(ft)ft.style.display="";} formTable=table||current; editingId=id||null;
   const sch=SCHEMA[formTable];
   let rec=id?DB[formTable].find(r=>r.id===id):Object.assign({},preset||{});
   if(!id&&formTable==="jobs")rec=Object.assign({phase:PH.RFQ,rfqDate:todayISO(),leadUnit:"working days"},rec);
   document.getElementById("mtitle").textContent=(id?"Edit ":"Add ")+sch.label.replace(/s$/,"");
-  document.getElementById("mbody").innerHTML=sch.fields.map(f=>fieldHTML(f,rec)).join("");
+  if(formTable==="materials"){
+    const ess=["jobRef","description","size","grade","qtyReq","unit","notes"];
+    const F=k=>sch.fields.find(f=>f.k===k);
+    const more=sch.fields.filter(f=>!ess.includes(f.k));
+    const hasMore=more.some(f=>rec[f.k]&&rec[f.k]!==0);
+    document.getElementById("mbody").innerHTML=ess.slice(0,6).map(k=>fieldHTML(F(k),rec)).join("")+`<div class="pricehint" id="pricehint"></div>`+fieldHTML(F("notes"),rec)
+      +`<details class="more" ${hasMore?"open":""}><summary>Ordering, receiving &amp; price (optional — the Purchasing buttons fill these in)</summary><div class="moregrid">${more.map(f=>fieldHTML(f,rec)).join("")}</div></details>`;
+    ["description","size","grade"].forEach(k=>{const el=document.querySelector(`#mbody [data-k="${k}"]`);if(el)el.oninput=formPriceHint;});
+    formPriceHint();
+  } else document.getElementById("mbody").innerHTML=sch.fields.map(f=>fieldHTML(f,rec)).join("");
   document.getElementById("scrim").classList.add("show");
-  const first=document.querySelector("#mbody [data-k]");if(first&&first.focus)setTimeout(()=>first.focus(),30);
+  const first=document.querySelector(formTable==="materials"&&rec.jobRef?'#mbody [data-k="description"]':"#mbody [data-k]");if(first&&first.focus)setTimeout(()=>first.focus(),30);
 }
 function fieldHTML(f,rec){
   if(f.t==="heading")return `<div class="fhead">${esc(f.l)}</div>`;
@@ -2550,6 +2883,10 @@ function saveForm(){
   if(formMode==="phase")return savePhase();
   if(formMode==="quote"||formMode==="pitem")return savePriceForms();
   if(formMode==="rfqmake")return saveRfqFromMaterials();
+  if(formMode==="order")return saveOrder();
+  if(formMode==="quote2")return saveQuote2();
+  if(formMode==="compare")return saveCompare();
+  if(formMode==="eta"){const m=DB.materials.find(x=>x.id===purCtx.id);document.querySelectorAll("#mbody [data-k]").forEach(el=>{m[el.dataset.k]=el.value;});save();closeForm();rerender();toast("Saved");return;}
   if(formMode==="import"||formMode==="match"||formMode==="view"){closeForm();return;}
   const sch=SCHEMA[formTable],rec=editingId?DB[formTable].find(r=>r.id===editingId):{id:uid()};
   const oldPhase=editingId?rec.phase:null;

@@ -1,6 +1,6 @@
 # Protrac — fabrication job tracker
 
-**Live demo:** `https://reynardvsookram-alt.github.io/Protrac/` 
+**Live demo:** `https://<your-username>.github.io/protrac/` *(replace after enabling GitHub Pages)*
 
 Protrac tracks a steel-fabrication job from the client's RFQ to delivery: quoting deadlines, purchase orders, material take-offs, supplier RFQs, steel prices and QC sign-off. I built it to replace the spreadsheets, paper QC checklists and memory I was relying on as the only engineer at a fabrication shop in Trinidad.
 
@@ -33,12 +33,12 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
 
 - **Dashboard built around actions**: quotes overdue, jobs overdue, due within 5 working days, RFQs to quote, awaiting PO, open QC fails. Every number opens the filtered list.
 - **Job page**: progress stepper, next-action button, timeline with turnaround stats (RFQ → quote, quote → PO, delivery vs. promise).
-- **Material list**:
-  - Paste from Excel, with header row and column matching detected automatically.
-  - Multi-sheet .xlsx import, keeping each sheet as a group.
-  - Auto-pricing from the price book.
-  - Ordered/received tracking and MTR tracking.
-- **Supplier RFQs from materials**: select lines, pick suppliers, and get ready-to-send email text plus a paste-into-Excel table. Marking a supplier "Received" updates the material lines.
+- **Material lists**: paste straight from Excel (header row and columns detected automatically) or import a multi-sheet .xlsx. Lines are priced from the price book as they come in.
+- **Purchasing pipeline**: one page with four clickable stages: **To order → Waiting on suppliers → Ordered → Received**.
+  - Tick lines and send one RFQ to several suppliers, with ready-to-send email text.
+  - Enter each supplier's reply per item; prices are logged in the price book automatically.
+  - **Compare & order**: suppliers side by side, cheapest pre-selected, totals per supplier.
+  - Track ETAs, receive deliveries, and flag missing MTRs.
 - **Price book**: imports an existing supplier costing workbook (Price Book + Quote Log sheets). Search by size (`4x4x1/4`, `plate 3/8`, `sch40`), compare suppliers, view price history and flags. Prices show excl./incl. VAT.
 - **QC**:
   - Four stages: Welding/Fabrication, Sandblasting, Painting and Final Inspection.
@@ -47,6 +47,8 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
   - A QC register across all jobs.
 - **Also**: search across jobs, materials and prices; reminders; per-job schedule with Gantt; dark mode; JSON backup/restore; CSV export.
 
+![Purchasing pipeline](screenshot-purchasing.png)
+![Compare supplier quotes and order](screenshot-compare.png)
 ![Material list priced from the price book](screenshot-mat.png)
 ![One-tap QC](screenshot-qc.png)
 ![Price book](screenshot-prices.png)
