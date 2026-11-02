@@ -1,6 +1,6 @@
 # Protrac — fabrication job tracker
 
-**Live demo:** `https://<your-username>.github.io/protrac/` *(replace after enabling GitHub Pages)*
+**Live demo:** `https://reynardvsookram-alt.github.io/Protrac/` *(replace after enabling GitHub Pages)*
 
 Protrac tracks a steel-fabrication job from the client's RFQ to delivery: quoting deadlines, purchase orders, material take-offs, supplier RFQs, steel prices and QC sign-off. I built it to replace the spreadsheets, paper QC checklists and memory I was relying on as the only engineer at a fabrication shop in Trinidad.
 
