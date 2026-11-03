@@ -617,6 +617,45 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
   .srow{grid-template-columns:minmax(0,1fr) auto}
   .srow .a{grid-column:1/-1}
 }
+
+/* ===== v4 ===== */
+.field input[type=checkbox],.field input[type=radio],.mbody input[type=checkbox],.mbody input[type=radio]{width:auto;min-width:0;flex:0 0 auto;padding:0;box-shadow:none}
+.suplist label{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;align-items:center}
+.suplist label .sn{font-weight:700}
+.suplist label .resp{text-align:right}
+.lsearch{position:relative;margin:0 0 14px}
+.lsearch input{width:100%;font-size:14.5px;padding:11px 14px 11px 40px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--ink);box-shadow:var(--raise)}
+.lsearch input:focus{outline:2px solid var(--weld-soft);border-color:var(--weld-dim)}
+.lsearch::before{content:"🔍";position:absolute;left:14px;top:11px;opacity:.55;pointer-events:none}
+.filters{margin-bottom:10px}
+.emailprev{background:#fff;color:#1d1d1f;border:1px solid var(--line);border-radius:10px;padding:16px 18px;font:13.5px/1.5 Arial,Helvetica,sans-serif;max-height:340px;overflow:auto}
+.emailprev table{border-collapse:collapse}
+.subjrow{display:flex;gap:8px;align-items:center}
+.subjrow input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--ink);font:inherit}
+.mgrid{border-collapse:separate;border-spacing:0;width:100%}
+.mgrid th{position:sticky;top:0;background:var(--card-alt);z-index:1;font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:7px 6px;text-align:left;border-bottom:1px solid var(--line)}
+.mgrid td{padding:0;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.mgrid td:last-child{border-right:0}
+.mgrid input{width:100%;border:0;background:transparent;color:var(--ink);font:inherit;font-size:13px;padding:8px 7px;min-width:0}
+.mgrid input:focus{outline:2px solid var(--weld);outline-offset:-2px;background:var(--card)}
+.mgrid tr.del input{text-decoration:line-through;opacity:.45}
+.mgrid tr.bad td{background:var(--bad-bg)}
+.mgrid .rn{width:34px;text-align:center;color:var(--ink-soft);font-family:var(--mono);font-size:11px}
+.mgrid .st{font-size:11px;color:var(--ink-soft);padding:0 6px;white-space:nowrap}
+.mgrid .xb{border:0;background:none;color:var(--ink-soft);cursor:pointer;padding:6px 8px;font-size:14px}
+.mgrid .xb:hover{color:var(--bad)}
+.gridwrap{max-height:62vh;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.cathead{display:flex;gap:6px;align-items:center}
+.cathead select{flex:1}
+.setgrid>*,.panel,.dsection,.jbody>*{min-width:0}
+.setrow{flex-wrap:wrap}
+.tnode{flex-wrap:wrap;min-width:0}
+.mbody>.imp,.mbody>.empty,.mbody>.minimsg{grid-column:1/-1}
+a.btn{text-decoration:none}
+.mgrid td.rn{vertical-align:middle}
+.tnode>*{min-width:0}
+@media(max-width:760px){.step{min-width:0}.step .sdate{display:none}.slbl{font-size:10px;font-weight:600;line-height:1.2}.sdot{width:22px;height:22px;font-size:10px}.step::before{top:10px}.stepper{overflow:visible}}
+@media(max-width:760px){.suplist label{grid-template-columns:20px minmax(0,1fr)}.suplist label .resp{grid-column:2;text-align:left}}
 @media(max-width:760px){.dashrow,.dgrid2{grid-template-columns:1fr}.mbody{grid-template-columns:1fr}.field.full{grid-column:1}.side{width:62px}.brand h1,.brand .sub,.nav button span.lbl,.nav .cnt,.side-foot button span{display:none}}
 </style>
 </head>
@@ -640,7 +679,7 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
       <h2 id="viewtitle">Dashboard</h2>
       <div class="viewtabs" id="viewtabs"></div>
       <div class="spacer"></div>
-      <div class="search" id="searchwrap" style="display:none"><input id="search" placeholder="Search…" oninput="render()"></div>
+      <div id="searchwrap" style="display:none"></div>
       <button class="btn" id="csvbtn" style="display:none" onclick="exportCSV()">Export CSV</button>
       <button class="btn primary" id="addbtn" style="display:none" onclick="openForm()">+ Add</button>
     </div>
@@ -782,7 +821,7 @@ const TABLES=Object.keys(SCHEMA);
 
 /* ============ STATE ============ */
 let DB=null, current="dashboard", currentView="dashboard", sortKey=null, sortDir=1, jobFilter=null;
-let purStage="", purQ="", purSel=new Set(), purCtx=null, matFilter="", matSel=new Set(), impCtx=null, priceQ="", priceCat="", priceVat=false, qcFilter="", phaseCtx=null, editingId=null, formTable=null, formMode="record", lineCtx=null, detailJob=null, detailTab="overview", calMonth=null;
+let listQ="", gridFilters={}, matGrid=null, purStage="", purQ="", purSel=new Set(), purCtx=null, matFilter="", matSel=new Set(), impCtx=null, priceQ="", priceCat="", priceVat=false, qcFilter="", phaseCtx=null, editingId=null, formTable=null, formMode="record", lineCtx=null, detailJob=null, detailTab="overview", calMonth=null;
 
 function load(){
   try{const r=localStorage.getItem(STORE);if(r){DB=JSON.parse(r);migrate();save();return;}}catch(e){}
@@ -876,7 +915,7 @@ function save(){ pbInvalidate(); try{localStorage.setItem(STORE,JSON.stringify(D
 const DEMO_PRICES={"items":[["RHS-01","RHS / SHS","SHS 2\" x 2\" x 5mm (≈3/16\")","2x2x5mm 2x2x3/16 2x2x1/4","6 m","MS","Length","Supplier A: Supplier A stocks 5mm wall only. an RFQ asked for 1/4\" wall and got this price — expect 5mm to be supplied.  |  Supplier B: quoted 2x2x1/4 @ $… — wall thickness not confirmed in writing; check it's truly 1/4\" vs Supplier A 5mm. 1 Jun (an RFQ) Supplier B wrote $… for 2x2x1/4, then $… on 6 Aug & 14 Sep — ⚠ confirm current price and wall.","square hollow tube box"],["RHS-02","RHS / SHS","RHS 4\" x 2\" x 5mm (≈3/16\")","4x2x5mm 2x4x5mm 4x2x1/4 2x4x1/4","6 m","MS","Length","Supplier A: 5mm wall. Offered against 4x2x1/4 and 3x2x1/4 requests. an RFQ first showed $… — corrected by rep to $… on 8 Jul.","rectangular hollow tube box"],["RHS-03","RHS / SHS","RHS 8\" x 4\" x 1/4\"","8x4x1/4 4x8x1/4","Not stated","MS","Length","Supplier A: First quoted $… in error (that is the 1/4\" plate price); corrected to $…. Confirm stock length.","rectangular hollow tube forklift pocket"],["RHS-04","RHS / SHS","SHS 4\" x 4\" x 1/4\"","4x4x1/4","Not stated (assume 20')","MS","Length","Supplier A: Confirm stock length.  |  Supplier B: 4x4x1/4 offered GALVANISED (zinc) only @ $… — not a like-for-like with Supplier A black steel. Black 1/4 not stocked (offered 4x4x1/8 instead).","square hollow tube"],["RHS-05","RHS / SHS","SHS 3\" x 3\" x 1/4\"","3x3x1/4","Not stated","MS","Length","Supplier A: ⚠ VERIFY: priced higher than 4x4x1/4 ($…). Likely typo.","square hollow tube"],["RHS-06","RHS / SHS","SHS 6\" x 6\" x 1/4\"","6x6x1/4","20'","ASTM A36 (as requested)","Length","⚠ Supplier B: handwritten $… vs Supplier A $… — confirm with Supplier B (possible misread / wrong wall).","square hollow tube"],["RHS-07","RHS / SHS","SHS 6\" x 6\" x 3/8\"","6x6x3/8","-","-","Length","Supplier A: Not stocked. Import + lead time requested 7 Aug — no reply on file.","square hollow tube"],["RHS-08","RHS / SHS","RHS 6\" x 4\" x 3/8\"","6x4x3/8","Not stated","MS","Length","","rectangular hollow tube"],["RHS-09","RHS / SHS","RHS 6\" x 4\" x 1/4\"","6x4x1/4","-","-","Length","Supplier A: Left unpriced on an RFQ reply.  |  Supplier B: offered as alternative to 4x2x1/4 / 8x4x1/4.","rectangular hollow tube"],["RHS-10","RHS / SHS","RHS 12\" x 4\" x 3/8\"","12x4x3/8","-","-","Length","Supplier A: Not stocked. Import + lead time requested 7 Aug — no reply on file.","rectangular hollow tube"],["RHS-11","RHS / SHS","RHS 3\" x 2\" x 1/4\"","3x2x1/4","-","-","Length","Supplier A: Not stocked — Supplier A offered 4x2x5mm RHS (RHS-02) instead.","rectangular hollow tube"],["RHS-12","RHS / SHS","SHS 8\" x 8\" x 1/4\"","8x8x1/4","Not stated","Not stated","Length","Supplier B: offered as alternative when 8x4x1/4 was not stocked.","square hollow tube"],["RHS-13","RHS / SHS","SHS 4\" x 4\" x 1/8\"","4x4x1/8","Not stated","Not stated","Length","","square hollow tube"],["RHS-14","RHS / SHS","SHS 4\" x 4\" x 3/8\"","4x4x3/8 hss","Not stated","Not stated","Length","Supplier B: also offered @ $… as the 3/8\" alternative for a 4x4x1/4 forklift pocket (26 May).","square hollow tube hss"],["RHS-16","RHS / SHS","RHS 8\" x 4\" x 3/8\" HSS","8x4x3/8 hss","-","A500 Gr C (requested)","Length","","rectangular hollow tube hss skid"],["RHS-17","RHS / SHS","SHS 8\" x 8\" x 1/2\"","8x8x1/2 hss","Not stated","Not stated","Length","Supplier B: offered when 8x4x3/8 and 10x6x3/8 HSS were not stocked. Heavier/larger — check it suits the design.","square hollow tube hss"],["RHS-18","RHS / SHS","RHS 10\" x 6\" x 3/8\" HSS","10x6x3/8 hss","-","A500 Gr C (requested)","Length","","rectangular hollow tube hss skid"],["RHS-19","RHS / SHS","RHS 6\" x 3\"","6x3 rhs","-","-","Length","","rectangular hollow tube"],["FB-01","Flat Bar","Flat 1\" x 1/4\"","1x1/4","Not stated (assume 20')","MS","Length","Supplier B: $… (1 Jun).","flats flat bar"],["FB-02","Flat Bar","Flat 2\" x 1/4\"","2x1/4","20'","MS","Length","","flats flat bar"],["FB-03","Flat Bar","Flat 3\" x 1/4\"","3x1/4","20'","MS","Length","","flats flat bar"],["FB-04","Flat Bar","Flat 3\" x 3/8\"","3x3/8","Not stated (assume 20')","MS / A36","Length","","flats flat bar"],["FB-05","Flat Bar","Flat 3\" x 1/2\"","3x1/2","Not stated (assume 20')","MS / A36","Length","","flats flat bar"],["FB-06","Flat Bar","Flat 4\" x 1/4\"","4x1/4","20'","MS","Length","Supplier A: ⚠ 6 Aug: $… on an RFQ but $… on an RFQ. PO SESL26-260 placed at $….","flats flat bar"],["FB-07","Flat Bar","Flat 4\" x 1\"","4x1","20'","MS","Length","","flats flat bar"],["FB-08","Flat Bar","Flat 4\" x 1/8\" or 3/16\"","4x1/8 4x3/16","-","-","Length","Supplier A: Not stocked — 4\" x 1/4\" (FB-06) offered @ $….","flats flat bar"],["FB-09","Flat Bar","Flat 2\" x 3/8\"","2x3/8","Not stated","A36","Length","","flats flat bar"],["PL-01","Plate","Plate 1/4\" thk","1/4 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-02","Plate","Plate 3/8\" thk","3/8 plate","4' x 8'","A36","Sheet","Supplier B: an RFQ asked A572 Gr50 — Supplier B wrote 'A36' against it.","plate sheet 4x8"],["PL-03","Plate","Plate 1/2\" thk","1/2 plate","4' x 8'","A36","Sheet","Supplier B: an RFQ asked A572 Gr50 1/2\" — Supplier B wrote '4x8 @ $…' (same as A36 price); confirm grade.","plate sheet 4x8"],["PL-04","Plate","Plate 5/8\" thk","5/8 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-05","Plate","Plate 3/4\" thk","3/4 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-06","Plate","Plate 1\" thk","1 plate 1in","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-07","Plate","Plate 1/4\" thk — large sheet","1/4 plate 8x20","8' x 20'","A36 — Supplier A note: \"BQ only\"","Sheet","Supplier A: rep wrote \"BQ only\" — confirm grade/quality before using on structural or certified work.  |  Supplier B: also wrote 'BQ' @ $….","plate sheet 8x20 bq"],["PL-08","Plate","Plate 1\" thk — Gr 50","1 plate gr50","Not stated","Gr 50","Sheet","Supplier A: Sheet size not stated — confirm before ordering.  |  Supplier B: wrote '4x8' @ $… (same as their 1\" A36) — confirm Gr 50 on MTR.","plate sheet grade 50 a572"],["PL-09","Plate","Plate 3/16\" thk","3/16 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-10","Plate","Plate 1\" A572 Gr 50 — cut pieces 8\" x 9\"","1 a572 gr50 pad eye","Cut pieces","ASTM A572 Gr 50","Each","","plate pad eye a572"],["SH-01","Sheet","Sheet 1/8\" thk","1/8 sheet","4' x 8'","A36","Sheet","","sheet plate 4x8 checker"],["SH-02","Sheet","Galvanised sheet 14 ga","14ga galv","4' x 8'","A653 G90","Sheet","Supplier A: Not stocked.","sheet galvanized galvanised"],["SH-03","Sheet","Expanded metal 25mm diamond 3/16\"","expanded metal 3/16","-","A36","Sheet","","expanded metal mesh"],["SH-04","Sheet","Diamond (checker) plate 3/16\"","3/16 diamond checker","4' x 8'","Not stated","Sheet","Supplier B: 4x8 @ $….","sheet plate diamond checker floor deck"],["SH-05","Sheet","Corrugated sheet 18 ga","18ga corrugated","-","-","Sheet","","sheet corrugated roofing"],["AN-01","Angle","Angle 1\" x 1\" x 1/8\"","1x1x1/8","Not stated (assume 20')","MS","Length","","angle iron"],["AN-02","Angle","Angle 1-1/2\" x 1-1/2\" x 3/16\"","1.5x1.5x3/16 1-1/2x1-1/2x3/16","20'","MS","Length","","angle iron"],["AN-03","Angle","Angle 2\" x 2\" x 3/16\"","2x2x3/16","Not stated (assume 20')","MS / A36","Length","","angle iron"],["AN-04","Angle","Angle 2\" x 2\" x 1/4\"","2x2x1/4","Not stated (assume 20')","MS","Length","","angle iron"],["AN-05","Angle","Angle 3\" x 3\" x 1/4\"","3x3x1/4","20'","A36","Length","","angle iron"],["CH-01","Channel","Channel 4\" x 2\" x 7.25 lb/ft (C4x7.25)","4x2 2x4 c4x7.25 4x2x3/16","20'","MS / A36","Length","Supplier A: Quoted as \"2x4x7.25# x 20'\" against a 2x4x3/16 request.  |  Supplier B: 2x4x3/16 channel @ $… — section/weight not confirmed.","channel c-channel"],["CH-02","Channel","Channel 3\" x 2\" x 1/4\" (as requested)","3x2x1/4 c3","Not stated","MS","Length","Supplier A: Section weight not confirmed by Supplier A — verify.","channel c-channel"],["CH-03","Channel","Channel 6\" x 2\" x 12 lb/ft","6x2x12 6x3x1/4 upn160 c6","20'","MS","Length","Supplier A: Offered for UPN160 request (13 Aug) and for 6x3x1/4 request (17 Sep) at same price. Confirm actual flange width.","channel c-channel upn"],["CH-04","Channel","Channel 6\" x 10 lb/ft (written \"6x3 x 10#\") x 20'","6x3 c6x10 3x6","20'","Not stated","Length","⚠ Supplier B: handwriting unclear ('6x3 +10# x 20' 1000.00', with an over-written figure) — confirm section and price.","channel c-channel"],["CH-05","Channel","Channel 2\" x 6\" (as requested)","2x6 channel","-","-","Length","","channel c-channel"],["CH-06","Channel","Channel 10\" x 2-3/4\" x 21 lb/ft (≈C10x20)","10x2-3/4x21 c10","20'","Not stated","Length","Supplier B: offered for 4\"x10\" forklift-pocket channel request. Confirm exact section.","channel c-channel forklift"],["CH-07","Channel","Channel 8\" x 17 lb/ft (written \"8x3 x 17#\")","8x3x17 c8","20'","Not stated","Length","⚠ Supplier B: handwriting reads '8x3+17# x 20'' — confirm section (C8x18.75 is the nearest standard).","channel c-channel forklift"],["BM-01","Beam","Wide flange W6 x 20","w6x20 6x20","20'","A36","Length","Supplier B: an RFQ asked A572 Gr50 at $… — grade not confirmed.","beam wide flange w-beam i-beam"],["BM-02","Beam","Beam 4\" x 4\" x 13 lb/ft","4x4x13 w4x13","-","-","Length","Supplier A: Not stocked.","beam wide flange w-beam"],["BM-03","Beam","Beam 8\" x 6\" x 24 lb/ft (likely W8x24)","8x6x24 w8x24","20'","Not stated","Length","Supplier A: Offered as substitute for 6x6x24lb beam. Confirm exact section before design use.","beam wide flange w-beam"],["BM-04","Beam","Beam 6\" x 6\" x 24/25 lb/ft","6x6x24 w6x25","-","-","Length","Supplier A: Not stocked in 24/25 lb. Offered 8x6x24# (BM-03) on 4 Aug and 6x6x20# x 30' (BM-05) on 16 Sep.  |  ⚠ Supplier B: 6x6x24lb @ $… — identical to their W6x20 price; likely W6x20 supplied. Confirm section.","beam wide flange w-beam"],["BM-05","Beam","Beam 6\" x 6\" x 20 lb/ft (W6x20) — 30' length","6x6x20 w6x20 30ft 30'","30'","A36 (as requested)","Length","Supplier A: ⚠ Offered against a 6x6x25lb request — 20 lb/ft is LIGHTER. Check section properties against design before accepting. Same section as BM-01 (20' @ $… = $…/ft); this 30' length works out to $…/ft.","beam wide flange w-beam i-beam"],["BM-06","Beam","Beam 6\" x 6\" x 25 lb/ft (W6x25) — 30' length","6x6x25 w6x25 30ft","30'","A36 (as requested)","Length","Supplier B: 30' length = $…/ft.","beam wide flange w-beam i-beam"],["PP-01","Pipe","Pipe 1-1/2\" Sch 40 ERW","1-1/2 sch40 1.5 sch 40","20'","Not stated (ERW)","Length","Supplier A: $… once (an RFQ, 6 Aug); $… on every other quote and PO.  |  Supplier B: $… for '1-1/2\" steel pipe 20'' — schedule not stated; confirm Sch 40. an RFQ states 6 m stock length.","pipe tube erw"],["PP-02","Pipe","Pipe 2\" Sch 40 ERW","2 sch40","Not stated","Not stated (ERW)","Length","Supplier A: $… on 6 Aug, $… on 13 Aug.","pipe tube erw"],["PP-03","Pipe","Pipe 4\" Sch 40 ERW","4 sch40","19'","ASTM A53 Gr B","Length","","pipe tube erw a53"],["PP-04","Pipe","Pipe 6\" Sch 40 ERW","6 sch40","20'","ASTM A53 Gr B","Length","","pipe tube erw a53"],["PP-05","Pipe","Pipe 1\" Sch 80","1 sch80","-","-","Length","Supplier A: Not stocked.","pipe heavy wall"],["PP-06","Pipe","Pipe 4\" Sch 80","4 sch80","-","-","Length","Supplier A: Not stocked.","pipe heavy wall"],["PP-07","Pipe","Pipe 8\" Sch 80","8 sch80","-","-","Length","Supplier A: Not stocked.","pipe heavy wall"],["PP-08","Pipe","Pipe 3\" Sch 40","3 sch40","-","CS","Length","","pipe"],["PP-09","Pipe","Pipe 20\" NPS STD wall (0.375\")","20 std pipe","-","ASTM A53 Gr B","Each","","pipe large bore"],["PP-10","Pipe","Pipe 3/4\" Sch 40","3/4 sch40","Not stated","Not stated","Length","⚠ Supplier B: $… is more than their 2\" Sch 40 ($…) — confirm.","pipe"],["FT-01","Pipe Fittings","Elbow 4\" 90° Sch 40","4 elbow 90","-","CS","Each","Supplier A: Material confirmed as CS 6 Aug; formal quote requested 10 Aug — no price on file.","fitting elbow"],["FT-02","Pipe Fittings","Elbow 3\" 90° Sch 40","3 elbow 90","-","CS","Each","Supplier A: As FT-01 — no price on file.","fitting elbow"],["FT-03","Pipe Fittings","Slip-on flange 4\" Class 150","4 flange so 150","-","-","Each","Supplier A: Not stocked.","flange slip on"],["FT-04","Pipe Fittings","Elbow 1-1/2\" 90° Short Radius","1-1/2 elbow sr","-","-","Each","Supplier A: Not stocked.","fitting elbow"],["FT-05","Pipe Fittings","Elbow 1-1/2\" 90° Long Radius","1-1/2 elbow lr","-","-","Each","Supplier A: Not stocked.","fitting elbow"],["FT-06","Pipe Fittings","Nipple 1\" Sch 80 x 6\" long","1 nipple sch80","-","-","Each","Supplier A: Not stocked.","fitting nipple"],["FT-07","Pipe Fittings","Elbow 3\" 45° Sch 40","3 elbow 45","-","CS","Each","","fitting elbow"],["FT-08","Pipe Fittings","Flange 5\" Class 150 RF (B16.5)","5 flange rf 150","-","CS","Each","","flange raised face"],["FT-09","Pipe Fittings","Pneumatic valve 3\" PTFE/Viton (HCl service)","pneumatic valve","-","-","Each","","valve"],["FT-10","Pipe Fittings","Elbow 2\" 90° Short Radius","2 elbow sr","-","-","Each","","fitting elbow"],["FT-11","Pipe Fittings","Elbow 2\" 90° Long Radius","2 elbow lr","-","-","Each","","fitting elbow"],["RB-01","Round Bar","Round bar 1/4\" MS","1/4 rod","Not stated","MS","Length","","rod smooth bar round"],["RB-02","Round Bar","Round bar 3/8\" MS","3/8 rod","Not stated","MS","Length","","rod smooth bar round"],["RB-03","Round Bar","Round bar 3/8\" HT","3/8 rod ht","Not stated","HT (high tensile)","Length","","rod round bar rebar ht"],["RB-04","Round Bar","Round bar 5/8\" MS","5/8 rod","Not stated","MS","Length","","rod smooth bar round"],["RB-05","Round Bar","Round bar 3/4\" MS","3/4 rod","Not stated","MS","Length","Supplier A: ⚠ 13 Aug: MS $… / HT $…. Later quotes + PO show \"3/4 MS\" at $… — confirm MS vs HT on delivery/MTR.","rod smooth bar round"],["RB-06","Round Bar","Round bar 3/4\" HT","3/4 rod ht","Not stated","HT (high tensile)","Length","","rod round bar ht"],["RB-07","Round Bar","Round bar 1\" MS","1 rod 1in","Not stated","MS (quoted)","Length","Supplier A: A572 Gr.50 was requested; Supplier A quoted \"MS rods\". Check grade on MTR.","rod round bar"],["RB-08","Round Bar","Round bar 1-1/8\" MS","1-1/8 rod","Not stated","MS","Length","Supplier A: ⚠ VERIFY: looks high vs 1\" ($…) and 1-1/2\" ($…).","rod round bar"],["RB-09","Round Bar","Round bar 1-1/2\"","1-1/2 rod 1.5","Not stated","MS / A36","Length","","rod round bar"],["RB-10","Round Bar","Round bar 2\" A36","2 rod","-","A36","Length","","rod round bar"],["RB-11","Round Bar","Round bar 3/4\" SS316","3/4 ss316 rod","-","SS316","Length","","rod round bar stainless"],["GR-01","Grating","Galvanised grating 1\" thk, 3' x 6'","1 grating 3x6","3' x 6'","Galvanised","Sheet","","grating galvanized"],["GR-02","Grating","Grating 1\" thk, 3' x 6 m (as requested)","1 grating 3ft x 6m","3' x 6 m (as requested)","Not stated","Length","Supplier A: Possibly same panel as GR-01 (6' vs 6 m typo?) — verify size.","grating"],["FS-01","Fasteners","A325 bolt 5/8\" x 2-1/2\" c/w nut & washer","5/8 x 2-1/2 a325 bolt nut washer","-","ASTM A325","Set","Supplier A: rep wrote \"5/8x2-1/2 A325 B/N/W\" — $… appears to be per bolt/nut/washer set. Confirm.","bolt nut washer"],["FS-02","Fasteners","A325 bolt / all-thread 5/8\" x 2\"","5/8 x 2 a325","-","ASTM A325","Each","Supplier A: Requested 7 Aug (an RFQ Sect. 4) — no reply on file.","bolt all thread"],["FS-03","Fasteners","U-bolt 1/2\" x 6\" c/w nut & washer","u-bolt 6 1/2","-","-","Each","Supplier A: Not stocked.","u bolt"],["FS-04","Fasteners","U-bolt 1/2\" x 4\" c/w nut & washer","u-bolt 4 1/2","-","-","Each","Supplier A: Not stocked.","u bolt"],["FS-05","Fasteners","Nyloc nut M8 SS316","m8 nyloc","-","SS316","Each","Supplier A: Not stocked.","nut stainless"],["FS-06","Fasteners","Plain washer M8 SS316","m8 washer","-","SS316","Each","Supplier A: Not stocked.","washer stainless"],["FS-07","Fasteners","Hex head bolt M8 x 35 SS316","m8x35 bolt","-","SS316","Each","Supplier A: No price given.","bolt stainless"],["FS-08","Fasteners","Plain washer M10 SS316","m10 washer","-","SS316","Each","Supplier A: Not stocked.","washer stainless"],["FS-09","Fasteners","Shoulder screw Ø10 (M8) x 50 SS316","m8 shoulder screw","-","SS316","Each","Supplier A: Not stocked.","screw stainless"],["FS-10","Fasteners","Hex bolt 7/8\" x 3-1/2\" (SS316 / HDG)","7/8 bolt","-","SS316 or HDG","Each","","bolt"],["FS-11","Fasteners","Hex bolt 3/4\"-10 UNC x 3\" (SS316 / HDG)","3/4 bolt","-","SS316 or HDG","Each","","bolt"],["FS-12","Fasteners","Heavy hex nut 7/8\" & 3/4\"","heavy hex nut","-","SS316 or HDG","Each","","nut"],["FS-13","Fasteners","Flat washer 7/8\" & 3/4\"","washer","-","SS316 or HDG","Each","","washer"],["FS-14","Fasteners","Countersunk screw M6 SS316","m6 csk screw","-","SS316","Each","","screw stainless"],["FS-15","Fasteners","R-clip + lanyard SS316","r-clip lanyard","-","SS316","Each","","clip"],["OT-01","Plastics / Other","UHMW-PE sheet 1/2\" UV stabilised","uhmw 1/2","-","UHMW-PE","Each","","plastic uhmw wear pad"],["OT-02","Plastics / Other","UHMW-PE sheet 1/4\" UV stabilised","uhmw 1/4","-","UHMW-PE","Each","","plastic uhmw wear pad"]],"quotes":[["RHS-16",1,"2026-05-26",null,"No stock",""],["RHS-18",1,"2026-05-26",null,"Substitute offered",""],["RHS-17",1,"2026-05-26",8810,"Substitute offered",""],["RHS-04",1,"2026-05-26",null,"Substitute offered",""],["RHS-14",1,"2026-05-26",2205,"Substitute offered","A500 Gr C requested — grade not confirmed."],["CH-04",1,"2026-06-01",955,"Substitute offered","⚠ Handwriting unclear."],["AN-04",1,"2026-06-01",230,"Quoted",""],["CH-05",1,"2026-06-01",null,"No price given",""],["PL-01",1,"2026-06-01",1350,"Quoted",""],["PL-06",1,"2026-06-01",8175,"Quoted",""],["SH-04",1,"2026-06-01",1000,"Quoted",""],["SH-05",1,"2026-06-01",null,"No stock",""],["PP-01",1,"2026-06-01",300,"Quoted","6 m stock length."],["RHS-19",1,"2026-06-01",null,"No price given",""],["PL-03",1,"2026-06-01",2595,"Quoted",""],["PL-09",1,"2026-06-01",1050,"Quoted",""],["SH-01",1,"2026-06-01",620,"Quoted",""],["RHS-01",1,"2026-06-01",190,"Quoted","⚠ Later quoted $…."],["FB-01",1,"2026-06-01",65,"Quoted",""],["CH-06",1,"2026-06-01",2410,"Substitute offered",""],["CH-07",1,"2026-06-01",1915,"Substitute offered",""],["RHS-14",1,"2026-06-02",2205,"Quoted",""],["PL-02",1,"2026-06-02",2045,"Quoted",""],["PP-08",1,"2026-06-02",null,"No stock",""],["FT-07",1,"2026-06-02",null,"No stock",""],["FT-02",1,"2026-06-02",null,"No stock",""],["FT-09",1,"2026-06-02",null,"No stock",""],["FT-08",1,"2026-06-02",null,"No stock",""],["RHS-05",1,"2026-06-02",860,"Quoted",""],["PL-10",1,"2026-06-10",null,"No price given",""],["PL-03",1,"2026-06-10",2595,"Substitute offered","Full 4x8 sheet offered; grade not confirmed."],["PL-09",1,"2026-06-10",1050,"Quoted",""],["RHS-05",1,"2026-06-10",860,"Quoted",""],["SH-03",1,"2026-06-10",null,"No stock",""],["PL-05",1,"2026-06-15",4095,"Quoted",""],["PL-09",1,"2026-06-15",1050,"Quoted",""],["PP-09",1,"2026-06-15",null,"No stock",""],["FB-09",1,"2026-06-15",205,"Quoted",""],["RB-10",1,"2026-06-15",null,"No stock",""],["RB-11",1,"2026-06-15",null,"No stock",""],["OT-01",1,"2026-06-15",null,"No stock",""],["OT-02",1,"2026-06-15",null,"No stock",""],["FS-10",1,"2026-06-15",null,"No stock",""],["FS-11",1,"2026-06-15",null,"No stock",""],["FS-12",1,"2026-06-15",null,"No stock",""],["FS-13",1,"2026-06-15",null,"No stock",""],["FS-14",1,"2026-06-15",null,"No stock",""],["FS-15",1,"2026-06-15",null,"No stock",""],["BM-01",1,"2026-06-22",1900,"Quoted","Gr 50 requested — grade not confirmed."],["PL-02",1,"2026-06-22",2045,"Substitute offered","A36 offered instead of Gr 50."],["PL-05",1,"2026-06-22",4095,"Quoted","Grade not confirmed."],["RHS-02",1,"2026-07-03",null,"No stock",""],["RHS-03",1,"2026-07-03",null,"No stock",""],["RHS-11",1,"2026-07-03",null,"No stock",""],["RHS-12",1,"2026-07-03",4555,"Substitute offered",""],["RHS-09",1,"2026-07-03",2165,"Substitute offered",""],["PL-01",1,"2026-07-08",1350,"Quoted",""],["PL-03",1,"2026-07-08",2595,"Quoted",""],["PL-06",1,"2026-07-08",8175,"Quoted",""],["RHS-02",0,"2026-07-08",1245,"Substitute offered","Initial $… superseded by clarification."],["RHS-11",0,"2026-07-08",null,"Substitute offered","Substitute = RHS-02."],["RHS-03",0,"2026-07-08",3200,"Quoted",""],["PL-01",0,"2026-07-08",1670,"Quoted",""],["PL-03",0,"2026-07-08",3185,"Quoted",""],["PL-06",0,"2026-07-08",6975,"Quoted",""],["RHS-03",0,"2026-07-15",3200,"Purchased","PO total $… incl. VAT."],["BM-01",1,"2026-07-16",1900,"Quoted",""],["PL-03",1,"2026-07-16",2595,"Quoted",""],["AN-05",1,"2026-07-16",320,"Quoted",""],["FB-03",1,"2026-07-16",195,"Quoted",""],["FB-07",1,"2026-07-16",null,"No stock",""],["FB-03",0,"2026-07-16",270,"Quoted",""],["FB-07",0,"2026-07-16",2065,"Quoted",""],["BM-01",0,"2026-07-16",1960,"Quoted",""],["PL-03",0,"2026-07-16",3185,"Quoted",""],["AN-05",0,"2026-07-16",435,"Quoted",""],["PP-03",1,"2026-07-21",965,"Quoted","Length not stated."],["PP-04",1,"2026-07-21",2175,"Quoted","Length not stated."],["RB-07",1,"2026-07-21",null,"No stock",""],["PP-03",0,"2026-07-23",2030,"Quoted",""],["PP-04",0,"2026-07-23",3315,"Quoted",""],["RB-07",0,"2026-07-23",null,"No reply",""],["RHS-06",1,"2026-07-27",1590,"Quoted","⚠ Verify — less than half Supplier A price."],["PL-03",1,"2026-07-27",2595,"Quoted","Priced in Cat. 2 and Cat. 3."],["AN-05",1,"2026-07-27",320,"Quoted",""],["PL-05",1,"2026-07-27",4095,"Quoted",""],["PP-01",1,"2026-07-27",300,"Quoted","Schedule not stated."],["SH-01",1,"2026-07-27",620,"Quoted",""],["PL-01",1,"2026-07-27",1350,"Quoted",""],["BM-02",1,"2026-07-27",null,"No stock",""],["RHS-06",0,"2026-07-27",3360,"Quoted",""],["PL-03",0,"2026-07-27",3185,"Quoted",""],["AN-05",0,"2026-07-27",435,"Quoted",""],["PL-05",0,"2026-07-27",4815,"Quoted",""],["PP-01",0,"2026-07-27",510,"Quoted",""],["AN-01",1,"2026-07-28",null,"No stock",""],["AN-02",1,"2026-07-28",120,"Quoted",""],["SH-01",1,"2026-07-28",620,"Quoted",""],["SH-02",1,"2026-07-28",null,"No stock",""],["PL-01",1,"2026-07-28",1350,"Quoted",""],["SH-01",0,"2026-07-28",795,"Quoted",""],["PL-03",0,"2026-07-28",3185,"Quoted",""],["PL-01",0,"2026-07-28",1670,"Quoted",""],["BM-02",0,"2026-07-28",null,"No stock",""],["AN-01",0,"2026-07-28",90,"Quoted",""],["AN-02",0,"2026-07-28",190,"Quoted",""],["SH-01",0,"2026-07-28",795,"Quoted",""],["SH-02",0,"2026-07-28",null,"No stock",""],["PL-01",0,"2026-07-28",1670,"Quoted",""],["RHS-07",1,"2026-08-03",3365,"Quoted",""],["RHS-04",1,"2026-08-03",null,"Substitute offered","See RHS-13 (1/8 wall)."],["RHS-13",1,"2026-08-03",500,"Substitute offered",""],["RHS-08",1,"2026-08-03",null,"No stock",""],["PL-07",1,"2026-08-03",10925,"Quoted",""],["PL-08",1,"2026-08-03",6905,"Quoted",""],["RHS-10",1,"2026-08-03",null,"No stock",""],["BM-04",1,"2026-08-03",1950,"Quoted","⚠ Same price as their W6x20 — confirm section."],["AN-05",1,"2026-08-03",320,"Quoted",""],["RHS-07",0,"2026-08-04",null,"No stock",""],["RHS-04",0,"2026-08-04",1855,"Quoted",""],["RHS-08",0,"2026-08-04",5305,"Quoted",""],["PL-07",0,"2026-08-04",9250,"Quoted",""],["PL-08",0,"2026-08-04",8375,"Quoted",""],["RHS-10",0,"2026-08-04",null,"No stock",""],["BM-04",0,"2026-08-04",null,"Substitute offered",""],["BM-03",0,"2026-08-04",2220,"Substitute offered",""],["AN-05",0,"2026-08-04",435,"Quoted",""],["FB-06",1,"2026-08-06",285,"Quoted",""],["RHS-04",1,"2026-08-06",1520,"Substitute offered","Galvanised only."],["RHS-05",1,"2026-08-06",860,"Quoted",""],["RHS-01",1,"2026-08-06",400,"Quoted",""],["RHS-09",1,"2026-08-06",2165,"Quoted",""],["RHS-02",1,"2026-08-06",null,"No stock",""],["FT-01",1,"2026-08-06",null,"No stock",""],["FT-03",1,"2026-08-06",null,"No stock",""],["PP-03",1,"2026-08-06",965,"Quoted",""],["FT-02",1,"2026-08-06",null,"No stock",""],["RHS-06",0,"2026-08-06",3360,"Quoted",""],["PP-02",0,"2026-08-06",510,"Quoted",""],["PL-02",0,"2026-08-06",2505,"Quoted","Quoted in Sect. 1 and Sect. 3."],["GR-02",0,"2026-08-06",1050,"Quoted",""],["PP-01",0,"2026-08-06",475,"Quoted",""],["FB-06",0,"2026-08-06",335,"Quoted",""],["SH-01",0,"2026-08-06",795,"Quoted",""],["FS-01",0,"2026-08-06",10,"Quoted",""],["FB-06",0,"2026-08-06",500,"Quoted","Conflicts with $… same day."],["RHS-04",0,"2026-08-06",1855,"Quoted",""],["RHS-05",0,"2026-08-06",3010,"Quoted",""],["RHS-01",0,"2026-08-06",865,"Quoted","Likely 5mm wall supplied."],["RHS-09",0,"2026-08-06",null,"No price given",""],["RHS-02",0,"2026-08-06",1245,"Quoted","Likely 5mm wall supplied."],["FT-01",0,"2026-08-06",null,"No price given",""],["FT-03",0,"2026-08-06",null,"No stock",""],["PP-03",0,"2026-08-06",null,"No price given",""],["FT-02",0,"2026-08-06",null,"No price given",""],["FS-02",0,"2026-08-07",null,"No reply",""],["PL-01",1,"2026-08-12",1350,"Quoted",""],["PL-02",1,"2026-08-12",2045,"Quoted",""],["PL-03",1,"2026-08-12",2595,"Quoted",""],["PL-04",1,"2026-08-12",3000,"Quoted",""],["PL-05",1,"2026-08-12",4095,"Quoted",""],["PL-06",1,"2026-08-12",8175,"Quoted",""],["PP-05",1,"2026-08-12",null,"No stock",""],["PP-02",1,"2026-08-12",330,"Quoted",""],["PP-06",1,"2026-08-12",null,"No stock",""],["PP-04",1,"2026-08-12",2175,"Quoted",""],["PP-07",1,"2026-08-12",null,"No stock",""],["CH-03",1,"2026-08-12",null,"No stock",""],["RB-01",1,"2026-08-12",null,"No stock",""],["RB-02",1,"2026-08-12",null,"No stock",""],["RB-05",1,"2026-08-12",null,"No stock",""],["RB-08",1,"2026-08-12",null,"No stock",""],["PL-01",0,"2026-08-13",1670,"Quoted","Grade A36 confirmed."],["PL-02",0,"2026-08-13",2505,"Quoted",""],["PL-03",0,"2026-08-13",3185,"Quoted",""],["PL-04",0,"2026-08-13",3480,"Quoted",""],["PL-05",0,"2026-08-13",4815,"Quoted",""],["PL-06",0,"2026-08-13",6975,"Quoted",""],["PP-05",0,"2026-08-13",null,"No stock",""],["PP-02",0,"2026-08-13",570,"Quoted",""],["PP-06",0,"2026-08-13",null,"No stock",""],["PP-04",0,"2026-08-13",3315,"Quoted",""],["PP-07",0,"2026-08-13",null,"No stock",""],["CH-03",0,"2026-08-13",1775,"Substitute offered",""],["RB-01",0,"2026-08-13",15,"Substitute offered",""],["RB-02",0,"2026-08-13",30,"Substitute offered",""],["RB-03",0,"2026-08-13",25,"Substitute offered",""],["RB-05",0,"2026-08-13",130,"Substitute offered",""],["RB-06",0,"2026-08-13",85,"Substitute offered",""],["RB-08",0,"2026-08-13",1090,"Substitute offered",""],["PP-01",0,"2026-08-17",510,"Quoted",""],["FB-02",0,"2026-08-17",195,"Quoted",""],["PP-02",1,"2026-08-24",330,"Quoted",""],["FT-10",1,"2026-08-24",null,"No stock",""],["FT-11",1,"2026-08-24",null,"No stock",""],["FB-08",1,"2026-08-24",null,"Substitute offered",""],["FB-06",1,"2026-08-24",285,"Substitute offered",""],["PL-02",1,"2026-08-24",2045,"Quoted",""],["RB-02",1,"2026-08-24",null,"No stock",""],["PP-10",1,"2026-08-24",420,"Quoted","⚠ Verify vs 2\" @ $…."],["RB-05",1,"2026-08-24",125,"Quoted",""],["RHS-01",0,"2026-08-24",865,"Quoted",""],["PP-01",0,"2026-08-24",510,"Quoted",""],["FT-04",0,"2026-08-24",null,"No stock",""],["FT-05",0,"2026-08-24",null,"No stock",""],["FB-08",0,"2026-08-24",null,"Substitute offered",""],["FB-06",0,"2026-08-24",335,"Substitute offered",""],["PL-02",0,"2026-08-24",2505,"Quoted",""],["RB-02",0,"2026-08-24",30,"Quoted",""],["FT-06",0,"2026-08-24",null,"No stock",""],["RB-05",0,"2026-08-24",105,"Quoted","Price matches 3/4 HT from 13 Aug."],["FS-05",0,"2026-08-24",null,"No stock",""],["FS-06",0,"2026-08-24",null,"No stock",""],["FS-07",0,"2026-08-24",null,"No price given",""],["FS-08",0,"2026-08-24",null,"No stock",""],["FS-09",0,"2026-08-24",null,"No stock",""],["RHS-01",0,"2026-08-27",865,"Purchased","PO total $… incl. VAT."],["PP-01",0,"2026-08-27",510,"Purchased",""],["FB-06",0,"2026-08-27",335,"Purchased",""],["RB-05",0,"2026-08-27",105,"Purchased",""],["RB-02",0,"2026-08-27",30,"Purchased",""],["AN-05",1,"2026-09-01",320,"Quoted",""],["RB-07",0,"2026-09-08",190,"Purchased","Collected 10 Sep, cut in 4 for transport."],["SH-01",1,"2026-09-11",620,"Quoted",""],["CH-01",1,"2026-09-11",635,"Quoted",""],["RB-09",1,"2026-09-11",null,"No stock",""],["RB-04",1,"2026-09-11",80,"Quoted",""],["AN-03",1,"2026-09-11",170,"Quoted",""],["FB-04",1,"2026-09-11",335,"Quoted",""],["FB-05",1,"2026-09-11",null,"No stock",""],["SH-01",0,"2026-09-11",795,"Quoted",""],["CH-01",0,"2026-09-11",740,"Substitute offered",""],["RB-09",0,"2026-09-11",1335,"Quoted",""],["RB-04",0,"2026-09-11",80,"Quoted",""],["AN-03",0,"2026-09-11",240,"Quoted",""],["FB-04",0,"2026-09-11",520,"Quoted",""],["FB-05",0,"2026-09-11",695,"Quoted",""],["RHS-03",1,"2026-09-14",null,"No stock",""],["RHS-01",1,"2026-09-14",400,"Quoted",""],["PL-01",1,"2026-09-14",1350,"Quoted",""],["RHS-09",1,"2026-09-14",2165,"Substitute offered",""],["RHS-12",1,"2026-09-14",4555,"Substitute offered",""],["RHS-03",0,"2026-09-14",3200,"Quoted",""],["RHS-01",0,"2026-09-14",865,"Substitute offered","1/4\" requested — 5mm offered again."],["PL-01",0,"2026-09-14",1670,"Quoted",""],["AN-05",1,"2026-09-16",320,"Quoted",""],["BM-06",1,"2026-09-16",3565,"Quoted",""],["AN-05",0,"2026-09-16",435,"Quoted",""],["BM-04",0,"2026-09-16",null,"Substitute offered",""],["BM-05",0,"2026-09-16",2830,"Substitute offered",""],["FS-03",0,"2026-09-17",null,"No stock",""],["FS-04",0,"2026-09-17",null,"No stock",""],["AN-04",0,"2026-09-17",300,"Quoted","Quoted in Cat. 1 and Cat. 2."],["CH-02",0,"2026-09-17",490,"Quoted",""],["CH-03",0,"2026-09-17",1775,"Quoted","Same price as 6x2x12# channel."],["GR-01",0,"2026-09-17",1225,"Quoted",""],["FB-02",0,"2026-09-17",195,"Quoted",""],["FB-01",0,"2026-09-17",120,"Quoted",""],["AN-05",0,"2026-09-17",435,"Quoted","Blank in Cat. 1, priced in Cat. 2."],["SH-01",0,"2026-09-17",795,"Quoted",""]]};
 function seed(){
   const t=todayISO(),D=n=>isoAdd(t,n);
-  const S=(company,supplies,notes)=>({id:uid(),company,contact:"",email:"",phone:"",supplies,status:"Active",notes:notes||""});
+  const S=(company,supplies,notes)=>({id:uid(),company,contact:"Sales desk",email:"quotes@"+company.toLowerCase().replace(/[^a-z]+/g,"-").replace(/^-|-$/g,"")+".example",phone:"",supplies,status:"Active",notes:notes||""});
   const sup=[S("Steel Supplier A",["Steel"],"Types prices into our RFQ table. Stocks 5mm-wall SHS."),S("Steel Supplier B",["Steel"],"Hand-writes prices on the RFQ and scans it back — confirm unclear figures by phone."),S("Stainless & Fasteners Co.",["Stainless Steel","Fasteners"]),S("Coatings Distributor",["Paint & Coatings"]),S("Industrial Supply House",["Other","Machinery"])];
   // price book (demo: real item list, supplier names hidden, prices scaled)
   const priceItems=[],byCode={};
@@ -1247,15 +1286,17 @@ function migrateV2(){
 
 /* ============ v2: PRICE BOOK ============ */
 let _pbCache=null;
+const PB_TOK=new WeakMap();
+function pbT(it){let t=PB_TOK.get(it);if(!t){const hay=normText([it.code,it.category,it.description,it.tags,it.stockLength,it.grade,it.synonyms].join(" "));t={hay,tok:new Set(hay.split(" "))};PB_TOK.set(it,t);}return t;}
 function pbInvalidate(){_pbCache=null;}
 function pbIndex(){
-  if(_pbCache)return _pbCache;
+  if(_pbCache&&_pbCache.src===DB.priceItems&&_pbCache.qsrc===DB.priceQuotes&&_pbCache.n===(DB.priceItems||[]).length&&_pbCache.qn===(DB.priceQuotes||[]).length)return _pbCache;
   const byItem={};
   (DB.priceQuotes||[]).forEach(q=>{(byItem[q.itemRef]=byItem[q.itemRef]||[]).push(q);});
   const sup={};(DB.priceQuotes||[]).forEach(q=>{sup[q.supplier]=(sup[q.supplier]||0)+1;});
   const suppliers=Object.keys(sup).sort((a,b)=>sup[b]-sup[a]);
-  const items={};(DB.priceItems||[]).forEach(it=>{items[it.id]=it;it._hay=normText([it.code,it.category,it.description,it.tags,it.stockLength,it.grade,it.synonyms].join(" "));it._tok=new Set(it._hay.split(" "));});
-  return (_pbCache={byItem,suppliers,items});
+  const items={};(DB.priceItems||[]).forEach(it=>{items[it.id]=it;const hay=normText([it.code,it.category,it.description,it.tags,it.stockLength,it.grade,it.synonyms].join(" "));PB_TOK.set(it,{hay,tok:new Set(hay.split(" "))});delete it._hay;delete it._tok;});
+  return (_pbCache={byItem,suppliers,items,src:DB.priceItems,qsrc:DB.priceQuotes,n:(DB.priceItems||[]).length,qn:(DB.priceQuotes||[]).length});
 }
 function priceItem(id){return pbIndex().items[id]||null;}
 function hasPrice(q){return q&&q.price!==""&&q.price!=null&&!isNaN(+q.price);}
@@ -1277,11 +1318,11 @@ function normText(s){
 }
 function isDimTok(t){return /\d/.test(t)&&(/[x\/]/.test(t)||/^sch\d+$/.test(t)||/^\d+(\.\d+)?(mm|ft)?$/.test(t));}
 function scoreItem(it,qtoks){
-  let s=0;
+  let s=0;const T=pbT(it);
   for(const t of qtoks){
     if(t.length<1)continue;
-    if(it._tok.has(t))s+=isDimTok(t)?(/[x\/]|sch/.test(t)?7:3):2;
-    else if(t.length>2&&it._hay.includes(t))s+=1;
+    if(T.tok.has(t))s+=isDimTok(t)?(/[x\/]|sch/.test(t)?7:3):2;
+    else if(t.length>2&&T.hay.includes(t))s+=1;
     else if(isDimTok(t))s-=3;
   }
   return s;
@@ -1292,7 +1333,7 @@ function searchPrices(q,opts){
   if(opts.cat)list=list.filter(i=>i.category===opts.cat);
   if(!qt.length)return list.map(it=>({it,s:0}));
   const scored=list.map(it=>({it,s:scoreItem(it,qt)}));
-  if(opts.strict)return scored.filter(x=>qt.every(t=>x.it._hay.includes(t))).sort((a,b)=>b.s-a.s);
+  if(opts.strict)return scored.filter(x=>qt.every(t=>pbT(x.it).hay.includes(t))).sort((a,b)=>b.s-a.s);
   return scored.filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
 }
 function matQuery(m){return [m.description,m.size,m.length&&/\d/.test(m.length)?"":""].join(" ");}
@@ -1342,12 +1383,11 @@ function setManualPrice(mid){const m=(DB.materials||[]).find(x=>x.id===mid);cons
 
 function renderPrices(c){
   const idx=pbIndex(),sups=idx.suppliers.slice(0,3),vat=priceVat?1+vatRate():1;
-  const cats=Array.from(new Set((DB.priceItems||[]).map(i=>i.category).filter(Boolean))).sort();
-  const res=searchPrices(priceQ,{cat:priceCat,strict:true});
+  const cats=priceCats();
   const demo=DB.meta.demoPrices?`<div class="demobar">ℹ️ <b>Demo price book</b> — real item list, supplier names hidden and prices scaled for illustration. Import your own workbook (📂 below or in Settings) to use real prices.</div>`:"";
-  const head=`<div class="tbar"><div class="gsearch grow" style="margin:0"><input id="pq" value="${esc(priceQ)}" placeholder="Search a size or item — e.g. 4x4x1/4, plate 3/8, sch40, angle" oninput="priceQ=this.value;renderPriceRows()"></div></div>
-    <div class="tbar"><button class="btn" onclick="importPriceWorkbook()">📂 Import price workbook</button><button class="btn" onclick="openQuoteForm()">+ Log a supplier price</button><button class="btn" onclick="openPriceItemForm()">+ New item</button><span class="grow"></span><button class="pchip ${priceVat?'on':''}" onclick="priceVat=!priceVat;render()">${priceVat?"incl. VAT":"excl. VAT"}</button></div>
-    <div class="pchips"><button class="pchip ${!priceCat?'on':''}" onclick="priceCat='';render()">All</button>${cats.map(k=>`<button class="pchip ${priceCat===k?'on':''}" onclick="priceCat='${esc(k)}';render()">${esc(k)}</button>`).join("")}</div>`;
+  const head=`<div class="tbar"><button class="btn" onclick="importPriceWorkbook()">📂 Import price workbook</button><button class="btn" onclick="openQuoteForm()">+ Log a supplier price</button><button class="btn" onclick="openPriceItemForm()">+ New item</button><span class="grow"></span><button class="pchip ${priceVat?'on':''}" onclick="priceVat=!priceVat;render()">${priceVat?"incl. VAT":"excl. VAT"}</button></div>
+    <div class="pchips"><button class="pchip ${!priceCat?'on':''}" onclick="priceCat='';render()">All</button>${cats.map(k=>`<button class="pchip ${priceCat===k?'on':''}" data-c="${esc(k)}" onclick="priceCat=this.dataset.c;render()">${esc(k)} <span style="opacity:.6">${(DB.priceItems||[]).filter(i=>i.category===k).length}</span></button>`).join("")}<button class="pchip" onclick="addPriceCat()">+ Category</button></div>
+    <div class="lsearch"><input id="pq" type="search" value="${esc(priceQ)}" placeholder="Search a size or item — e.g. 4x4x1/4, plate 3/8, sch40, angle" oninput="priceQ=this.value;renderPriceRows()"></div>`;
   if(!(DB.priceItems||[]).length){c.innerHTML=demo+head+`<div class="empty"><div class="big">💲</div>No price book yet. Import your supplier price workbook (.xlsx) — Protrac reads the <b>Price Book</b> and <b>Quote Log</b> sheets — or add items and log prices as quotes come in.</div>`;return;}
   c.innerHTML=demo+head+`<div id="prows"></div>`;
   renderPriceRows();
@@ -1356,13 +1396,14 @@ function renderPriceRows(){
   const el=document.getElementById("prows");if(!el)return;
   const idx=pbIndex(),sups=idx.suppliers.slice(0,3),vat=priceVat?1+vatRate():1;
   const res=searchPrices(priceQ,{cat:priceCat,strict:true});
+  if(!res.length&&priceCat&&!priceQ){el.innerHTML=`<div class="empty">No items in <b>${esc(priceCat)}</b> yet. <button class="linkbtn" onclick="openPriceItemForm(null,priceCat)">+ Add the first item</button></div>`;return;}
   const rows=res.slice(0,150).map(({it})=>{
     const L=latestBySupplier(it.id),b=bestPrice(it);
     const flag=/⚠|verify|confirm/i.test(it.notes||"")?`<span class="warnflag" title="${esc(it.notes)}">⚠</span> `:"";
     const cells=sups.map(s=>{const x=L[s];if(!x)return `<td class="resp">—</td>`;if(x.priced){const stale=x.any&&x.any!==x.priced?`<span class="ps">last: ${esc(x.any.response||"")}</span>`:"";return `<td><span class="pricecell ${b&&b.supplier===s?'best':''}">${money(+x.priced.price*vat)}<span class="ps">${esc(fmtShort(x.priced.date))}</span>${stale}</span></td>`;}return `<td class="resp">${esc(x.any?x.any.response:"")}</td>`;}).join("");
     return `<tr onclick="openPriceItem('${it.id}')"><td><div style="font-weight:700">${flag}${esc(it.description)}</div><div class="resp">${esc([it.code,it.stockLength,it.grade].filter(x=>x&&x!=="-").join(" · "))}</div></td><td>${esc(it.uom||"")}</td>${cells}<td>${b?`<span class="pricecell best">${money(b.price*vat)}<span class="ps">${esc(b.supplier)}</span></span>`:'<span class="resp">no price</span>'}</td></tr>`;
   }).join("");
-  el.innerHTML=res.length?`<div class="impnote" style="margin-bottom:8px">${res.length} item${res.length===1?"":"s"} · prices ${priceVat?"incl.":"excl."} VAT · tap a row for history &amp; notes</div><div class="tablewrap"><table class="ptab"><thead><tr><th>Item</th><th>Unit</th>${sups.map(s=>`<th>${esc(s)}</th>`).join("")}<th>Best</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="empty">No items match “${esc(priceQ)}”. Try just the size (e.g. 4x4) or one word.</div>`;
+  el.innerHTML=res.length?`<div class="impnote" style="margin-bottom:8px">${priceCat?"<b>"+esc(priceCat)+"</b> · ":""}${res.length} item${res.length===1?"":"s"} · prices ${priceVat?"incl.":"excl."} VAT · tap a row for history &amp; notes</div><div class="tablewrap"><table class="ptab"><thead><tr><th>Item</th><th>Unit</th>${sups.map(s=>`<th>${esc(s)}</th>`).join("")}<th>Best</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="empty">No items match “${esc(priceQ)}”. Try just the size (e.g. 4x4) or one word.</div>`;
 }
 function openPriceItem(id){
   const it=priceItem(id);if(!it)return;formMode="view";
@@ -1388,12 +1429,13 @@ function openQuoteForm(itemId){
     <div class="field"><label>Response</label><select data-k="response">${["Quoted","Substitute offered","No stock","No price given","Purchased"].map(o=>`<option>${o}</option>`).join("")}</select></div>
     <div class="field full"><label>Note</label><input data-k="note" placeholder="e.g. 5mm wall offered instead of 1/4"></div>`);
 }
-function openPriceItemForm(id){
+function openPriceItemForm(id,presetCat){
   formMode="pitem";impCtx={itemId:id||null};
   const it=id?priceItem(id):{};
-  const cats=Array.from(new Set((DB.priceItems||[]).map(i=>i.category).filter(Boolean))).sort();
-  const f=(k,l,ph)=>`<div class="field"><label>${l}</label><input data-k="${k}" value="${esc(it[k]||"")}" placeholder="${ph||""}"${k==="category"?' list="catlist"':""}></div>`;
-  openModal(id?"Edit price item":"New price item",`<div class="field full"><label>Description</label><input data-k="description" value="${esc(it.description||"")}" placeholder='e.g. SHS 4" x 4" x 1/4"'></div>`+f("category","Category","e.g. RHS / SHS")+`<datalist id="catlist">${cats.map(x=>`<option value="${esc(x)}">`).join("")}</datalist>`+f("tags","Search tags","e.g. 4x4x1/4 4x4x6mm")+f("stockLength","Stock length / sheet","e.g. 6 m, 4' x 8'")+f("grade","Grade","e.g. A36")+f("uom","Unit","Length / Sheet / Each")+f("code","Item ID","e.g. RHS-19"));
+  const cats=priceCats();
+  if(!id&&presetCat)it.category=presetCat;
+  const f=(k,l,ph)=>k==="category"?`<div class="field"><label>Category</label><select data-k="category" data-prev="${esc(it.category||"")}" onchange="catSelectChange(this)"><option value="">— choose —</option>${cats.map(cc=>`<option ${cc===it.category?"selected":""}>${esc(cc)}</option>`).join("")}<option value="__new__">➕ New category…</option></select></div>`:`<div class="field"><label>${l}</label><input data-k="${k}" value="${esc(it[k]||"")}" placeholder="${ph||""}"></div>`;
+  openModal(id?"Edit price item":"New price item",`<div class="field full"><label>Description</label><input data-k="description" value="${esc(it.description||"")}" placeholder='e.g. SHS 4" x 4" x 1/4"'></div>`+f("category","Category")+f("tags","Search tags","e.g. 4x4x1/4 4x4x6mm")+f("stockLength","Stock length / sheet","e.g. 6 m, 4' x 8'")+f("grade","Grade","e.g. A36")+f("uom","Unit","Length / Sheet / Each")+f("code","Item ID","e.g. RHS-19"));
 }
 function savePriceForms(){
   const d={};document.querySelectorAll("#mbody [data-k]").forEach(el=>{d[el.dataset.k]=el.value;});
@@ -1405,6 +1447,7 @@ function savePriceForms(){
   }
   if(formMode==="pitem"){
     if(!(d.description||"").trim()){toast("Enter a description");return;}
+    if(d.category==="__new__")d.category="";
     let it=impCtx&&impCtx.itemId?DB.priceItems.find(x=>x.id===impCtx.itemId):null;
     if(!it){it={id:uid(),synonyms:"",notes:""};DB.priceItems.push(it);}
     Object.assign(it,d);pbInvalidate();save();closeForm();rerender();toast("Item saved");
@@ -1432,12 +1475,14 @@ function procReadyNudge(j){
   return "";
 }
 function renderJobMaterials(j){
+  if(matGrid&&matGrid.jobId===j.id)return renderGrid2(j);
   const ms=jobMats(j.id),t=matTotals(ms);
   const tb=`<div class="tbar">
-    <button class="btn primary" onclick="openImport('materials','${j.id}')">📋 Paste / import from Excel</button>
-    <button class="btn" onclick='openForm(null,"materials",${JSON.stringify({jobRef:j.id})})'>+ Add line</button>
+    <button class="btn primary" onclick="startGrid('${j.id}')">⊞ ${ms.length?"Edit / add as table":"Type list as a table"}</button>
+    <button class="btn" onclick="openImport('materials','${j.id}')">📋 Paste / import from Excel</button>
+    <button class="btn" onclick='openForm(null,"materials",${JSON.stringify({jobRef:j.id})})'>+ Add one line</button>
     ${ms.length?`<button class="btn" onclick="priceAll('${j.id}')">💲 Price from price book</button>`:""}</div>`;
-  if(!ms.length)return `<div class="dsection"><h3><span class="ic">🔩</span> Material list</h3>${tb}<div class="empty" style="padding:24px"><div class="big">📋</div>Copy your material list in Excel (select the cells → Ctrl+C) and tap <b>Paste / import from Excel</b>.<br>Or import the whole .xlsx — every sheet if you want.</div></div>`;
+  if(!ms.length)return `<div class="dsection"><h3><span class="ic">🔩</span> Material list</h3>${tb}<div class="empty" style="padding:24px"><div class="big">📋</div>Tap <b>Type list as a table</b> to enter lines like a spreadsheet,<br>or copy cells in Excel and tap <b>Paste / import from Excel</b>.</div></div>`;
   const allSel=ms.length&&ms.every(m=>matSel.has(m.id));
   const groups={};ms.forEach(m=>{(groups[m.group||""]=groups[m.group||""]||[]).push(m);});
   const row=m=>`<tr>
@@ -1483,7 +1528,7 @@ function openRfqFromMaterials(jobId){
   openModal("Send supplier RFQ",`<div class="field"><label>RFQ number</label><input data-k="rfqNumber" value="${nextRfqNo()}"></div>
     <div class="field"><label>Reply needed by</label><input type="date" data-k="replyBy" value="${addWorkingDays(todayISO(),3)}"></div>
     <div class="field full"><label>${sel.length} line${sel.length>1?"s":""}</label><div class="impnote">${sel.slice(0,6).map(m=>esc([m.qtyReq,m.unit,m.description,m.size].filter(Boolean).join(" "))).join("<br>")}${sel.length>6?"<br>…":""}</div></div>
-    <div class="field full"><label>Send to</label><div class="suplist">${sups.map(s=>`<label><input type="checkbox" class="cbx" data-sup="${s.id}" ${(s.supplies||[]).includes("Steel")?"checked":""}> ${esc(s.company)} <span class="resp">${esc((s.supplies||[]).join(", "))}</span></label>`).join("")||'<div class="minimsg">Add suppliers first (Suppliers page).</div>'}</div></div>`,{ok:"Create RFQ"});
+    <div class="field full"><label>Send to</label><div class="suplist">${sups.map(s=>`<label><input type="checkbox" class="cbx" data-sup="${s.id}" ${(s.supplies||[]).includes("Steel")?"checked":""}><span class="sn">${esc(s.company)}</span><span class="resp">${esc((s.supplies||[]).join(", "))}${s.email?"":" · no email"}</span></label>`).join("")||'<div class="minimsg">Add suppliers first (Suppliers page).</div>'}</div></div>`,{ok:"Create RFQ"});
 }
 function saveRfqFromMaterials(){
   const d={};document.querySelectorAll("#mbody [data-k]").forEach(el=>{d[el.dataset.k]=el.value;});
@@ -1569,7 +1614,8 @@ function renderJobQC(j){
 function renderQC(c){
   const list=(DB.jobs||[]).filter(j=>j.phase!==PH.LOST&&(EXEC.includes(j.phase)||j.phase===PH.DONE||qcSummary(j).done));
   const filt={"":()=>true,fail:j=>qcSummary(j).fail>0,final:j=>!isClosed(j)&&!["Pass","N/A"].includes(((j.qc||{}).final||{}).s),done:j=>((j.qc||{}).final||{}).s==="Pass"}[qcFilter]||(()=>true);
-  const rows=list.filter(filt);
+  const qq=listQ.trim().toLowerCase();
+  const rows=list.filter(filt).filter(j=>!qq||[j.jobName,j.jobId,j.client,j.poNumber].join(" ").toLowerCase().includes(qq));
   const chip=(j,k)=>{const r=(j.qc||{})[k]||{},s=r.s;return `<span class="qcchip qc-${s==="N/A"?"NA":s||"none"}" title="${esc(s?(s+" · "+fmtShort(r.date)+(r.note?" — "+r.note:"")):"not inspected")}" onclick="openJob('${j.id}','checklist')">${s==="Pass"?"✓":s==="Fail"?"✗":s==="N/A"?"N/A":"—"}</span>`;};
   const fails=(DB.jobs||[]).flatMap(j=>QC_STAGES.filter(([k])=>((j.qc||{})[k]||{}).s==="Fail").map(([k,l])=>({j,l,r:j.qc[k]})));
   c.innerHTML=`<div class="cards">
@@ -1577,7 +1623,7 @@ function renderQC(c){
       <div class="statcard clickable c-warn" onclick="qcFilter='final';render()"><div class="n">${list.filter(j=>!isClosed(j)&&!["Pass","N/A"].includes(((j.qc||{}).final||{}).s)).length}</div><div class="l">Awaiting final inspection</div></div>
       <div class="statcard clickable c-ok" onclick="qcFilter='done';render()"><div class="n">${list.filter(j=>((j.qc||{}).final||{}).s==="Pass").length}</div><div class="l">Final inspection passed</div></div></div>
     ${fails.length?`<div class="panel" style="margin-bottom:14px"><h3>Open fails</h3>${fails.map(f=>`<div class="tlrow" style="cursor:pointer" onclick="openJob('${f.j.id}','checklist')"><span class="tll"><b>${esc(f.j.jobName)}</b></span><span class="qcchip qc-Fail">${esc(f.l)}</span><span class="tln">${esc(fmtShort(f.r.date))} — ${esc(f.r.note||"no note")}</span></div>`).join("")}</div>`:""}
-    <div class="pchips">${[["","All"],["fail","Open fails"],["final","Awaiting final"],["done","Final passed"]].map(([k,l])=>`<button class="pchip ${qcFilter===k?'on':''}" onclick="qcFilter='${k}';render()">${l}</button>`).join("")}</div>
+    <div class="pchips">${[["","All"],["fail","Open fails"],["final","Awaiting final"],["done","Final passed"]].map(([k,l])=>`<button class="pchip ${qcFilter===k?'on':''}" onclick="qcFilter='${k}';render()">${l}</button>`).join("")}</div>${listSearch("Search by job name, job ID or client…")}
     ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Job</th><th>Phase</th>${QC_STAGES.map(([,l])=>`<th style="text-align:center">${esc(l.replace(" / ","/"))}</th>`).join("")}</tr></thead><tbody>${rows.map(j=>`<tr><td><button class="joblink" onclick="openJob('${j.id}','checklist')">${esc(j.jobName)}</button><div class="resp">${esc(j.client||"")}</div></td><td><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span></td>${QC_STAGES.map(([k])=>`<td style="text-align:center">${chip(j,k)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">No jobs here.</div>`}
     <div class="impnote" style="margin-top:8px">Jobs appear here once a PO is received. Tap any cell to open that job's QC.</div>`;
 }
@@ -1847,7 +1893,7 @@ function purCounts(){
   const recOpen=by("received").filter(m=>{const j=(DB.jobs||[]).find(x=>x.id===m.jobRef);return !j||!isClosed(j);});
   return {toorder:by("toorder").length,waiting:(DB.procurement||[]).filter(rfqOpen).length,ordered:by("ordered").length,received:recOpen.length,_ms:ms,_rec:recOpen};
 }
-function purMatch(m){if(!purQ)return true;const q=purQ.toLowerCase();return [m.description,m.size,m.grade,refName("jobs",m.jobRef),refName("suppliers",m.supplierRef)].join(" ").toLowerCase().includes(q);}
+function purMatch(m){if(!purQ)return true;const q=purQ.toLowerCase();const j=(DB.jobs||[]).find(x=>x.id===m.jobRef)||{};const hay=[m.description,m.size,m.grade,m.notes,m.poRef,j.jobName,j.jobId,j.client,j.poNumber,refName("suppliers",m.supplierRef)].join(" ").toLowerCase();return q.split(/\s+/).every(w=>hay.includes(w));}
 function jobHead(j,extra){
   if(!j)return `<div class="pghead"><span class="t">No job</span><span class="sp"></span>${extra||""}</div>`;
   const dm=jobDueMeta(j);
@@ -1872,8 +1918,8 @@ function renderPurchasing(c){
     waiting:"RFQs out to suppliers, oldest first. When a supplier replies, tap <b>Enter quote</b> and type their price per item — it goes into the price book. Then <b>Compare &amp; order</b>.",
     ordered:"On order, grouped by supplier. Tap <b>Received</b> as deliveries arrive.",
     received:"Received for jobs still open. Tap <b>MTR</b> when the mill cert is filed — DNV / certified work needs them."}[purStage];
-  const tools=`<div class="tbar"><div class="gsearch grow" style="margin:0"><input id="purq" value="${esc(purQ)}" placeholder="Filter by item, size, job or supplier…" oninput="purQ=this.value;renderPurBody()"></div>
-    <button class="btn" onclick="pickJobThen('add')">+ Add material</button><button class="btn" onclick="pickJobThen('import')">📋 Paste from Excel</button></div>`;
+  const tools=`<div class="tbar"><button class="btn primary" onclick="pickJobThen('add')">⊞ Add materials (table)</button><button class="btn" onclick="pickJobThen('import')">📋 Paste from Excel</button></div>
+    <div class="lsearch"><input id="purq" type="search" value="${esc(purQ)}" placeholder="Search by item, size, job name, job ID or supplier…" oninput="purQ=this.value;renderPurBody()"></div>`;
   c.innerHTML=cards+`<div class="stagehelp">${help}</div>`+tools+`<div id="purbody"></div>`;
   renderPurBody();
 }
@@ -1898,7 +1944,7 @@ function renderPurBody(){
   }
   else if(purStage==="waiting"){
     const q=(purQ||"").toLowerCase();
-    const list=(DB.procurement||[]).filter(rfqOpen).filter(r=>!q||[r.rfqNumber,r.item,refName("jobs",r.jobRef),...(r.suppliers||[]).map(s=>refName("suppliers",s.supplierRef))].join(" ").toLowerCase().includes(q))
+    const list=(DB.procurement||[]).filter(rfqOpen).filter(r=>!q||[r.rfqNumber,r.item,refName("jobs",r.jobRef),((DB.jobs||[]).find(x=>x.id===r.jobRef)||{}).jobId,...(r.suppliers||[]).map(s=>refName("suppliers",s.supplierRef))].join(" ").toLowerCase().includes(q))
       .sort((a,b)=>(a.date||"").localeCompare(b.date||""));
     html=list.length?list.map(r=>rfqCard2(r)).join(""):empty(q?"No RFQs match that filter.":"No RFQs waiting. Send one from <b>To order</b>.");
   }
@@ -1926,7 +1972,7 @@ function purRfq(){matSel=new Set(Array.from(purSel));const first=(DB.materials||
 function pickJobThen(what){
   formMode="view";
   const js=(DB.jobs||[]).filter(j=>!isClosed(j)).sort((a,b)=>a.jobName.localeCompare(b.jobName));
-  openModal(what==="add"?"Add material to which job?":"Paste material list into which job?",`<div class="imp"><div class="jobpick">${js.map(j=>`<button onclick="closeForm();${what==="add"?`openForm(null,'materials',{jobRef:'${j.id}'})`:`openImport('materials','${j.id}')`}"><b>${esc(j.jobName)}</b><div class="resp">${esc(j.client||"")} · ${esc(j.phase)}</div></button>`).join("")||'<div class="minimsg">No open jobs.</div>'}</div></div>`,{noFooter:true});
+  openModal(what==="add"?"Add materials to which job?":"Paste material list into which job?",`<div class="imp"><div class="jobpick">${js.map(j=>`<button onclick="closeForm();${what==="add"?`openJob('${j.id}','materials');startGrid('${j.id}')`:`openImport('materials','${j.id}')`}"><b>${esc(j.jobName)}</b><div class="resp">${esc(j.client||"")} · ${esc(j.phase)}</div></button>`).join("")||'<div class="minimsg">No open jobs.</div>'}</div></div>`,{noFooter:true});
 }
 function matAction(id){
   const m=(DB.materials||[]).find(x=>x.id===id);if(!m)return;const st=matStage(m);
@@ -2054,6 +2100,207 @@ function saveCompare(){
   save();closeForm();purStage=current==="purchasing"?"ordered":purStage;rerender();toast(picks.length+" line"+(picks.length>1?"s":"")+" ordered from "+Array.from(used).map(s=>refName("suppliers",s.supplierRef)).join(" & "));
 }
 
+/* ============ v4: LIST SEARCH ============ */
+function listSearchPH(){
+  return current==="jobs"?"Search jobs by name, job ID, client or PO number…":current==="suppliers"?"Search suppliers by name, contact or what they supply…":"Search…";
+}
+function listSearch(ph){return `<div class="lsearch"><input id="lsearch" type="search" value="${esc(listQ)}" placeholder="${esc(ph||listSearchPH())}" oninput="setListQ(this.value)" autocomplete="off"></div>`;}
+function setListQ(v){
+  const el=document.getElementById("lsearch"),pos=el&&el.selectionStart!=null?el.selectionStart:v.length;
+  listQ=v;rerender();
+  const n=document.getElementById("lsearch");if(n){n.focus();try{n.setSelectionRange(pos,pos);}catch(e){}}
+}
+
+/* ============ v4: PRICE CATEGORIES ============ */
+function priceCats(){const s=new Set((DB.meta.priceCategories||[]).concat((DB.priceItems||[]).map(i=>i.category)).filter(Boolean));return Array.from(s).sort((a,b)=>a.localeCompare(b));}
+function addPriceCat(after){
+  uiAsk({title:"New price-book category",msg:"Category name (e.g. Expanded Metal, Gaskets, Consumables):",input:true,ok:"Add category",onOk:v=>{
+    const n=(v||"").trim();if(!n)return;
+    const ex=priceCats().find(c=>c.toLowerCase()===n.toLowerCase());
+    if(!ex){DB.meta.priceCategories=(DB.meta.priceCategories||[]).concat([n]);save();}
+    const name=ex||n;
+    if(after)after(name);else{priceCat=name;render();toast(ex?"That category already exists":"Category “"+name+"” added");}
+  }});
+}
+function renamePriceCat(old){
+  uiAsk({title:"Rename category",msg:"New name for “"+old+"”. Every item in it moves too.",input:true,value:old,ok:"Rename",onOk:v=>{
+    const n=(v||"").trim();if(!n||n===old)return;
+    (DB.priceItems||[]).forEach(i=>{if(i.category===old)i.category=n;});
+    DB.meta.priceCategories=Array.from(new Set((DB.meta.priceCategories||[]).filter(c=>c!==old).concat([n])));
+    if(priceCat===old)priceCat=n;save();render();toast("Renamed");
+  }});
+}
+function removePriceCat(name){
+  const used=(DB.priceItems||[]).filter(i=>i.category===name).length;
+  if(used){toast(`“${name}” has ${used} item${used>1?"s":""} — move or delete them first, or rename the category`);return;}
+  DB.meta.priceCategories=(DB.meta.priceCategories||[]).filter(c=>c!==name);if(priceCat===name)priceCat="";save();render();toast("Category removed");
+}
+function catSelectChange(sel){
+  if(sel.value!=="__new__")return;
+  sel.value=sel.dataset.prev||"";
+  addPriceCat(name=>{
+    if(!Array.from(sel.options).some(o=>o.value===name)){const o=document.createElement("option");o.value=name;o.textContent=name;sel.insertBefore(o,sel.lastElementChild);}
+    sel.value=name;sel.dataset.prev=name;
+  });
+}
+
+/* ============ v4: RFQ EMAIL (rich table) ============ */
+function rfqParts(rfq){
+  const mats=(rfq.materialRefs||[]).map(id=>(DB.materials||[]).find(m=>m.id===id)).filter(Boolean);
+  const job=rfq.jobRef?refName("jobs",rfq.jobRef):"";
+  const jid=rfq.jobRef?(((DB.jobs||[]).find(x=>x.id===rfq.jobRef)||{}).jobId||""):"";
+  const subject=`Request for Quotation ${rfq.rfqNumber||""}${job?" — "+job:""}`.trim();
+  const sign=(DB.meta.emailSignoff||"").trim();
+  return {mats,subject,sign,ref:[rfq.rfqNumber,jid].filter(Boolean).join(" / ")};
+}
+function rfqEmailHTML(rfq){
+  const {mats,sign}=rfqParts(rfq);
+  const td='style="border:1px solid #9aa1a9;padding:6px 9px;vertical-align:top"';
+  const th='style="border:1px solid #9aa1a9;padding:6px 9px;background:#e8ebef;text-align:left;font-weight:bold"';
+  const blank='style="border:1px solid #9aa1a9;padding:6px 9px;min-width:90px;background:#fffbe6"';
+  const rows=mats.length?mats.map((m,i)=>`<tr><td ${td}>${i+1}</td><td ${td}>${esc(m.description||"")}</td><td ${td}>${esc(m.size||"")}</td><td ${td}>${esc(m.grade||"")}</td><td ${td}>${esc(m.qtyReq??"")}</td><td ${td}>${esc(m.unit||"")}</td><td ${blank}></td><td ${blank}></td></tr>`).join("")
+    :`<tr><td ${td} colspan="8">${esc(rfq.item||"").replace(/\n/g,"<br>")}</td></tr>`;
+  return `<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#1d1d1f">
+<p>Good day,</p>
+<p>Kindly quote the items below. Please state:</p>
+<ul><li>unit price excl. VAT and your unit (per length / sheet / each)</li><li>stock length / sheet size and availability</li><li>lead time, and whether MTRs (mill certs) can be supplied</li></ul>
+${rfq.replyBy?`<p>We would appreciate your reply by <b>${esc(fmtDate(rfq.replyBy))}</b>.</p>`:""}
+<table style="border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:13px">
+<tr><th ${th}>#</th><th ${th}>Description</th><th ${th}>Size</th><th ${th}>Grade</th><th ${th}>Qty</th><th ${th}>Unit</th><th ${th}>Unit price excl. VAT</th><th ${th}>Availability / lead time</th></tr>
+${rows}
+</table>
+<p>Thank you,${sign?"<br>"+esc(sign).replace(/\n/g,"<br>"):""}</p>
+</div>`;
+}
+function rfqEmailText(rfq){
+  const {mats,sign}=rfqParts(rfq);
+  const lines=mats.length?mats.map((m,i)=>`${i+1}. ${[m.description,m.size].filter(Boolean).join(" ")}${m.grade?" — Grade: "+m.grade:""} — Qty: ${[m.qtyReq,m.unit].filter(v=>v!==""&&v!=null).join(" ")||"—"}`).join("\n"):(rfq.item||"");
+  return `Good day,
+
+Kindly quote the items below. Please state:
+- unit price excl. VAT and your unit (per length / sheet / each)
+- stock length / sheet size and availability
+- lead time, and whether MTRs (mill certs) can be supplied
+${rfq.replyBy?`\nWe would appreciate your reply by ${fmtDate(rfq.replyBy)}.\n`:""}
+${lines}
+
+Thank you,${sign?"\n"+sign:""}
+`;
+}
+function copyRich(html,text,msg){
+  const done=()=>toast(msg);
+  const fallback=()=>{try{const d=document.createElement("div");d.contentEditable="true";d.style.cssText="position:fixed;left:-9999px;top:0;background:#fff";d.innerHTML=html;document.body.appendChild(d);const r=document.createRange();r.selectNodeContents(d);const s=window.getSelection();s.removeAllRanges();s.addRange(r);const ok=document.execCommand("copy");s.removeAllRanges();document.body.removeChild(d);if(ok)done();else copyText(text,msg+" (as plain text)");}catch(e){copyText(text,msg+" (as plain text)");}};
+  try{
+    if(navigator.clipboard&&window.ClipboardItem){navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([html],{type:"text/html"}),"text/plain":new Blob([text],{type:"text/plain"})})]).then(done,fallback);}
+    else fallback();
+  }catch(e){fallback();}
+}
+function rfqMailto(rfq){
+  const {subject}=rfqParts(rfq);
+  const to=(rfq.suppliers||[]).map(s=>((DB.suppliers||[]).find(x=>x.id===s.supplierRef)||{}).email).filter(Boolean).join(",");
+  return "mailto:"+encodeURIComponent(to).replace(/%2C/g,",")+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(rfqEmailText(rfq));
+}
+function showRfqText(id){
+  const r=(DB.procurement||[]).find(x=>x.id===id);if(!r)return;formMode="view";
+  const {subject}=rfqParts(r);
+  const emails=(r.suppliers||[]).map(s=>{const sp=(DB.suppliers||[]).find(x=>x.id===s.supplierRef)||{};return sp.company?(sp.company+(sp.email?" <"+sp.email+">":" (no email on file)")):"";}).filter(Boolean);
+  openModal("RFQ "+(r.rfqNumber||"")+" — ready to send",`<div class="imp">
+    <div class="impnote"><b>Best way:</b> tap <b>Copy email with table</b>, then paste into the body of your email. The table keeps its columns in Gmail and Outlook, and the two yellow columns are left blank for the supplier to fill in.</div>
+    <div><div class="impnote" style="margin-bottom:4px"><b>To:</b> ${emails.length?esc(emails.join(", ")):"add suppliers to this RFQ"}</div>
+      <div class="subjrow"><input id="rfqsubj" readonly value="${esc(subject)}"><button class="btn sm" onclick="copyText(document.getElementById('rfqsubj').value,'Subject copied')">Copy subject</button></div></div>
+    <div class="emailprev" id="rfqprev">${rfqEmailHTML(r)}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn primary" onclick="copyRich(rfqEmailHTML(DB.procurement.find(x=>x.id==='${id}')),rfqEmailText(DB.procurement.find(x=>x.id==='${id}')),'Email copied — paste it into the body of your email')">📋 Copy email with table</button>
+      <button class="btn" onclick="copyText(rfqEmailText(DB.procurement.find(x=>x.id==='${id}')),'Plain-text list copied')">Copy as plain list</button>
+      ${(r.materialRefs||[]).length?`<button class="btn" onclick="copyText(rfqTSV(DB.procurement.find(x=>x.id==='${id}')),'Table copied — paste into Excel')">⊞ Copy for Excel</button>`:""}
+      <a class="btn" href="${esc(rfqMailto(r))}" target="_blank" rel="noopener">✉️ Open in email app</a>
+      <button class="btn" onclick="closeForm()">Done</button></div>
+    <div class="impnote">“Open in email app” fills in the suppliers, subject and a plain list (email links can't carry a table). Add supplier emails on the Suppliers page. Your sign-off is set in Settings.</div>
+  </div>`,{wide:true,noFooter:true});
+}
+
+/* ============ v4: MATERIAL TABLE EDITOR ============ */
+const GCOLS=[["lineNo","#",54],["description","Description *",200],["size","Size",130],["grade","Grade",100],["qtyReq","Qty",64],["unit","Unit",86],["length","Length",86],["notes","Notes",170]];
+function gridBlank(){return {id:null,lineNo:"",description:"",size:"",grade:"",qtyReq:"",unit:"",length:"",notes:"",_del:false};}
+function gridRowEmpty(r){return GCOLS.every(([k])=>!String(r[k]??"").trim());}
+function startGrid(jobId){
+  const rows=jobMats(jobId).map(m=>({id:m.id,lineNo:m.lineNo||"",description:m.description||"",size:m.size||"",grade:m.grade||"",qtyReq:m.qtyReq??"",unit:m.unit||"",length:m.length||"",notes:m.notes||"",_del:false}));
+  for(let i=0;i<(rows.length?3:8);i++)rows.push(gridBlank());
+  matGrid={jobId,rows,dirty:false};
+  if(detailJob!==jobId)openJob(jobId,"materials");else{detailTab="materials";renderDetail();}
+  setTimeout(()=>{const i=rows.findIndex(r=>!r.id);const el=document.querySelector(`.mgrid input[data-r="${Math.max(0,i)}"][data-c="description"]`);if(el)el.focus();},40);
+}
+function gridRowHTML(r,i){
+  const m=r.id?(DB.materials||[]).find(x=>x.id===r.id):null;
+  return `<tr class="${r._del?"del":""}" data-row="${i}"><td class="rn">${i+1}</td>${GCOLS.map(([k,,w])=>`<td style="min-width:${w}px"><input data-r="${i}" data-c="${k}" value="${esc(r[k]??"")}" ${k==="qtyReq"?'inputmode="decimal"':""} ${k==="unit"?'list="unitlist"':""} oninput="gridSet(this)" onkeydown="gridKey(event,this)" onpaste="gridPaste(event,this)"></td>`).join("")}<td class="st">${m?esc(matStatus(m)):"new"}</td><td><button class="xb" title="${r.id?"Delete line (undo by tapping again)":"Clear row"}" onclick="gridDel(${i})">${r._del?"↺":"✕"}</button></td></tr>`;
+}
+function renderGrid2(j){
+  const g=matGrid;
+  const n=g.rows.filter(r=>!r._del&&!gridRowEmpty(r)).length;
+  return `<div class="dsection"><h3><span class="ic">⊞</span> Material list — table entry</h3>
+    <div class="impnote" style="margin-bottom:10px">Type like a spreadsheet: <b>Enter</b> or <b>↓</b> moves down, <b>Tab</b> moves right. Paste cells straight from Excel into any box and they fill across and down. New rows appear as you go. Nothing is saved until you tap <b>Save</b>.</div>
+    <div class="gridwrap"><table class="mgrid"><thead><tr><th></th>${GCOLS.map(([,l])=>`<th>${l}</th>`).join("")}<th>Status</th><th></th></tr></thead><tbody id="gridbody">${g.rows.map(gridRowHTML).join("")}</tbody></table></div>
+    <datalist id="unitlist">${["lengths","length","sheets","sheet","each","pcs","m","ft","kg","lot","bags","pails","rolls","gal"].map(u=>`<option value="${u}">`).join("")}</datalist>
+    <div class="tbar" style="margin-top:12px"><button class="btn primary" onclick="gridSave()">Save ${n} line${n===1?"":"s"}</button><button class="btn" onclick="gridMore()">+ 10 rows</button><span style="flex:1"></span><button class="btn" onclick="gridCancel()">Cancel</button></div></div>`;
+}
+function gridEnsure(){
+  const g=matGrid,tb=document.getElementById("gridbody");let blanks=0;
+  for(let i=g.rows.length-1;i>=0&&!g.rows[i].id&&gridRowEmpty(g.rows[i]);i--)blanks++;
+  while(blanks<2){g.rows.push(gridBlank());if(tb)tb.insertAdjacentHTML("beforeend",gridRowHTML(g.rows[g.rows.length-1],g.rows.length-1));blanks++;}
+  gridCount();
+}
+function gridCount(){const b=document.querySelector(".dsection .tbar .btn.primary");if(!b||!matGrid)return;const n=matGrid.rows.filter(r=>!r._del&&!gridRowEmpty(r)).length;b.textContent="Save "+n+" line"+(n===1?"":"s");}
+function gridSet(el){const r=matGrid.rows[+el.dataset.r];if(!r)return;r[el.dataset.c]=el.value;matGrid.dirty=true;const tr=el.closest("tr");if(tr)tr.classList.remove("bad");gridEnsure();}
+function gridFocus(r,c){if(r>=matGrid.rows.length){matGrid.rows.push(gridBlank());const tb=document.getElementById("gridbody");if(tb)tb.insertAdjacentHTML("beforeend",gridRowHTML(matGrid.rows[r],r));}const el=document.querySelector(`.mgrid input[data-r="${r}"][data-c="${c}"]`);if(el){el.focus();try{el.select();}catch(e){}}}
+function gridKey(e,el){
+  const r=+el.dataset.r,c=el.dataset.c;
+  if(e.key==="Enter"||e.key==="ArrowDown"){e.preventDefault();gridFocus(r+1,c);}
+  else if(e.key==="ArrowUp"){e.preventDefault();if(r>0)gridFocus(r-1,c);}
+}
+function gridPaste(e,el){
+  const t=(e.clipboardData||window.clipboardData).getData("text");
+  if(!t||(!t.includes("\t")&&!t.includes("\n")))return;
+  e.preventDefault();
+  let rows=parseDelim(t.replace(/\n+$/,""),"\t").filter(r=>r.some(v=>(v||"").trim()));
+  const tg=IMPORT_TARGETS.materials;let order=null;
+  const hr=detectHeader(rows,tg);
+  if(hr>=0){const map=autoMap(rows,hr,tg);order={};Object.keys(map).forEach(k=>{if(GCOLS.some(([c])=>c===k))order[k]=map[k];});rows=rows.slice(hr+1).filter(r=>!/^(sub\s*)?total\b|^grand total/i.test(((r[order.description]||"")+"").trim()));}
+  const r0=+el.dataset.r,c0=GCOLS.findIndex(([k])=>k===el.dataset.c);
+  rows.forEach((cells,i)=>{
+    const ri=r0+i;while(matGrid.rows.length<=ri)matGrid.rows.push(gridBlank());const row=matGrid.rows[ri];
+    if(order)Object.keys(order).forEach(k=>{row[k]=((cells[order[k]]??"")+"").trim();});
+    else cells.forEach((v,ci)=>{const col=GCOLS[c0+ci];if(col)row[col[0]]=(v||"").trim();});
+  });
+  matGrid.dirty=true;renderDetail();gridEnsure();
+  toast(rows.length+" row"+(rows.length>1?"s":"")+" pasted"+(order?" (columns matched from the header row)":""));
+  gridFocus(r0,el.dataset.c);
+}
+function gridDel(i){const r=matGrid.rows[i];if(!r)return;if(r.id)r._del=!r._del;else GCOLS.forEach(([k])=>r[k]="");matGrid.dirty=true;renderDetail();}
+function gridMore(){for(let i=0;i<10;i++)matGrid.rows.push(gridBlank());renderDetail();}
+function gridCancel(){const close=()=>{matGrid=null;renderDetail();};if(matGrid&&matGrid.dirty)uiConfirm("Discard the changes in this table?",close,{ok:"Discard"});else close();}
+function gridSave(){
+  const g=matGrid;if(!g)return;
+  const bad=[];g.rows.forEach((r,i)=>{if(!r._del&&!gridRowEmpty(r)&&!String(r.description).trim())bad.push(i);});
+  if(bad.length){document.querySelectorAll(".mgrid tr").forEach(tr=>{if(bad.includes(+tr.dataset.row))tr.classList.add("bad");});toast(bad.length+" row"+(bad.length>1?"s need":" needs")+" a description");gridFocus(bad[0],"description");return;}
+  const num=v=>{const x=parseFloat(String(v??"").replace(/,/g,""));return isNaN(x)?"":x;};
+  let added=0,upd=0,del=0;const touched=[];
+  const dels=g.rows.filter(r=>r.id&&r._del).map(r=>r.id);
+  const go2=()=>{
+    if(dels.length){DB.materials=DB.materials.filter(m=>!dels.includes(m.id));DB.procurement.forEach(p=>{if(p.materialRefs)p.materialRefs=p.materialRefs.filter(x=>!dels.includes(x));});del=dels.length;}
+    g.rows.forEach(r=>{
+      if(r._del||gridRowEmpty(r))return;
+      const vals={lineNo:String(r.lineNo).trim(),description:String(r.description).trim(),size:String(r.size).trim(),grade:String(r.grade).trim(),qtyReq:num(r.qtyReq),unit:String(r.unit).trim(),length:String(r.length).trim(),notes:String(r.notes).trim()};
+      if(r.id){const m=DB.materials.find(x=>x.id===r.id);if(!m)return;const changed=Object.keys(vals).some(k=>String(m[k]??"")!==String(vals[k]??""));if(!changed)return;
+        const relink=["description","size","grade"].some(k=>String(m[k]??"")!==String(vals[k]??""));Object.assign(m,vals);if(relink&&!(+m.unitCost>0)&&!(+m.quotedPrice>0))m.priceItemRef="";upd++;touched.push(m);}
+      else{const m=Object.assign({id:uid(),jobRef:g.jobId,qtyOrdered:0,qtyReceived:0,supplierRef:"",unitCost:"",heatNo:"",mtr:false,priceItemRef:"",group:""},vals);DB.materials.push(m);added++;touched.push(m);}
+    });
+    const pr=autoPriceMaterials(touched.filter(m=>!m.priceItemRef));
+    matGrid=null;save();renderDetail();buildNav();
+    toast([added&&added+" added",upd&&upd+" updated",del&&del+" deleted"].filter(Boolean).join(" · ")+(pr.linked?` · ${pr.linked} priced`:"")||"No changes");
+  };
+  if(dels.length)uiConfirm(`Delete ${dels.length} existing line${dels.length>1?"s":""}?`,go2,{ok:"Save & delete"});else go2();
+}
+
 /* ============ THEME ============ */
 function initTheme(){ let t=null; try{t=localStorage.getItem(THEMEKEY)||localStorage.getItem(LEGACY_THEME);}catch(e){} if(t!=="dark"&&t!=="light"){const a=document.documentElement.getAttribute("data-theme");t=(a==="dark"||a==="light")?a:((window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light");} document.documentElement.setAttribute("data-theme",t); updThemeBtn(t); }
 function toggleTheme(){ const cur=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark"; document.documentElement.setAttribute("data-theme",cur); try{localStorage.setItem(THEMEKEY,cur);}catch(e){} updThemeBtn(cur); }
@@ -2074,8 +2321,8 @@ function buildNav(){
     return `<button class="${active?'active':''}" onclick="go('${id}')"><span class="ic">${ic}</span><span class="lbl">${label}</span>${cnt}</button>`;
   }).join("");
 }
-function go(id){ if(id==="materials"||id==="procurement"){if(id==="procurement")purStage="waiting";id="purchasing";} if(id!=="purchasing"){purQ="";} detailJob=null; current=id; sortKey=null; jobFilter=null; currentView=SCHEMA[id]?SCHEMA[id].views[0]:id; matFilter=""; window.scrollTo&&window.scrollTo(0,0); document.getElementById("search").value=""; render(); buildNav(); }
-function dashFilter(kind){ detailJob=null; current="jobs"; currentView="grid"; sortKey=null; jobFilter=kind; document.getElementById("search").value=""; render(); buildNav(); }
+function go(id){ listQ=""; gridFilters={}; if(id==="materials"||id==="procurement"){if(id==="procurement")purStage="waiting";id="purchasing";} if(id!=="purchasing"){purQ="";} detailJob=null; current=id; sortKey=null; jobFilter=null; currentView=SCHEMA[id]?SCHEMA[id].views[0]:id; matFilter=""; window.scrollTo&&window.scrollTo(0,0);  render(); buildNav(); }
+function dashFilter(kind){ detailJob=null; current="jobs"; currentView="grid"; sortKey=null; jobFilter=kind; listQ=""; gridFilters={}; render(); buildNav(); }
 function dashGo(page){ if(page==="procurement")purStage="waiting"; go(page); }
 function clearJobFilter(){ jobFilter=null; render(); }
 const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Jobs overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active jobs (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded"};
@@ -2110,9 +2357,9 @@ function setView(v){currentView=v;render();}
 /* ============ FILTER ============ */
 function filteredRows(){
   let rows=(DB[current]||[]).slice();
-  const q=document.getElementById("search").value.trim().toLowerCase();
-  if(q)rows=rows.filter(r=>SCHEMA[current].fields.some(f=>{let v=r[f.k];if(f.t==="link")v=refName(f.to,v);if(Array.isArray(v))v=v.join(" ");return(v??"").toString().toLowerCase().includes(q);}));
-  document.querySelectorAll("[data-filter]").forEach(sel=>{if(sel.value)rows=rows.filter(r=>(r[sel.dataset.filter]||"")===sel.value);});
+  const q=listQ.trim().toLowerCase();
+  if(q)rows=rows.filter(r=>{const hay=SCHEMA[current].fields.map(f=>{let v=r[f.k];if(f.t==="link")v=refName(f.to,v);if(Array.isArray(v))v=v.join(" ");return (v??"").toString();}).join(" ").toLowerCase();return q.split(/\s+/).every(w=>hay.includes(w));});
+  Object.keys(gridFilters).forEach(k=>{const v=gridFilters[k];if(v)rows=rows.filter(r=>(r[k]||"")===v);});
   if(current==="jobs"&&jobFilter){
     const F={quoteover:j=>{const s=jobState(j);return s.kind==="quote"&&s.overdue;},jobover:j=>{const s=jobState(j);return s.kind==="delivery"&&s.overdue;},
       soon:j=>jobState(j).soon,rfq:j=>j.phase===PH.RFQ,awaitingpo:j=>j.phase===PH.QUOTED,chase:j=>jobState(j).chase,active:j=>EXEC.includes(j.phase),
@@ -2138,10 +2385,10 @@ function renderGrid(c){
   const sch=SCHEMA[current];
   const cols=sch.gridCols?sch.gridCols.map(k=>({_due:{k:"_due",l:"Due / next action"},_price:{k:"_price",l:"Best price"},_mstatus:{k:"_mstatus",l:"Status"}})[k]||sch.fields.find(f=>f.k===k)):sch.fields.filter(f=>f.t!=="textarea"&&f.t!=="heading").slice(0,9);
   const selFields=sch.fields.filter(f=>f.t==="select"&&!f.noFilter);
-  const fbar=selFields.length?`<div class="filters"><span class="lbl">Filter</span>`+selFields.map(f=>{const ops=optsFor(f);return `<select data-filter="${f.k}" onchange="render()"><option value="">${f.l}: All</option>${ops.map(o=>`<option>${esc(o)}</option>`).join("")}</select>`;}).join("")+`</div>`:"";
+  const fbar=selFields.length?`<div class="filters"><span class="lbl">Filter</span>`+selFields.map(f=>{const ops=optsFor(f);const cur=gridFilters[f.k]||"";return `<select data-filter="${f.k}" onchange="gridFilters['${f.k}']=this.value;render()" class="${cur?"on":""}"><option value="">${f.l}: All</option>${ops.map(o=>`<option ${cur===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;}).join("")+`</div>`:"";
   const rows=filteredRows();
   let body;
-  if(!rows.length)body=`<div class="empty"><div class="big">${sch.icon}</div>No ${sch.label.toLowerCase()} yet. Click <b>+ Add</b> to create one.</div>`;
+  if(!rows.length)body=(listQ||Object.values(gridFilters).some(Boolean)||jobFilter)?`<div class="empty"><div class="big">🔍</div>No ${sch.label.toLowerCase()} match. <button class="linkbtn" onclick="listQ='';gridFilters={};jobFilter=null;render()">Clear search &amp; filters</button></div>`:`<div class="empty"><div class="big">${sch.icon}</div>No ${sch.label.toLowerCase()} yet. Click <b>+ Add</b> to create one.</div>`;
   else{
     const head=cols.map(f=>`<th onclick="setSort('${f.k}')">${f.l}${sortKey===f.k?`<span class="arr">${sortDir>0?'▲':'▼'}</span>`:''}</th>`).join("")+`<th></th>`;
     const isJobs=current==="jobs";
@@ -2163,7 +2410,7 @@ function renderGrid(c){
   }
   const mchips=current==="materials"?`<div class="pchips">${[["","All"],["out","Outstanding"],["unpriced","Unpriced"],["received","Received"],["nomtr","Received, no MTR"]].map(([k,l])=>`<button class="pchip ${matFilter===k?'on':''}" onclick="matFilter='${k}';render()">${l}</button>`).join("")}</div>`:"";
   const chip=(current==="jobs"&&jobFilter)?`<div class="filterbanner">Showing <b>${JOBFILTER_LABEL[jobFilter]||jobFilter}</b> <span class="cnt">${filteredRows().length}</span><button onclick="clearJobFilter()" title="Clear filter">✕ Clear</button></div>`:"";
-  c.innerHTML=mchips+chip+(current==="materials"?"":fbar)+body;
+  c.innerHTML=mchips+chip+(current==="materials"?"":fbar)+listSearch()+body;
 }
 function setSort(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1;}render();}
 function cellHTML(f,r){
@@ -2221,7 +2468,7 @@ function renderKanban(c){
   const sch=SCHEMA[current],kf=sch.kanbanField;
   const opts=optsFor(sch.fields.find(f=>f.k===kf));
   const rows=filteredRows();
-  c.innerHTML=`<div class="kanban">`+opts.map(st=>{
+  c.innerHTML=listSearch()+`<div class="kanban">`+opts.map(st=>{
     const items=rows.filter(r=>(r[kf]||opts[0])===st);
     return `<div class="kcol"><h3><span class="dot" style="background:var(${dotVar(st)})"></span>${st}<span class="n">${items.length}</span></h3><div class="kbody" data-status="${esc(st)}" ondragover="kOver(event)" ondragleave="kLeave(event)" ondrop="kDrop(event)">${items.map(r=>kCard(r,sch)).join("")}</div></div>`;
   }).join("")+`</div>`;
@@ -2252,7 +2499,7 @@ function renderCalendar(c){
   const y=calMonth.getFullYear(),m=calMonth.getMonth();
   const first=new Date(y,m,1),start=new Date(first);start.setDate(1-((first.getDay()+6)%7));
   const monthName=calMonth.toLocaleDateString(undefined,{month:"long",year:"numeric"});
-  const evs={};(DB.jobs||[]).forEach(j=>{const s=jobState(j);const d=s.due||(s.kind==="followup"&&!s.paused?s.followUp:"");if(d)(evs[d]=evs[d]||[]).push({j,s});});
+  const evs={},cq=listQ.trim().toLowerCase();(DB.jobs||[]).filter(j=>!cq||[j.jobName,j.jobId,j.client,j.poNumber].join(" ").toLowerCase().includes(cq)).forEach(j=>{const s=jobState(j);const d=s.due||(s.kind==="followup"&&!s.paused?s.followUp:"");if(d)(evs[d]=evs[d]||[]).push({j,s});});
   let cells="";
   for(let i=0;i<42;i++){
     const d=new Date(start);d.setDate(start.getDate()+i);
@@ -2261,7 +2508,7 @@ function renderCalendar(c){
     cells+=`<div class="calcell ${dim?'dim':''} ${isToday?'today':''}"><div class="dn">${d.getDate()}</div>${dayEvs}</div>`;
   }
   const dows=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="dow">${d}</div>`).join("");
-  c.innerHTML=`<div class="cal"><div class="calhead"><button class="btn" onclick="calNav(-1)">‹</button><h3>${monthName}</h3><button class="btn" onclick="calNav(1)">›</button><button class="btn" onclick="calToday()">Today</button></div><div class="calgrid">${dows}${cells}</div></div>`;
+  c.innerHTML=listSearch()+`<div class="cal"><div class="calhead"><button class="btn" onclick="calNav(-1)">‹</button><h3>${monthName}</h3><button class="btn" onclick="calNav(1)">›</button><button class="btn" onclick="calToday()">Today</button></div><div class="calgrid">${dows}${cells}</div></div>`;
 }
 function calNav(d){calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+d,1);render();}
 function calToday(){const n=new Date();calMonth=new Date(n.getFullYear(),n.getMonth(),1);render();}
@@ -2348,7 +2595,7 @@ function ganttSVG(jobFilter,opts){
 }
 const GANTT_LEGEND=`<div class="glegend"><span>◆ milestone</span><span>▭ parent (rolled up)</span><span style="color:var(--ok)">■ done</span><span style="color:var(--info)">■ in progress</span><span style="color:var(--idle)">■ not started</span><span style="color:var(--weld)">┊ today</span></div>`;
 function renderSchedule(c){
-  const q=document.getElementById("search").value.trim().toLowerCase();
+  const q=listQ.trim().toLowerCase();
   let tasks=(DB.tasks||[]).slice();
   if(q)tasks=tasks.filter(t=>[t.taskName,refName("jobs",t.jobRef),t.status,t.assignee,refName("tasks",t.parentTask)].join(" ").toLowerCase().includes(q));
   const today=todayISO();
@@ -2461,7 +2708,8 @@ function moveReminder(id,bucket){const r=(DB.meta.reminders||[]).find(x=>x.id===
 function delReminder(id){DB.meta.reminders=(DB.meta.reminders||[]).filter(x=>x.id!==id);save();render();}
 function openReminderCount(){return((DB.meta&&DB.meta.reminders)||[]).filter(r=>r.bucket!=="completed").length;}
 function renderReminders(c){
-  const rem=(DB.meta&&DB.meta.reminders)||[];
+  const rq=listQ.trim().toLowerCase();
+  const rem=((DB.meta&&DB.meta.reminders)||[]).filter(r=>!rq||((r.text||"")+" #"+String(r.num||0).padStart(3,"0")).toLowerCase().includes(rq));
   const cols=[["urgent","🔴 Urgent","urg"],["todo","🟠 To Do","tod"],["completed","✅ Completed","cmp"]];
   const card=r=>{
     const acts=r.bucket==="urgent"
@@ -2477,7 +2725,7 @@ function renderReminders(c){
     const body=items.length?items.map(card).join(""):`<div class="minimsg">Nothing here${b==='completed'?' yet':''}.</div>`;
     return `<div class="rcol ${cls}"><h3>${label} <span class="cnt">${items.length}</span></h3>${add}<div class="rcol-body">${body}</div></div>`;
   }).join("");
-  c.innerHTML=`<div class="reminfo">Your personal to-dos and notes, kept separate from formal job statuses. <b>Urgent</b> shows first — the quick things to clear each morning.</div><div class="remcols">${colHtml}</div>`;
+  c.innerHTML=`<div class="reminfo">Your personal to-dos and notes, kept separate from formal job statuses. <b>Urgent</b> shows first — the quick things to clear each morning.</div>${listSearch("Search reminders…")}<div class="remcols">${colHtml}</div>`;
 }
 
 /* ============ SETTINGS ============ */
@@ -2507,7 +2755,11 @@ function renderSettings(c){
     <div class="panel"><h3>✅ QC &amp; pricing</h3>
       <div class="setrow"><span>QC sign-off name (stamped on each tap)</span><span class="spacer"></span><input style="max-width:170px" value="${esc(inspector())}" onchange="DB.meta.inspectorName=this.value.trim()||'QC';save();toast('Saved')"></div>
       <div class="setrow"><span>VAT rate (%)</span><span class="spacer"></span><input type="number" style="width:80px" value="${Math.round(vatRate()*1000)/10}" onchange="DB.meta.vatRate=Math.max(0,+this.value||0)/100;save();toast('Saved')"></div>
-      <div class="setrow"><span>Supplier price workbook (.xlsx)</span><span class="spacer"></span><button class="btn" onclick="importPriceWorkbook()">📂 Import</button></div></div>
+      <div class="setrow"><span>Supplier price workbook (.xlsx)</span><span class="spacer"></span><button class="btn" onclick="importPriceWorkbook()">📂 Import</button></div>
+      <div class="setrow" style="align-items:flex-start"><span>RFQ email sign-off<br><small style="color:var(--ink-soft)">added under “Thank you,”</small></span><span class="spacer"></span><textarea style="max-width:220px;min-height:62px;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--card);color:var(--ink);font:inherit;font-size:13px" placeholder="Name&#10;Title&#10;Phone" onchange="DB.meta.emailSignoff=this.value;save();toast('Saved')">${esc(DB.meta.emailSignoff||"")}</textarea></div></div>
+    <div class="panel"><h3>💲 Price-book categories</h3><div class="setnote">Add a category here or with “+ Category” on the Price Book page. A category with items in it can be renamed but not removed.</div>
+      <div class="setlist">${priceCats().map(cc=>{const n=(DB.priceItems||[]).filter(i=>i.category===cc).length;return `<div class="setrow"><span>${esc(cc)}</span><span class="resp">${n} item${n===1?"":"s"}</span><span class="spacer"></span><button class="icobtn" title="Rename" data-c="${esc(cc)}" onclick="renamePriceCat(this.dataset.c)">✏️</button><button class="icobtn del" title="Remove" data-c="${esc(cc)}" onclick="removePriceCat(this.dataset.c)">🗑</button></div>`;}).join("")||'<div class="minimsg">No categories yet.</div>'}</div>
+      <div class="setadd"><button class="btn" onclick="addPriceCat(()=>render())">+ Add category</button></div></div>
     <div class="panel"><h3>⚑ Priorities</h3><div class="setnote">Add or remove priority levels (e.g. Cancelled, Postponed) and set their colour.</div><div class="setlist">${pr}</div>
       <div class="setadd"><input id="pr-name" placeholder="New priority (e.g. Postponed)" onkeydown="if(event.key==='Enter')addPriority()">${colSel("pr-col")}<button class="btn primary" onclick="addPriority()">Add</button></div></div>
     <div class="panel"><h3>🏭 Job stages</h3><div class="setnote">The physical pipeline a job moves through (Design → Approval → Fabrication → Sandblast → Paint → QC → Complete). This is separate from Phase (the commercial lifecycle), and drives the "where does each job stand" view.</div><div class="setlist">${sg}</div>
@@ -2573,7 +2825,7 @@ function removeClientAt(i){const name=(DB.meta.clients||[])[i];if(name==null)ret
 
 /* ============ PROCUREMENT (RFQ) ============ */
 function renderProcurement(c){
-  const q=document.getElementById("search").value.trim().toLowerCase();
+  const q=listQ.trim().toLowerCase();
   let rfqs=(DB.procurement||[]).slice();
   if(q)rfqs=rfqs.filter(r=>[r.rfqNumber,r.item,refName("jobs",r.jobRef),(r.suppliers||[]).map(s=>refName("suppliers",s.supplierRef)).join(" ")].join(" ").toLowerCase().includes(q));
   const lines=allLines();
@@ -2653,7 +2905,7 @@ function saveLine(){
 }
 
 /* ============ JOB DETAIL ============ */
-function openJob(id,tab){ matSel=new Set(); detailJob=id; detailTab=tab||"overview"; document.getElementById("search").value=""; renderDetail(); buildNav(); }
+function openJob(id,tab){ matSel=new Set(); detailJob=id; detailTab=tab||"overview"; renderDetail(); buildNav(); }
 function setDetailTab(t){ detailTab=t; renderDetail(); }
 function renderDetail(){
   const j=(DB.jobs||[]).find(x=>x.id===detailJob);

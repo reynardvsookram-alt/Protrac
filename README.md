@@ -1,6 +1,6 @@
 # Protrac — fabrication job tracker
 
-**Live demo:** `https://reynardvsookram-alt.github.io/Protrac/` *(replace after enabling GitHub Pages)*
+**Live demo:** `https://<your-username>.github.io/protrac/` *(replace after enabling GitHub Pages)*
 
 Protrac tracks a steel-fabrication job from the client's RFQ to delivery: quoting deadlines, purchase orders, material take-offs, supplier RFQs, steel prices and QC sign-off. I built it to replace the spreadsheets, paper QC checklists and memory I was relying on as the only engineer at a fabrication shop in Trinidad.
 
@@ -33,9 +33,9 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
 
 - **Dashboard built around actions**: quotes overdue, jobs overdue, due within 5 working days, RFQs to quote, awaiting PO, open QC fails. Every number opens the filtered list.
 - **Job page**: progress stepper, next-action button, timeline with turnaround stats (RFQ → quote, quote → PO, delivery vs. promise).
-- **Material lists**: paste straight from Excel (header row and columns detected automatically) or import a multi-sheet .xlsx. Lines are priced from the price book as they come in.
+- **Material lists**: type them into a spreadsheet-style table (Enter moves down, paste cells straight from Excel), or import a multi-sheet .xlsx. Lines are priced from the price book as they come in.
 - **Purchasing pipeline**: one page with four clickable stages: **To order → Waiting on suppliers → Ordered → Received**.
-  - Tick lines and send one RFQ to several suppliers, with ready-to-send email text.
+  - Tick lines and send one RFQ to several suppliers. The RFQ copies as a real email table (keeps its columns in Gmail/Outlook) with blank price and lead-time columns for the supplier to fill in.
   - Enter each supplier's reply per item; prices are logged in the price book automatically.
   - **Compare & order**: suppliers side by side, cheapest pre-selected, totals per supplier.
   - Track ETAs, receive deliveries, and flag missing MTRs.
@@ -59,7 +59,7 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
 - **One self-contained file**: vanilla JavaScript, no frameworks, no external libraries, works offline. Data stays in the browser (`localStorage`) and is backed up to a JSON file.
 - **Excel import without a library**: reads `.xlsx` by unzipping it with the browser's built-in `DecompressionStream` and parsing the sheet XML (shared strings, date formats, multiple sheets).
 - **Working-day engine**: weekends plus T&T public holidays, including Easter-based holidays and Sunday → Monday observed rules. Eid and Divali are added per year in Settings.
-- **Tested**: 150 automated checks in Node (date maths, phase clocks, holds, data migrations from older versions) and 36 end-to-end checks in headless Chrome (Excel import, price workbook import, QC, RFQ flow, phone layout).
+- **Tested**: an automated sweep that clicks all 1,600+ buttons, dialogs and save paths across every page (zero errors), plus 150 automated checks in Node (date maths, phase clocks, holds, data migrations from older versions) and 100+ end-to-end checks in headless Chrome (Excel import, price workbook import, purchasing flow, QC, phone layout).
 
 ## About the demo data
 
