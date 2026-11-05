@@ -34,13 +34,13 @@ legacy.jobs.push({ id: 'jfab', jobName: 'Legacy fab job', status: 'In Progress',
 legacy.jobs.push({ id: 'jhold', jobName: 'Legacy held job', status: 'On Hold', stage: 'Design', startDate: '2026-10-05', dueDate: '2026-11-30', updates: [] });
 const legacyStr = JSON.stringify(legacy);
 
-// ---- 2. New app, fresh profile containing ONLY the legacy key ----
-const N = makeCtx({ sonriz_pm_v2: legacyStr });
+// ---- 2. Old-format data (status/stage/start/due, no phases) saved under the current key ----
+const N = makeCtx({ protrac_v1: legacyStr });
 const appCode = ext(path.join(ROOT, 'index.html'));
 vm.runInContext(appCode, N.ctx);
 const c = N.ctx;
-ok(N.store['protrac_v1'], 'data saved under new key');
-ok(N.store['sonriz_pm_v2'] === legacyStr, 'legacy key left untouched');
+ok(N.store['protrac_v1'] && N.store['protrac_v1'] !== legacyStr, 'old-format data migrated and re-saved');
+ok(!/legacy_|_pm_v2/.test(appCode), 'no old-tracker storage key in the app');
 const DBn = () => run(c, 'DB');
 const job = n => DBn().jobs.find(j => j.jobName.startsWith(n));
 ok(DBn().jobs.length === legacy.jobs.length, 'no jobs lost in migration');
@@ -185,7 +185,8 @@ ok(run(F.ctx, 'DB.jobs.length') === 11 && run(F.ctx, 'DB.jobs.every(j=>PHASES.in
 const fs_ = run(F.ctx, 'DB.jobs.map(j=>jobState(j))');
 ok(fs_.some(s => s.kind === 'quote' && s.overdue) && fs_.some(s => s.chase), 'seed demonstrates quote-overdue and chase');
 run(F.ctx, 'go("dashboard")');
-ok(!/sonriz|marc/i.test(JSON.stringify(run(F.ctx, 'DB'))), 'seed has no company names');
+ok(run(F.ctx, 'DB.jobs.every(j=>!j.client||/^(Client [A-Z] — .+|Other)$/.test(j.client))'), 'seed clients are anonymised');
+ok(run(F.ctx, 'DB.jobs.map(j=>j.jobId).sort().join(",")') === '001,002,003,004,005,006,007,008,009,010,011', 'demo jobs numbered 001–011');
 
 
 // ---- 9. v2 migrations on legacy data (context N came from the OLD app's data) ----
@@ -210,5 +211,73 @@ run(c, `DB=JSON.parse(${JSON.stringify(v1data)});migrate();`);
 ok(run(c, 'DB.jobs.length') === 6 && run(c, 'DB.jobs.every(j=>j.qc&&PHASES.includes(j.phase))') && run(c, 'DB.materials.every(m=>"lineNo" in m)'), 'Protrac v1 backup migrates to v2');
 ok(run(c, 'typeof searchPrices("4x4").length') === 'number', 'price search on empty book');
 
+
+// ---- 10. v6 (phase-1 clean-up): migration, job numbers, folder name, undo/redo, auto production, auto QC N/A ----
+const G = makeCtx({});
+vm.runInContext(appCode, G.ctx);
+const g = s => run(G.ctx, s);
+// old data with stage / manual % / meta.statuses / meta.stages still loads, and the job fields survive
+g(`DB.meta.statuses=[{name:"In Progress",tok:"prog"}];DB.meta.stages=[{name:"Paint",tok:"info"}];DB.jobs[0].stage="Paint";DB.jobs[0].percent=37;delete DB.jobs[0].phaseRedo;delete DB.jobs[0].qcAuto;delete DB.meta.projectsPath;delete DB.meta.quoteDays;migrate();`);
+ok(!('statuses' in g('DB.meta')) && !('stages' in g('DB.meta')), 'v6: old Status / Stage lists dropped from settings');
+ok(g('DB.jobs[0].stage') === 'Paint' && g('DB.jobs[0].percent') === 37, 'v6: old job Stage and % kept on the record (nothing deleted)');
+ok(Array.isArray(g('DB.jobs[0].phaseRedo')) && g('typeof DB.jobs[0].qcAuto') === 'object' && g('DB.meta.projectsPath') === '' && g('DB.meta.quoteDays') === 5, 'v6: new fields defaulted');
+{ const a = JSON.stringify(g('DB')); g('migrate()'); ok(JSON.stringify(g('DB')) === a, 'v6 migrate() idempotent'); }
+// job numbers + folder name
+ok(g('nextJobNo()') === '012', 'next job number = highest + 1, zero-padded');
+g(`DB.jobs.push({id:"jx",jobId:"Q-99",jobName:"x",phase:PH.RFQ,holds:[],phaseLog:[],updates:[]});`);
+ok(g('nextJobNo()') === '012', 'non-numeric IDs are ignored, never renumbered');
+ok(g('DB.jobs.find(j=>j.id==="jx").jobId') === 'Q-99', 'existing IDs untouched');
+ok(g('folderName({jobId:"006",client:"Client A — Oilfield Services",jobName:"Tank hatch cover"})') === '006. Client A Tank hatch cover', 'folder name format');
+ok(g('folderName({jobId:"007",client:"Other",jobName:"Gate: 2/3 \\"rev\\""})') === '007. Gate- 2-3 -rev-', 'folder name strips Windows-illegal characters');
+g('DB.meta.projectsPath="P:\\\\Projects\\\\"');
+ok(g('folderPath({jobId:"006",client:"Client A — Oilfield Services",jobName:"Tank hatch cover"})') === 'P:\\Projects\\006. Client A Tank hatch cover', 'file location = projects path + folder name');
+ok(g('jobQ(DB.jobs,"6",j=>j.jobName).map(j=>j.jobId).join()') === '006' && g('jobQ(DB.jobs,"006",j=>j.jobName).length') === 1, 'typing a job number finds that job');
+// progress + current step come from the schedule
+const pj = g('DB.jobs.find(j=>j.jobId==="006").id');
+ok(g(`(()=>{const j=DB.jobs.find(x=>x.id==="${pj}");const k=schedSteps(j);return jobPct(j)===Math.round(k.filter(t=>t.status==="Done").length/k.length*100)})()`), 'progress = share of schedule steps done');
+ok(g(`currentStep(DB.jobs.find(x=>x.id==="${pj}")).length>0`), 'current step read from the schedule');
+// undo / redo
+g(`globalThis.U={id:"u1",jobId:"099",jobName:"Undo test",client:"Other",jobType:"Build to client drawing",optFab:true,optCoat:true,phase:PH.RFQ,rfqDate:isoAdd(todayISO(),-10),rfqDueDate:isoAdd(todayISO(),5),holds:[],phaseLog:[{phase:PH.RFQ,from:"",date:isoAdd(todayISO(),-10),ts:1}],updates:[],phaseRedo:[],qcAuto:{},leadUnit:"working days"};DB.jobs.push(U);buildSchedule(U);`);
+ok(!g('canUndoPhase(U)'), 'nothing to undo on a new job');
+g(`phaseCtx={jobId:"u1",action:"quoted"};formMode="phase";document.getElementById("mbody");`);
+g(`setPhase(U,PH.QUOTED,{date:isoAdd(todayISO(),-6)});U.leadMin=10;U.leadMax=12;setPhase(U,PH.PO,{date:isoAdd(todayISO(),-2)});U.poNumber="PO 1";`);
+const nUpd = g('U.updates.length');
+g('undoPhase("u1")');
+ok(g('U.phase') === 'Quoted – Awaiting PO' && g('canRedoPhase(U)') && g('U.poNumber') === 'PO 1' && g('U.poDate') === g('isoAdd(todayISO(),-2)'), 'undo steps back one phase; PO number and date kept');
+ok(g('jobState(U).kind') === 'followup' && !g('jd(U,"poDate")'), 'after undo the job is back on the quote clock');
+ok(g('U.updates.length') === nUpd + 1 && /Undo/.test(g('U.updates[U.updates.length-1].text')), 'undo logged in Updates');
+g('undoPhase("u1")');
+ok(g('U.phase') === 'RFQ Received' && g('U.phaseRedo.length') === 2, 'undo again → RFQ, two redos stacked');
+ok(g('DB.tasks.find(t=>t.jobRef==="u1"&&t.stepKey==="quoted").status') !== 'Done', 'schedule step un-ticks when its phase is undone');
+g('redoPhase("u1")');
+ok(g('U.phase') === 'Quoted – Awaiting PO' && g('U.phaseLog[U.phaseLog.length-1].date') === g('isoAdd(todayISO(),-6)'), 'redo re-applies with the original date');
+ok(/Redo/.test(g('U.updates[U.updates.length-1].text')), 'redo logged in Updates');
+g('setPhase(U,PH.LOST)');
+ok(!g('canRedoPhase(U)') && g('U.phaseRedo.length') === 0, 'a new phase change clears redo');
+g('undoPhase("u1")');
+ok(g('U.phase') === 'Quoted – Awaiting PO', 'undo works from Lost too');
+ok(g('JSON.parse(localStorage.getItem("protrac_v1")).jobs.find(j=>j.id==="u1").phaseRedo.length') === 1, 'redo stack is saved with the job');
+// auto production (A3)
+g(`setPhase(U,PH.PO);setPhase(U,PH.PROC);DB.materials.push({id:"m1",jobRef:"u1",description:"Plate",qtyReq:2,qtyOrdered:2,qtyReceived:0},{id:"m2",jobRef:"u1",description:"Angle",qtyReq:4,qtyOrdered:4,qtyReceived:0});`);
+g('receiveMats(["m1"])');
+ok(g('U.phase') === 'Procurement', 'one of two lines received → still Procurement');
+g('DB.materials.find(m=>m.id==="m2").qtyReceived=1;autoProd(["u1"])');
+ok(g('U.phase') === 'Procurement', 'part-received never fires');
+g('receiveMats(["m2"])');
+ok(g('U.phase') === 'In Production' && g('U.prodStartDate') === g('todayISO()'), 'all lines received → In Production, start = last receipt');
+ok(/moved automatically/.test(g('U.updates[U.updates.length-1].text')), 'auto move logged in Updates');
+g('undoPhase("u1")');
+ok(g('U.phase') === 'Procurement', 'auto move can be undone');
+g(`globalThis.V={id:"v1",jobId:"098",jobName:"No mats",phase:PH.PO,holds:[],phaseLog:[],updates:[],phaseRedo:[],qcAuto:{}};DB.jobs.push(V);autoProd(["v1"]);`);
+ok(g('V.phase') === 'PO Received', 'jobs with no material lines are not moved');
+g('U.phase=PH.QUOTED;autoProd(["u1"])');
+ok(g('U.phase') === 'Quoted – Awaiting PO', 'only fires from PO / Procurement');
+// auto QC N/A (D4)
+g(`globalThis.R={id:"q1",jobId:"097",jobName:"Repair",jobType:"Repair / blast & paint",optSite:true,optFab:false,optCoat:true,phase:PH.RFQ,rfqDate:todayISO(),holds:[],phaseLog:[],updates:[],qc:{},phaseRedo:[],qcAuto:{}};DB.jobs.push(R);save();`);
+ok(g('R.qc.weld.s') === 'N/A' && g('R.qc.weld.auto') === true && g('!(R.qc.blast&&R.qc.blast.s)') && g('!(R.qc.final&&R.qc.final.s)'), 'excluded QC stage set to N/A; included ones left alone');
+g('qcSet("q1","weld","N/A");save()');
+ok(!g('R.qc.weld.s'), 'tapping N/A again clears it, and it does not come back');
+g('R.optFab=true;R.qc.weld={s:"N/A",auto:true};save()');
+ok(!g('R.qc.weld.s'), 'turning the option back on clears an automatic N/A');
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

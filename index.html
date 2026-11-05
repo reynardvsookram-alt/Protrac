@@ -126,21 +126,6 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .linktag{color:var(--info);font-weight:600}
 .overdue{color:var(--bad);font-weight:700} .duesoon{color:var(--warn);font-weight:700}
 
-.kanban{display:flex;gap:14px;align-items:flex-start;overflow-x:auto;padding-bottom:8px}
-.kcol{flex:0 0 270px;background:var(--card);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;max-height:calc(100vh - 200px);box-shadow:var(--raise)}
-.kcol h3{margin:0;padding:13px 15px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}
-.kcol h3 .dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 6px currentColor}
-.kcol h3 .n{margin-left:auto;font-family:var(--mono);color:var(--ink-soft);font-size:12px}
-.kbody{padding:10px;overflow-y:auto;flex:1;min-height:60px}
-.kbody.drop{background:var(--weld-soft);outline:2px dashed var(--weld-dim);outline-offset:-6px;border-radius:8px}
-.kcard{background:linear-gradient(180deg,var(--card),var(--card-alt));border:1px solid var(--line);border-radius:10px;padding:11px 12px;margin-bottom:9px;cursor:grab;box-shadow:inset 0 1px 0 var(--emboss-hi),var(--raise);position:relative}
-.kcard:active{cursor:grabbing}
-.kcard.dragging{opacity:.4}
-.kcard .t{font-weight:700;font-size:13px;margin-bottom:5px;padding-right:22px}
-.kcard .kopen{position:absolute;top:9px;right:9px;border:0;background:none;font-size:14px;opacity:.5;padding:0;line-height:1}
-.kcard .kopen:hover{opacity:1;color:var(--weld)}
-.kcard .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--ink-soft)}
-.kcard .due{margin-top:7px;font-size:11px;color:var(--ink-soft)}
 
 .cal{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;box-shadow:var(--raise)}
 .calhead{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line)}
@@ -338,7 +323,6 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .pbar .pf{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,var(--weld-dim),var(--weld));transition:width .4s ease}
 .pbar .pf.full{background:linear-gradient(90deg,var(--ok),#27c07a)}
 .pbar em{font-style:normal;font-size:11px;font-weight:700;color:var(--ink-soft);min-width:30px;text-align:right}
-.kcard .kbar{margin-top:9px;min-width:0}
 .scsec{margin-top:18px}
 .scsec h3{font-size:13.5px;margin:0 0 9px;display:flex;align-items:center;gap:8px;font-weight:700}
 .sccount{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:0 8px;font-size:11px;color:var(--ink-soft);font-weight:700}
@@ -533,7 +517,8 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
   .dhead .dt{font-size:17px}
   .tll{width:100%}
   .jtabs{flex-wrap:nowrap;overflow-x:auto}
-  .jtabs button{white-space:nowrap;padding:8px 10px}
+  .jtabs button{white-space:nowrap;padding:8px 4px;flex:1 1 0;justify-content:center;gap:5px;font-size:12.5px;min-width:0}
+  .jtabs .tic{display:none}
   .ovcounts{grid-template-columns:repeat(2,1fr)}
   .side-foot button span{display:inline}.side-foot button span.lbl{display:none}
   .guide ol{font-size:12.5px}
@@ -807,6 +792,81 @@ th{font-weight:600}
   .tplrow .tplbtns{grid-column:2/-1;justify-content:flex-end}
 }
 @media(max-width:760px){.dashrow,.dgrid2{grid-template-columns:1fr}.mbody{grid-template-columns:1fr}.field.full{grid-column:1}.side{width:62px}.brand h1,.brand .sub,.nav button span.lbl,.nav .cnt,.side-foot button span{display:none}}
+/* ---- v6: scrollbars — phone: none; desktop: thin, dark, shown on hover / while scrolling ---- */
+:root{--sb:rgba(27,37,49,.28);--sb-hover:rgba(27,37,49,.45)}
+[data-theme="dark"]{--sb:rgba(232,237,243,.22);--sb-hover:rgba(232,237,243,.38)}
+*{scrollbar-width:thin;scrollbar-color:transparent transparent}
+*:hover,.is-scrolling{scrollbar-color:var(--sb) transparent}
+html:hover{scrollbar-color:var(--sb) transparent}
+@media (pointer:coarse),(max-width:760px){*,*:hover,.is-scrolling,html:hover{scrollbar-width:none}}
+/* edge fades where content scrolls sideways */
+.fade-l{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 28px);mask-image:linear-gradient(90deg,transparent 0,#000 28px)}
+.fade-r{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent 100%)}
+.fade-l.fade-r{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%)}
+
+/* ---- v6: board ---- */
+.board{position:relative;display:flex;min-height:340px}
+.boardscroll{display:flex;gap:14px;overflow-x:auto;overflow-y:hidden;flex:1;min-width:0;scrollbar-width:none;padding:2px 2px 4px;scroll-snap-type:x proximity}
+.boardscroll::-webkit-scrollbar{display:none}
+.lane{flex:0 0 292px;display:flex;flex-direction:column;min-height:0;max-height:100%;background:linear-gradient(180deg,var(--card),var(--card-alt));border:1px solid var(--line);border-radius:16px;box-shadow:var(--raise);scroll-snap-align:start;transition:border-color .15s,box-shadow .15s}
+.lane.drop{border-color:var(--weld-dim);box-shadow:0 0 0 3px var(--weld-soft),var(--raise)}
+.lanehd{display:flex;align-items:center;gap:8px;padding:13px 14px 11px;border-bottom:1px solid var(--line);font-size:12.5px;font-weight:700}
+.lanehd .dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
+.lanehd .ln{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lcnt{min-width:24px;height:22px;padding:0 7px;border-radius:999px;background:var(--hover);border:1px solid var(--line);font:600 11.5px var(--mono);display:inline-flex;align-items:center;justify-content:center;color:var(--ink-soft)}
+.lanebody{flex:1;min-height:60px;overflow-y:auto;overscroll-behavior:contain;padding:10px;display:flex;flex-direction:column;gap:9px}
+.laneempty{font-size:12px;color:var(--ink-soft);text-align:center;padding:18px 0;border:1px dashed var(--line);border-radius:10px}
+.laneadd{margin:0 10px 10px;padding:9px;border:1px dashed var(--line);border-radius:10px;background:transparent;color:var(--ink-soft);font:600 12.5px var(--sans);cursor:pointer}
+.laneadd:hover{border-color:var(--weld-dim);color:var(--weld)}
+.kcard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px 10px;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-x pan-y;transition:border-color .15s,transform .15s,box-shadow .15s}
+.kcard:hover{border-color:var(--weld-dim);box-shadow:var(--raise)}
+.kcard.dragging{opacity:.35}
+.kghost{position:fixed;left:0;top:0;z-index:120;pointer-events:none;box-shadow:0 14px 34px rgba(0,0,0,.35);border-color:var(--weld-dim);cursor:grabbing}
+body.kdragging,body.kdragging *{cursor:grabbing!important}
+.kc-top{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.kc-top .badge{font-size:10.5px;padding:2px 8px;border-radius:999px}
+.kno{margin-left:auto;font:600 11px var(--mono);color:var(--ink-soft)}
+.kcard .t{font-weight:700;font-size:13px;line-height:1.3;margin-bottom:3px}
+.kc-cl{font-size:11.5px;color:var(--ink-soft);margin-bottom:6px}
+.kc-ft{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink-soft)}
+.kc-ft .due{flex:1;min-width:0}
+.kpct{font:600 11px var(--mono)}
+.kbar{height:4px;border-radius:4px;background:var(--hover);margin-top:7px;overflow:hidden}
+.kbar span{display:block;height:100%;background:linear-gradient(90deg,var(--weld-dim),var(--weld));border-radius:4px}
+.barrow{position:absolute;top:50%;transform:translateY(-50%) scale(.9);width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:22px;line-height:1;box-shadow:0 6px 18px rgba(0,0,0,.18);cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:3}
+.barrow.l{left:6px}.barrow.r{right:6px}
+.board.can-l .barrow.l,.board.can-r .barrow.r{opacity:1;pointer-events:auto;transform:translateY(-50%) scale(1)}
+.barrow:hover{border-color:var(--weld-dim);color:var(--weld)}
+.barrow:active{transform:translateY(-50%) scale(.92)}
+.board::before,.board::after{content:"";position:absolute;top:0;bottom:0;width:56px;pointer-events:none;opacity:0;transition:opacity .2s;z-index:2}
+.board::before{left:0;background:linear-gradient(90deg,var(--paper),transparent)}
+.board::after{right:0;background:linear-gradient(270deg,var(--paper),transparent)}
+.board.can-l::before,.board.can-r::after{opacity:1}
+@media (pointer:coarse),(max-width:760px){.barrow{display:none}.lane{flex-basis:calc(100vw - 120px);max-width:320px}.board::before,.board::after{width:28px}}
+
+/* ---- v6: job form ---- */
+.segbtns{display:flex;flex-wrap:wrap;gap:6px}
+.segbtn{flex:1 1 150px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:600 13px var(--sans);cursor:pointer;text-align:center;transition:border-color .15s,background .15s,transform .1s}
+.segbtn:hover{border-color:var(--weld-dim)}
+.segbtn:active{transform:scale(.98)}
+.segbtn.on{border-color:var(--weld);background:var(--weld-soft);color:var(--weld);box-shadow:inset 0 0 0 1px var(--weld)}
+.qchips{display:flex;gap:6px;margin-top:2px}
+.qchip{padding:5px 10px;border:1px solid var(--line);border-radius:999px;background:var(--card);color:var(--ink-soft);font:600 12px var(--sans);cursor:pointer}
+.qchip.on{border-color:var(--weld);color:var(--weld);background:var(--weld-soft)}
+.optchks{display:flex;flex-wrap:wrap;gap:6px}
+.optchk,.field label.optchk{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;text-transform:none;letter-spacing:0;color:var(--ink)}
+.optchk input{width:16px;height:16px;accent-color:var(--weld);margin:0}
+.field label.optchk{font-size:12.5px;font-weight:600;color:var(--ink);text-transform:none;letter-spacing:0}
+.lblnote{font-size:11.5px;color:var(--ink-soft);font-weight:500;text-transform:none;letter-spacing:0}
+.mbody .fhead.full{display:block}
+/* ---- v6: misc ---- */
+.jno{font-family:var(--mono);font-weight:600;color:var(--ink-soft)}
+.stepcell{font-size:12px;color:var(--ink)}
+.nextchip{border-color:var(--weld-dim)}
+.btn.ghost{background:transparent;box-shadow:none}
+.toast:not(.show){pointer-events:none}
+.toastbtn{margin-left:12px;padding:4px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font:700 12.5px var(--sans);cursor:pointer}
+.olderups summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--ink-soft);padding:8px 0}
 </style>
 </head>
 <body>
@@ -851,12 +911,11 @@ th{font-weight:600}
 </div></div>
 <div class="toast" id="toast"></div>
 <input type="file" id="xlfile" accept=".xlsx,.csv,.tsv,.txt" style="display:none">
-<input type="file" id="matcsv" accept=".csv,text/csv" style="display:none">
 
 <script>
 "use strict";
 const STORE="protrac_v1", THEMEKEY="protrac_theme";
-const LEGACY_STORE="sonriz_pm_v2", LEGACY_THEME="sonriz_theme";
+
 const uid=()=>"r"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const todayISO=()=>ymd(new Date());
 const LINE_STATUS=["RFQ Sent","Quote Received","Will Not Supply","Ordered","Received"];
@@ -877,29 +936,23 @@ const STATUS_COLOR={
 };
 const SCHEMA={
   jobs:{ label:"Jobs", icon:"📋", primary:"jobName", views:["grid","kanban","calendar"], kanbanField:"phase",
-    gridCols:["jobName","jobId","client","phase","stage","priority","_due","percent"],
+    gridCols:["jobName","client","phase","_step","priority","_due","_pct"],
     fields:[
-      {k:"jobName",l:"Job Name",t:"text",req:1},
-      {k:"jobId",l:"Job ID",t:"text",mono:1},
+      {k:"jobName",l:"Job name",t:"text",req:1,full:1},
+      {k:"jobId",l:"Job no.",t:"text",mono:1},
       {k:"client",l:"Client",t:"select",opts:["Other"],dyn:"clients"},
-      {k:"phase",l:"Phase",t:"select",opts:PHASES,badge:1,quick:1,phase:1},
-      {k:"stage",l:"Stage",t:"select",opts:["Design","Approval","Fabrication","Sandblast","Paint","QC","Complete"],badge:1,quick:1,dyn:"stages"},
+      {k:"phase",l:"Phase",t:"select",opts:PHASES,badge:1,phase:1},
       {k:"priority",l:"Priority",t:"select",opts:["Low","Medium","High","Urgent"],pri:1,quick:1,dyn:"priorities"},
-      {k:"_h0",l:"⓪ Job type & workflow — builds the schedule for you",t:"heading"},
       {k:"jobType",l:"Job type",t:"select",opts:["Design & build","Build to client drawing","Repair / blast & paint"],noFilter:1,full:1},
       {k:"optSite",l:"Site visit",t:"checkbox"},
       {k:"optConcept",l:"Concept design",t:"checkbox"},
       {k:"optFab",l:"Fabrication / welding",t:"checkbox"},
       {k:"optCoat",l:"Blast & coating",t:"checkbox"},
       {k:"optAssembly",l:"Assembly / fit-out",t:"checkbox"},
-      {k:"_h1",l:"① RFQ from client",t:"heading"},
       {k:"rfqDate",l:"RFQ received",t:"date"},
-      {k:"rfqDueDate",l:"Client's response deadline",t:"date"},
-      {k:"rfqDays",l:"…or respond within (working days)",t:"number"},
-      {k:"_h2",l:"② Quotation",t:"heading"},
-      {k:"quoteSentDate",l:"Quote submitted to manager",t:"date"},
+      {k:"rfqDueDate",l:"Client's deadline",t:"date"},
+      {k:"quoteSentDate",l:"Quote submitted on",t:"date"},
       {k:"followUpDate",l:"Follow up client on",t:"date"},
-      {k:"_h3",l:"③ Purchase order & lead time",t:"heading"},
       {k:"poNumber",l:"PO number",t:"text",mono:1},
       {k:"poDate",l:"PO received",t:"date"},
       {k:"leadMin",l:"Lead time — min (target)",t:"number"},
@@ -907,9 +960,7 @@ const SCHEMA={
       {k:"leadUnit",l:"Lead time unit",t:"select",opts:["working days","weeks"],noFilter:1},
       {k:"dueOverride",l:"Fixed delivery date (overrides lead time)",t:"date"},
       {k:"deliveredDate",l:"Delivered on",t:"date"},
-      {k:"_h4",l:"④ Progress & files",t:"heading"},
-      {k:"percent",l:"% Complete",t:"number",bar:1},
-      {k:"fileLocation",l:"File Location (folder or link)",t:"text",full:1},
+      {k:"fileLocation",l:"File location (folder or link)",t:"text",full:1},
       {k:"materialListLoc",l:"Material List Location (file or link)",t:"text",full:1},
       {k:"notes",l:"Notes",t:"textarea",full:1}
     ]},
@@ -986,8 +1037,6 @@ let supView=null, supCat="", supRating="", supItemQ="", _supWas="", listQ="", gr
 
 function load(){
   try{const r=localStorage.getItem(STORE);if(r){DB=JSON.parse(r);migrate();keepDemoCurrent();save();return;}}catch(e){}
-  // First run of Protrac: carry over data saved by the old tracker (left untouched as a safety copy)
-  try{const old=localStorage.getItem(LEGACY_STORE);if(old){DB=JSON.parse(old);migrate();save();setTimeout(()=>toast("Your existing tracker data was carried over into Protrac — review each job's phase"),500);return;}}catch(e){}
   DB=seed();migrate();autoPriceMaterials(DB.materials);seedSchedules();save();
 }
 function mapOldStatus(s){ return LINE_STATUS.includes(s)?s:(s==="Awaiting Quote"?"RFQ Sent":"RFQ Sent"); }
@@ -997,23 +1046,11 @@ function migrate(){
     const fromJobs=(DB.jobs||[]).map(j=>j.client).filter(Boolean);
     DB.meta=Object.assign({},DB.meta,{clients:Array.from(new Set(base.concat(fromJobs))).sort((a,b)=>a.localeCompare(b))});
   }
-  if(!Array.isArray(DB.meta.statuses)){
-    const def=[["Not Started","idle"],["In Progress","prog"],["Awaiting Quote","warn"],["Awaiting Approval","warn"],["On Hold","hold"],["Completed","ok"]];
-    const names=def.map(d=>d[0]);
-    const extra=Array.from(new Set((DB.jobs||[]).map(j=>j.status).filter(s=>s&&!names.includes(s))));
-    DB.meta.statuses=def.map(([name,tok])=>({name,tok})).concat(extra.map(name=>({name,tok:"idle"})));
-  }
   if(!Array.isArray(DB.meta.priorities)){
     const def=[["Low","idle"],["Medium","info"],["High","warn"],["Urgent","bad"]];
     const names=def.map(d=>d[0]);
     const extra=Array.from(new Set((DB.jobs||[]).map(j=>j.priority).filter(s=>s&&!names.includes(s))));
     DB.meta.priorities=def.map(([name,tok])=>({name,tok})).concat(extra.map(name=>({name,tok:"idle"})));
-  }
-  if(!Array.isArray(DB.meta.stages)){
-    const def=[["Design","idle"],["Approval","hold"],["Fabrication","prog"],["Sandblast","info"],["Paint","info"],["QC","warn"],["Complete","ok"]];
-    const names=def.map(d=>d[0]);
-    const extra=Array.from(new Set((DB.jobs||[]).map(j=>j.stage).filter(s=>s&&!names.includes(s))));
-    DB.meta.stages=def.map(([name,tok])=>({name,tok})).concat(extra.map(name=>({name,tok:"idle"})));
   }
   if(!Array.isArray(DB.meta.reminders))DB.meta.reminders=[];
   if(!Array.isArray(DB.meta.checklistTemplates)){
@@ -1046,6 +1083,21 @@ function migrate(){
   migrateProtrac();
   migrateV2();
   migrateV5();
+  migrateV6();
+}
+/* v6 (phase-1 workflow clean-up). Idempotent. Nothing is removed from job records:
+   the old Stage and manual % fields stay on each job but are no longer shown (progress now comes
+   from the schedule, the current step from the next open schedule step). */
+function migrateV6(){
+  const m=DB.meta;
+  if("statuses" in m)delete m.statuses;   // old job Status list — no longer used anywhere
+  if("stages" in m)delete m.stages;       // old Stage list — replaced by the schedule's current step
+  if(typeof m.projectsPath!=="string")m.projectsPath="";
+  if(typeof m.quoteDays!=="number"||!(m.quoteDays>0))m.quoteDays=5;
+  (DB.jobs||[]).forEach(j=>{
+    if(!Array.isArray(j.phaseRedo))j.phaseRedo=[];
+    if(!j.qcAuto||typeof j.qcAuto!=="object"||Array.isArray(j.qcAuto))j.qcAuto={};
+  });
 }
 /* Old status/start/due → phase model. Idempotent: only touches jobs without a valid phase. */
 function migrateProtrac(){
@@ -1109,27 +1161,27 @@ function seed(){
   PQ("AB-01",SC,268,-5,"also stocks");
   // ---------- jobs ----------
   const qc=(s,d,note)=>({s,date:s?W(d):"",by:s?"R. Sookram":"",note:note||""});
-  const J=(o)=>Object.assign({id:uid(),jobId:"",client:"",stage:"",priority:"Medium",percent:0,fileLocation:"",materialListLoc:"",notes:"",leadUnit:"working days",holds:[],updates:[],qc:{},phaseLog:[]},o);
+  const J=(o)=>Object.assign({id:uid(),jobId:"",client:"",priority:"Medium",fileLocation:"",materialListLoc:"",notes:"",leadUnit:"working days",holds:[],updates:[],qc:{},phaseLog:[]},o);
   const A="Client A — Oilfield Services",B="Client B — Energy Services",C="Client C — Oilfield Logistics",D="Client D — Waste Management";
   const T1=JOB_TYPES["Design & build"],T2=JOB_TYPES["Build to client drawing"],T3=JOB_TYPES["Repair / blast & paint"];
   const jobs=[
-    J(Object.assign({},T1,{optSite:true,jobName:"200 BBL tank — vertical / horizontal conversion",jobId:"Q-26-013",client:A,priority:"High",stage:"Design",jobType:"Design & build",phase:PH.RFQ,rfqDate:W(-6),rfqDueDate:W(7),
+    J(Object.assign({},T1,{optSite:true,jobName:"200 BBL tank — vertical / horizontal conversion",jobId:"009",client:A,priority:"High",jobType:"Design & build",phase:PH.RFQ,rfqDate:W(-6),rfqDueDate:W(7),
        notes:"Modify existing 200 BBL tank + lifting frame to operate vertical AND horizontal.\nRevised scope after site visit: reduce tare 17,500 → 15,000 kg; replace 2 manways with a frac-tank style manway; downsize frame members; digital level gauge reading in both orientations; acid lining for 15–17% HCl; 6\" discharge manifold; 2 sling sets; leak test; ladder for horizontal use.\nUnit is lifted EMPTY only — frame sized for the empty-lift case."})),
-    J(Object.assign({},T2,{optAssembly:false,jobName:"Tank hatch covers × 2",jobId:"Q-26-021",client:A,stage:"Design",jobType:"Build to client drawing",phase:PH.RFQ,rfqDate:W(-6),rfqDays:5,notes:"Fabricate 2 hatch covers to client drawing for an overseas base. Quote incl. blast & paint."})),
-    J(Object.assign({},T1,{jobName:"Vacuum cover — RVT tank",jobId:"Q-26-022",client:A,stage:"Design",jobType:"Design & build",phase:PH.RFQ,rfqDate:W(-1),rfqDueDate:W(9),notes:"Build a vacuum cover for an RVT tank. Waiting on tank-top dimensions."})),
-    J(Object.assign({},T2,{optCoat:false,jobName:"6\" spools, butterfly valves & 18\" discharge plate",jobId:"Q-26-019",client:B,stage:"Design",jobType:"Build to client drawing",phase:PH.RFQ,rfqDate:W(-8),rfqDueDate:W(2),notes:"6\" spools c/w SS Victaulic clamps, 6\" valves, 18\" plate with discharge spool. Client changed gate valves → butterfly valves after reviewing concept drawings."})),
-    J(Object.assign({},T1,{jobName:"DNV pump skids × 2 — design & fabrication",jobId:"Q-26-011",client:B,priority:"High",jobType:"Design & build",phase:PH.QUOTED,rfqDate:W(-24),rfqDueDate:W(-12),quoteSentDate:W(-13),followUpDate:W(-1),notes:"DNV 2.7-3 lifting skid design + fabrication for two pump units. Quote submitted to manager; client follow-up pending."})),
-    J(Object.assign({},T3,{jobName:"Dual batch mixer — blast, prime & paint",jobId:"J-26-031",client:B,priority:"High",stage:"Paint",jobType:"Repair / blast & paint",phase:PH.PROD,rfqDate:W(-22),rfqDueDate:W(-16),quoteSentDate:W(-17),poDate:W(-9),poNumber:"PO 45008812",leadMin:10,leadMax:13,percent:65,procStartDate:W(-9),prodStartDate:W(-6),
+    J(Object.assign({},T2,{optAssembly:false,jobName:"Tank hatch covers × 2",jobId:"010",client:A,jobType:"Build to client drawing",phase:PH.RFQ,rfqDate:W(-6),rfqDays:5,notes:"Fabricate 2 hatch covers to client drawing for an overseas base. Quote incl. blast & paint."})),
+    J(Object.assign({},T1,{jobName:"Vacuum cover — RVT tank",jobId:"011",client:A,jobType:"Design & build",phase:PH.RFQ,rfqDate:W(-1),rfqDueDate:W(9),notes:"Build a vacuum cover for an RVT tank. Waiting on tank-top dimensions."})),
+    J(Object.assign({},T2,{optCoat:false,jobName:"6\" spools, butterfly valves & 18\" discharge plate",jobId:"008",client:B,jobType:"Build to client drawing",phase:PH.RFQ,rfqDate:W(-8),rfqDueDate:W(2),notes:"6\" spools c/w SS Victaulic clamps, 6\" valves, 18\" plate with discharge spool. Client changed gate valves → butterfly valves after reviewing concept drawings."})),
+    J(Object.assign({},T1,{jobName:"DNV pump skids × 2 — design & fabrication",jobId:"005",client:B,priority:"High",jobType:"Design & build",phase:PH.QUOTED,rfqDate:W(-24),rfqDueDate:W(-12),quoteSentDate:W(-13),followUpDate:W(-1),notes:"DNV 2.7-3 lifting skid design + fabrication for two pump units. Quote submitted to manager; client follow-up pending."})),
+    J(Object.assign({},T3,{jobName:"Dual batch mixer — blast, prime & paint",jobId:"006",client:B,priority:"High",jobType:"Repair / blast & paint",phase:PH.PROD,rfqDate:W(-22),rfqDueDate:W(-16),quoteSentDate:W(-17),poDate:W(-9),poNumber:"PO 45008812",leadMin:10,leadMax:13,procStartDate:W(-9),prodStartDate:W(-6),
        notes:"External only, client colours; Asset ID, weights & reflective tape on RHS corners.\nMASK: hydraulic tank, SS junction boxes, gas cylinder/regulator, SS pipe runs, DNV data plate.\nSS tanks: light sweep blast only. Replace ~50 corroded 1/4\" x 2\" bolts.",qc:{weld:qc("N/A",-6,"No welding in scope"),blast:qc("Pass",-2)}})),
-    J(Object.assign({},T3,{jobName:"Nitrogen pumping unit NU#4 — spot blast & paint",jobId:"J-26-034",client:B,jobType:"Repair / blast & paint",phase:PH.PROC,rfqDate:W(-12),quoteSentDate:W(-8),rfqDueDate:W(-7),poDate:W(-2),poNumber:"PO 45008901",leadMin:2,leadMax:3,leadUnit:"weeks",procStartDate:W(-2),percent:10,
+    J(Object.assign({},T3,{jobName:"Nitrogen pumping unit NU#4 — spot blast & paint",jobId:"007",client:B,jobType:"Repair / blast & paint",phase:PH.PROC,rfqDate:W(-12),quoteSentDate:W(-8),rfqDueDate:W(-7),poDate:W(-2),poNumber:"PO 45008901",leadMin:2,leadMax:3,leadUnit:"weeks",procStartDate:W(-2),
        notes:"Degrease, spot blast corroded areas, paint back to existing colours (yellow/white/red). Client supplies paint & reflective stickers. SS left unpainted — Rust Treat clean."})),
-    J(Object.assign({},T3,{optFab:true,jobName:"Sand storage baskets B001 / B002 — refurbishment",jobId:"J-26-028",client:B,priority:"Urgent",stage:"Fabrication",jobType:"Repair / blast & paint",phase:PH.PROD,rfqDate:W(-28),rfqDueDate:W(-22),quoteSentDate:W(-23),poDate:W(-14),poNumber:"PO 45008650",leadMin:15,leadMax:20,procStartDate:W(-14),prodStartDate:W(-8),percent:40,
+    J(Object.assign({},T3,{optFab:true,jobName:"Sand storage baskets B001 / B002 — refurbishment",jobId:"004",client:B,priority:"Urgent",jobType:"Repair / blast & paint",phase:PH.PROD,rfqDate:W(-28),rfqDueDate:W(-22),quoteSentDate:W(-23),poDate:W(-14),poNumber:"PO 45008650",leadMin:15,leadMax:20,procStartDate:W(-14),prodStartDate:W(-8),
        notes:"Blast & paint both baskets; replace SS mesh, SS bolts and gasket; fit level indicator.",qc:{weld:qc("Fail",-1,"Undercut on lifting lug welds (B002) — grind & re-weld, repeat MPI")}})),
-    J(Object.assign({},T1,{jobName:"CCU storage racks (4 units) + blast & paint",jobId:"J-26-024",client:A,priority:"High",stage:"Paint",jobType:"Design & build",phase:PH.PROD,rfqDate:W(-40),rfqDueDate:W(-32),quoteSentDate:W(-33),poDate:W(-20),poNumber:"PO 7700213",leadMin:20,leadMax:24,procStartDate:W(-20),prodStartDate:W(-15),percent:80,
+    J(Object.assign({},T1,{jobName:"CCU storage racks (4 units) + blast & paint",jobId:"001",client:A,priority:"High",jobType:"Design & build",phase:PH.PROD,rfqDate:W(-40),rfqDueDate:W(-32),quoteSentDate:W(-33),poDate:W(-20),poNumber:"PO 7700213",leadMin:20,leadMax:24,procStartDate:W(-20),prodStartDate:W(-15),
        notes:"4-level racks with drawers/cabinets inside 4 CCUs, 300–500 kg per level. Marine coating system (primer / intermediate / topcoat), client red.",qc:{weld:qc("Pass",-7),blast:qc("Pass",-4)}})),
-    J(Object.assign({},T2,{optAssembly:false,jobName:"Container box repairs & coating — batch of 6",jobId:"J-26-017",client:C,stage:"Complete",jobType:"Repair / blast & paint",optSite:false,optFab:true,phase:PH.DONE,rfqDate:W(-38),rfqDueDate:W(-34),quoteSentDate:W(-35),poDate:W(-28),poNumber:"PO 3315",leadMin:10,leadMax:12,procStartDate:W(-28),prodStartDate:W(-26),deliveredDate:W(-17),percent:100,
+    J(Object.assign({},T2,{optAssembly:false,jobName:"Container box repairs & coating — batch of 6",jobId:"002",client:C,jobType:"Repair / blast & paint",optSite:false,optFab:true,phase:PH.DONE,rfqDate:W(-38),rfqDueDate:W(-34),quoteSentDate:W(-35),poDate:W(-28),poNumber:"PO 3315",leadMin:10,leadMax:12,procStartDate:W(-28),prodStartDate:W(-26),deliveredDate:W(-17),
        notes:"8' x 10' x 4' boxes: weld repairs (cleats, drain holes, D-rings, forklift pockets), blast, Carboline primer + topcoat.",qc:{weld:qc("Pass",-21),blast:qc("Pass",-20),paint:qc("Pass",-18),final:qc("Pass",-17)}})),
-    J(Object.assign({},T2,{jobName:"Cubic bins 3 & 6 yd³ × 12",jobId:"Q-26-009",client:D,jobType:"Build to client drawing",phase:PH.LOST,rfqDate:W(-30),rfqDueDate:W(-25),quoteSentDate:W(-26),lostDate:W(-14),notes:"Steel bins with and without HDPE lids."}))
+    J(Object.assign({},T2,{jobName:"Cubic bins 3 & 6 yd³ × 12",jobId:"003",client:D,jobType:"Build to client drawing",phase:PH.LOST,rfqDate:W(-30),rfqDueDate:W(-25),quoteSentDate:W(-26),lostDate:W(-14),notes:"Steel bins with and without HDPE lids."}))
   ];
   const [tank,hatch,vac,spools,skids,mixer,nu4,baskets,ccu,boxes,bins]=jobs;
   jobs.forEach(j=>{const log=[[PH.RFQ,j.rfqDate],[PH.QUOTED,j.quoteSentDate],[PH.PO,j.poDate],[PH.PROC,j.procStartDate],[PH.PROD,j.prodStartDate],[PH.DONE,j.deliveredDate],[PH.LOST,j.lostDate]].filter(x=>x[1]);
@@ -1210,7 +1262,7 @@ function seedSchedules(){
   const T=todayISO();
   (DB.jobs||[]).forEach(j=>{buildSchedule(j);});
   const custom=(j,after,name,days,status,start)=>{const sec=(DB.tasks||[]).find(t=>t.jobRef===j.id&&t.stepKey==="sec:prod");if(!sec)return;const ref=(DB.tasks||[]).find(t=>t.jobRef===j.id&&t.stepKey===after);const s=start||T;DB.tasks.push({id:uid(),taskName:name,jobRef:j.id,parentTask:sec.id,assignee:"Welder",percent:status==="Done"?100:0,dependsOn:"",milestone:!days,status,stepKey:"custom:"+uid(),order:(ref?ref.order:sec.order+50)+0.5,startDate:s,endDate:days?addWorkingDays(s,days-1):s,doneDate:status==="Done"?s:""});};
-  const bk=(DB.jobs||[]).find(j=>j.jobId==="J-26-028");
+  const bk=(DB.jobs||[]).find(j=>j.jobId==="004");
   if(bk){custom(bk,"qcweld","Grind out & re-weld lifting lugs (B002)",2,"In Progress",wdOff(T,0));custom(bk,"qcweld","Repeat MPI on lifting lugs",0,"Not Started",wdOff(T,2));}
   (DB.tasks||[]).forEach(t=>{if(t.parentTask&&t.stepKey&&!t.auto&&(t.status!=="Done"||t.inferred)&&t.endDate&&t.endDate<T&&!/custom:/.test(t.stepKey)){t.status="Done";t.percent=100;t.doneDate=t.endDate;t.inferred=false;}});
   syncAllSchedules();
@@ -1228,7 +1280,22 @@ function keepDemoCurrent(){
 }
 
 /* ============ HELPERS ============ */
-function refName(table,id){ if(!id)return""; const r=(DB[table]||[]).find(x=>x.id===id); if(!r)return""; return r[SCHEMA[table].primary]||"(untitled)"; }
+function refName(table,id){ if(!id)return""; const r=(DB[table]||[]).find(x=>x.id===id); if(!r)return""; if(table==="jobs")return jobLabel(r); return r[SCHEMA[table].primary]||"(untitled)"; }
+/* ---- Job number, folder name, computed progress / current step ---- */
+function jobNo(j){return ((j&&j.jobId)||"").toString().trim();}
+function jobLabel(j){if(!j)return"";const n=jobNo(j);return (n?n+" · ":"")+(j.jobName||"(untitled)");}
+function nextJobNo(){let mx=0;(DB.jobs||[]).forEach(j=>{const m=/^\s*(\d+)\s*$/.exec(j.jobId||"");if(m)mx=Math.max(mx,+m[1]);});return String(mx+1).padStart(3,"0");}
+function jobNoQuery(q){q=(q||"").trim();return /^\d{1,6}$/.test(q)?+q:null;}
+function jobNoHit(j,n){const m=/^\s*(\d+)\s*$/.exec(j.jobId||"");return !!m&&+m[1]===n;}
+/* a search box typed with just a number finds that job number; anything else is a text search */
+function jobQ(list,q,hay){const n=jobNoQuery(q);if(n!=null){const hit=list.filter(j=>jobNoHit(j,n));if(hit.length)return hit;}q=(q||"").trim().toLowerCase();if(!q)return list;return list.filter(j=>{const h=hay(j).toLowerCase();return q.split(/\s+/).every(w=>h.includes(w));});}
+function shortClient(c){c=(c||"").trim();if(!c||c==="Other")return"";return c.split(/\s+[—–]\s+/)[0].trim();}
+function folderName(j){const raw=[jobNo(j)?jobNo(j)+".":"",shortClient(j.client),j.jobName||""].filter(Boolean).join(" ");return raw.replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g," ").trim().replace(/[. ]+$/,"");}
+function folderPath(j){const base=((DB.meta&&DB.meta.projectsPath)||"").trim();if(!base)return"";const sep=base.includes("/")&&!base.includes("\\")?"/":"\\";return base.replace(/[\\/]+$/,"")+sep+folderName(j);}
+function copyFolderName(id){const j=(DB.jobs||[]).find(x=>x.id===id);if(!j)return;copyText(folderName(j),"Copied “"+folderName(j)+"”");}
+function schedSteps(j){return (DB.tasks||[]).filter(t=>t.jobRef===j.id&&t.stepKey&&t.parentTask);}
+function jobPct(j){if(j.phase===PH.DONE)return 100;const k=schedSteps(j);if(k.length)return Math.round(k.filter(t=>t.status==="Done").length/k.length*100);return Math.min(100,Math.max(0,Math.round(+j.percent||0)));}
+function currentStep(j){if(isClosed(j))return"";const t=schedSteps(j).filter(t=>t.status!=="Done").sort((a,b)=>(a.order||0)-(b.order||0))[0];return t?(t.taskName||"").split(" — ")[0]:"";}
 function badgeClass(v){ return "b-"+statusTok(v); }
 function fmtDate(d){ if(!d)return""; const dt=new Date(d+"T00:00:00"); if(isNaN(dt))return d; return dt.toLocaleDateString(undefined,{day:"2-digit",month:"short",year:"numeric"}); }
 function fmtShort(d){ if(!d)return"—"; const dt=new Date(d+"T00:00:00"); if(isNaN(dt))return d; return dt.toLocaleDateString(undefined,{day:"2-digit",month:"short"}); }
@@ -1242,7 +1309,7 @@ function dueMeta(d,status){
   return{txt:fmtDate(d),cls:""};
 }
 function esc(s){return(s??"").toString().replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2600);}
+function toast(m,act){const t=document.getElementById("toast");t.textContent=m;if(act&&t.appendChild&&document.createElement){const b=document.createElement("button");b.className="toastbtn";b.textContent=act.label;b.onclick=e=>{if(e&&e.stopPropagation)e.stopPropagation();t.classList.remove("show");act.fn();};t.appendChild(b);}t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),act?8000:2600);}
 function taskKids(id){return (DB.tasks||[]).filter(t=>t.parentTask===id);}
 function topTasks(jobId){return (DB.tasks||[]).filter(t=>t.jobRef===jobId&&!t.parentTask);}
 function taskPct(t){const k=taskKids(t.id);if(k.length){const v=k.map(x=>+x.percent||0);return Math.round(v.reduce((a,b)=>a+b,0)/v.length);}return +t.percent||0;}
@@ -1322,11 +1389,17 @@ function jobDueMeta(j){
   return{txt:pre+"due "+fmtShort(s.due),cls:"",s};
 }
 function prevOpenPhase(j){const l=(j.phaseLog||[]).slice().reverse().find(x=>!CLOSED.includes(x.phase));return l?l.phase:PH.RFQ;}
+/* has the job reached this phase? (dates typed for a later phase stay on the job after an undo, but only count once it's reached again) */
+const PH_ORDER=[PH.RFQ,PH.QUOTED,PH.PO,PH.PROC,PH.PROD,PH.DONE];
+const PH_DATE={quoteSentDate:PH.QUOTED,poDate:PH.PO,procStartDate:PH.PROC,prodStartDate:PH.PROD,deliveredDate:PH.DONE};
+function reached(j,ph){if(j.phase===PH.LOST)return true;return PH_ORDER.indexOf(j.phase)>=PH_ORDER.indexOf(ph);}
+function jd(j,k){const v=j[k]||"";return v&&PH_DATE[k]&&!reached(j,PH_DATE[k])?"":v;}
 function setPhase(j,ph,opts){
   opts=opts||{};const from=j.phase;if(from===ph)return;
   const date=opts.date||todayISO();
+  if(!opts.redo)j.phaseRedo=[];   // a new phase change clears redo
   const oh=openHold(j);if(oh&&phaseGroup(from)!==phaseGroup(ph))oh.end=date; // a hold can't span phases with different clocks
-  j.phase=ph;(j.phaseLog=j.phaseLog||[]).push({phase:ph,from:from||"",date,ts:Date.now()});
+  j.phase=ph;(j.phaseLog=j.phaseLog||[]).push({phase:ph,from:from||"",date,ts:Date.now(),note:opts.note||""});
   if(ph===PH.RFQ&&!j.rfqDate)j.rfqDate=date;
   if(ph===PH.QUOTED&&!j.quoteSentDate)j.quoteSentDate=date;
   if(ph===PH.PO&&!j.poDate)j.poDate=date;
@@ -1335,6 +1408,44 @@ function setPhase(j,ph,opts){
   if(ph===PH.DONE){j.deliveredDate=date;j.percent=100;}
   if(ph===PH.LOST)j.lostDate=date;
   if(!opts.silent)(j.updates=j.updates||[]).push({id:uid(),date,ts:Date.now(),text:"Phase → "+ph+(opts.note?" — "+opts.note:"")});
+}
+/* ---- Undo / redo phase changes (stored on the job, so it survives closing the app) ---- */
+function lastPhaseEntry(j){const l=j.phaseLog||[],e=l[l.length-1];if(!e||e.phase!==j.phase||e.migrated)return null;const from=e.from||(l.length>1?l[l.length-2].phase:"");return from&&from!==e.phase?Object.assign({},e,{from}):null;}
+function canUndoPhase(j){return !!lastPhaseEntry(j);}
+function canRedoPhase(j){const r=j.phaseRedo||[],e=r[r.length-1];return !!e&&e.from===j.phase;}
+function undoPhase(id){
+  const j=(DB.jobs||[]).find(x=>x.id===id);if(!j)return;const e=lastPhaseEntry(j);if(!e){toast("Nothing to undo");return;}
+  j.phaseLog.pop();(j.phaseRedo=j.phaseRedo||[]).push(e);
+  const oh=openHold(j);if(oh&&phaseGroup(e.phase)!==phaseGroup(e.from))oh.end=todayISO();
+  j.phase=e.from;
+  (j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"↩ Undo: phase back to "+e.from+" (from "+e.phase+")"});
+  replan(j);save();rerender();toast("Undone — back to "+e.from);
+}
+function redoPhase(id){
+  const j=(DB.jobs||[]).find(x=>x.id===id);if(!j||!canRedoPhase(j))return;const e=j.phaseRedo.pop();
+  setPhase(j,e.phase,{date:e.date,redo:true,silent:true,note:e.note});
+  if(e.phase===PH.PROD&&e.date)j.prodStartDate=j.prodStartDate||e.date;
+  (j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"↪ Redo: phase → "+e.phase+(e.date?" (dated "+fmtShort(e.date)+")":"")});
+  replan(j);save();rerender();toast("Redone — "+e.phase);
+}
+function undoRedoBtns(j){
+  return (canUndoPhase(j)?`<button class="btn sm ghost" title="Step back to ${esc(lastPhaseEntry(j).from)}" onclick="undoPhase('${j.id}')">↩ Undo</button>`:"")
+    +(canRedoPhase(j)?`<button class="btn sm ghost" title="Re-apply ${esc(j.phaseRedo[j.phaseRedo.length-1].phase)}" onclick="redoPhase('${j.id}')">↪ Redo</button>`:"");
+}
+/* re-plan a job's schedule when its dates change (keeps ticked steps and hand-edited dates) */
+function replan(j){if((DB.tasks||[]).some(t=>t.jobRef===j.id&&t.stepKey))buildSchedule(j,true);}
+/* every material line fully received → production starts by itself (Undo on the toast or the job page) */
+function autoProd(jobIds){
+  const moved=[];
+  Array.from(new Set(jobIds)).forEach(id=>{const j=(DB.jobs||[]).find(x=>x.id===id);if(!j||(j.phase!==PH.PO&&j.phase!==PH.PROC))return;
+    const ms=jobMats(j.id);if(!ms.length||!ms.every(m=>matStage(m)==="received"))return;
+    const last=ms.map(m=>m.receivedDate).filter(Boolean).sort().pop()||todayISO();
+    setPhase(j,PH.PROD,{date:last,note:"all materials received — moved automatically"});j.prodStartDate=last;replan(j);moved.push(j);});
+  return moved;
+}
+function autoProdToast(moved,pre){
+  if(!moved.length)return false;const j=moved[0];
+  toast((pre?pre+" — ":"")+(moved.length>1?moved.length+" jobs":jobLabel(j))+" moved to In Production",moved.length===1?{label:"Undo",fn:()=>undoPhase(j.id)}:null);return true;
 }
 const PHASE_ACTION={[PH.QUOTED]:"quoted",[PH.PO]:"po",[PH.PROC]:"proc",[PH.PROD]:"prod",[PH.DONE]:"done",[PH.LOST]:"lost"};
 function changePhase(j,val){
@@ -1345,7 +1456,7 @@ function changePhase(j,val){
 function toggleHold(id){
   const j=(DB.jobs||[]).find(x=>x.id===id);if(!j||isClosed(j))return;
   const oh=openHold(j);
-  if(oh){oh.end=todayISO();const n=holdDays(oh);(j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"Resumed after "+n+" working day"+(n===1?"":"s")+" on hold — due date extended by the same."});save();rerender();toast("Resumed — clock restarted");return;}
+  if(oh){oh.end=todayISO();const n=holdDays(oh);(j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"Resumed after "+n+" working day"+(n===1?"":"s")+" on hold — due date extended by the same."});replan(j);save();rerender();toast("Resumed — clock restarted");return;}
   uiAsk({title:"Put on hold",msg:"Reason (e.g. awaiting client approval, free-issue material). The clock pauses and the due date moves out by every working day held.",input:true,ok:"Put on hold",onOk:reason=>{
   (j.holds=j.holds||[]).push({id:uid(),start:todayISO(),end:"",reason:reason.trim(),group:phaseGroup(j.phase)});
   (j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"On hold"+(reason.trim()?" — "+reason.trim():"")+". Clock paused."});
@@ -1368,14 +1479,22 @@ function phaseStepper(j){
   const idx=steps.findIndex(s=>s[0]===j.phase);
   return `<div class="stepper ${j.phase===PH.LOST?"lost":""}">`+steps.map((s,i)=>`<div class="step ${idx>=0&&i<idx?"done":i===idx?"cur":""}"><span class="sdot">${idx>=0&&i<idx?"✓":i+1}</span><span class="slbl">${s[1]}</span><span class="sdate">${s[2]&&(idx<0||i<=idx)?esc(fmtShort(s[2])):""}</span></div>`).join("")+`</div>`;
 }
-function openPhaseAction(jobId,action){
+function leadFields(j,lbl){
+  return `<div class="field"><label>${lbl} — min (target)</label><input type="number" min="0" step="any" data-k="leadMin" value="${j.leadMin??""}"></div>
+      <div class="field"><label>${lbl} — max (due)</label><input type="number" min="0" step="any" data-k="leadMax" value="${j.leadMax??""}"></div>
+      <div class="field"><label>Unit</label><select data-k="leadUnit">${["working days","weeks"].map(o=>`<option ${(j.leadUnit||"working days")===o?"selected":""}>${o}</option>`).join("")}</select></div>`;
+}
+function openPhaseAction(jobId,action,opts){
+  opts=opts||{};
   {const sb=document.getElementById("mainsave");if(sb)sb.textContent="Save";}
   const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;
-  formMode="phase";phaseCtx={jobId,action};
-  const title={quoted:"Quote submitted to "+managerLabel(),po:"Purchase order received",proc:"Start procurement",prod:"Start production",done:"Mark delivered",lost:"Mark lost / declined",reopen:"Reopen job"}[action];
+  formMode="phase";phaseCtx={jobId,action,target:opts.target||""};
+  const title={quoted:"Quote submitted to "+managerLabel(),po:"Purchase order received",proc:"Start procurement",prod:"Start production",done:"Mark delivered",lost:"Mark lost / declined",reopen:"Reopen job"}[action]+(opts.target&&opts.target!==PH.PO?" → "+opts.target:"");
   const dl={quoted:"Submitted on",po:"PO received on",proc:"Procurement started on",prod:"Production started on",done:"Delivered on",lost:"Date",reopen:"Date"}[action];
-  let body=`<div class="field"><label>${dl}</label><input type="date" data-k="date" value="${todayISO()}"></div>`;
-  if(action==="quoted")body+=`<div class="field"><label>Follow up client on</label><input type="date" data-k="followUpDate" value=""></div><div class="hint">Leave blank to follow up ${followUpDays()} working days after submission. While awaiting the PO the job is never "overdue" — it flags "chase client" instead.</div>`;
+  const had={quoted:j.quoteSentDate,po:j.poDate,proc:j.procStartDate,prod:j.prodStartDate}[action]||"";
+  let body=`<div class="field"><label>${dl}</label><input type="date" data-k="date" value="${esc(had||todayISO())}"></div>`;
+  if(action==="quoted")body+=`<div class="field"><label>Follow up client on</label><input type="date" data-k="followUpDate" value="${esc(j.followUpDate||"")}"></div><div class="hint">Leave blank to follow up ${followUpDays()} working days after submission. While awaiting the PO the job is never "overdue" — it flags "chase client" instead.</div>
+      <div class="fhead full">Lead time you're quoting <span style="font-weight:500;text-transform:none;letter-spacing:0">(optional — fills in the PO step for you)</span></div>${leadFields(j,"Lead time")}`;
   if(action==="po"){
     body+=`<div class="field"><label>PO number</label><input type="text" data-k="poNumber" value="${esc(j.poNumber||"")}"></div>
       <div class="field"><label>Quoted lead time — min (target)</label><input type="number" min="0" step="any" data-k="leadMin" value="${j.leadMin??""}"></div>
@@ -1387,7 +1506,7 @@ function openPhaseAction(jobId,action){
   if(action==="done"){const f=((j.qc||{}).final||{}).s;if(f!=="Pass"&&f!=="N/A")body+=`<div class="hint" style="color:var(--warn);font-weight:700">⚠ Final inspection isn't signed off yet${f==="Fail"?" — it's marked FAIL":""}. You can still mark it delivered.</div>`;}
   if(action==="reopen")body+=`<div class="field"><label>Reopen to phase</label><select data-k="phase">${PHASES.filter(p=>!CLOSED.includes(p)).map(p=>`<option ${prevOpenPhase(j)===p?"selected":""}>${esc(p)}</option>`).join("")}</select></div>`;
   body+=`<div class="field full"><label>${action==="lost"?"Reason":"Note (optional)"}</label><textarea data-k="note"></textarea></div>`;
-  document.getElementById("mtitle").textContent=title+" — "+(j.jobName||"");
+  document.getElementById("mtitle").textContent=title+" — "+jobLabel(j);
   document.getElementById("mbody").innerHTML=body;
   document.getElementById("scrim").classList.add("show");
 }
@@ -1401,24 +1520,28 @@ function savePhase(){
     const num=v=>(v===""||v==null)?"":Number(v);
     j.poNumber=d.poNumber||"";j.leadMin=num(d.leadMin);j.leadMax=num(d.leadMax);j.leadUnit=d.leadUnit||"working days";j.dueOverride=d.dueOverride||"";j.poDate=date;
   }
-  if(a==="quoted"){j.quoteSentDate=date;if(d.followUpDate)j.followUpDate=d.followUpDate;}
+  if(a==="quoted"){j.quoteSentDate=date;j.followUpDate=d.followUpDate||"";
+    const num=v=>(v===""||v==null)?"":Number(v);if(d.leadMin!==""||d.leadMax!==""){j.leadMin=num(d.leadMin);j.leadMax=num(d.leadMax);j.leadUnit=d.leadUnit||"working days";}}
   if(a==="proc")j.procStartDate=date;
   if(a==="prod")j.prodStartDate=date;
-  const target={quoted:PH.QUOTED,po:PH.PO,proc:PH.PROC,prod:PH.PROD,done:PH.DONE,lost:PH.LOST,reopen:d.phase}[a];
+  const target=phaseCtx.target||{quoted:PH.QUOTED,po:PH.PO,proc:PH.PROC,prod:PH.PROD,done:PH.DONE,lost:PH.LOST,reopen:d.phase}[a];
   if(!target){closeForm();return;}
+  if(target===PH.PROC&&!j.procStartDate)j.procStartDate=date;
+  if(target===PH.PROD&&!j.prodStartDate)j.prodStartDate=date;
   const extra=a==="quoted"?"submitted to "+managerLabel():a==="po"&&j.poNumber?"PO "+j.poNumber:"";
   setPhase(j,target,{date,note:[extra,note].filter(Boolean).join(" · ")});
-  save();closeForm();rerender();toast("Phase → "+target);
+  replan(j);save();closeForm();rerender();toast("Phase → "+target,canUndoPhase(j)?{label:"Undo",fn:()=>undoPhase(j.id)}:null);
 }
 function jobTimeline(j){
   const R=[],row=(l,v,n)=>`<div class="tlrow"><span class="tll">${l}</span><span class="tlv">${v}</span>${n?`<span class="tln">${n}</span>`:""}</div>`;
+  const qsd=jd(j,"quoteSentDate"),pod=jd(j,"poDate");
   if(j.rfqDate){
     const dl=rfqBaseDue(j);let n=dl?"deadline "+fmtShort(dl):"no deadline set";
-    if(j.quoteSentDate&&dl){const late=workDaysBetween(addWorkingDays(dl,holdExt(j,"rfq")),j.quoteSentDate);n=late>0?`<span class="overdue">${late} wd late</span>`:`<span class="ontime">on time</span>`;}
-    R.push(row("RFQ → quote submitted",j.quoteSentDate?workDaysBetween(j.rfqDate,j.quoteSentDate)+" wd":"in progress",n));
+    if(qsd&&dl){const late=workDaysBetween(addWorkingDays(dl,holdExt(j,"rfq")),qsd);n=late>0?`<span class="overdue">${late} wd late</span>`:`<span class="ontime">on time</span>`;}
+    R.push(row("RFQ → quote submitted",qsd?workDaysBetween(j.rfqDate,qsd)+" wd":"in progress",n));
   }
-  if(j.quoteSentDate&&j.poDate)R.push(row("Quote → PO received",workDaysBetween(j.quoteSentDate,j.poDate)+" wd",j.poNumber?esc(j.poNumber):""));
-  if(j.poDate){
+  if(qsd&&pod)R.push(row("Quote → PO received",workDaysBetween(qsd,pod)+" wd",j.poNumber?esc(j.poNumber):""));
+  if(pod){
     const lt=(j.leadMin!==""&&j.leadMin!=null)||(j.leadMax!==""&&j.leadMax!=null)?[j.leadMin,j.leadMax].filter(v=>v!==""&&v!=null).join("–")+" "+(j.leadUnit||"working days"):"not set";
     R.push(row("Quoted lead time",esc(lt),j.dueOverride?"fixed date "+fmtShort(j.dueOverride):""));
     if(j.phase===PH.DONE&&j.deliveredDate){
@@ -1678,13 +1801,6 @@ function matStatus(m){const st=matStage(m),q=+m.qtyReq||0,r=+m.qtyReceived||0;
   if(st==="waiting")return matQuotes(m).length?"Quoted":"RFQ sent";return"To order";}
 const MSTAT_TOK={"To order":"warn","RFQ sent":"hold",Quoted:"hold",Ordered:"info","Part received":"prog",Received:"ok"};
 function matChip(m){const s=matStatus(m);return `<button class="mchip" style="${tokStyle(MSTAT_TOK[s])}" title="Tap for the next step" onclick="event.stopPropagation();matAction('${m.id}')">${s}</button>`;}
-function advanceMat(id){
-  const m=(DB.materials||[]).find(x=>x.id===id);if(!m)return;const s=matStatus(m),q=+m.qtyReq||1;
-  if(s==="Received"){toast("Already received — edit the line to change quantities");return;}
-  if(s==="Ordered"||s==="Part received"||s==="Part ordered"&&+m.qtyOrdered>=q){m.qtyReceived=q;m.qtyOrdered=Math.max(+m.qtyOrdered||0,q);toast("Marked received");}
-  else{m.qtyOrdered=q;toast("Marked ordered");}
-  save();rerender();
-}
 function jobMats(jobId){return (DB.materials||[]).filter(m=>m.jobRef===jobId);}
 function matTotals(list){let cost=0,unpriced=0,rec=0;list.forEach(m=>{const p=matPrice(m);if(p&&p.price!=null)cost+=p.price*(+m.qtyReq||0);else unpriced++;if(matStatus(m)==="Received")rec++;});return{cost,unpriced,rec,n:list.length};}
 function procReadyNudge(j){
@@ -1731,8 +1847,9 @@ function toggleMTR(id){const m=(DB.materials||[]).find(x=>x.id===id);if(!m)retur
 function bulkMat(act){
   const sel=(DB.materials||[]).filter(m=>matSel.has(m.id));if(!sel.length)return;
   if(act==="delete")return uiConfirm(`Delete ${sel.length} material line${sel.length>1?"s":""}?`,()=>{DB.materials=DB.materials.filter(m=>!matSel.has(m.id));matSel=new Set();save();rerender();toast("Deleted");});
-  sel.forEach(m=>{const q=+m.qtyReq||1;m.qtyOrdered=Math.max(+m.qtyOrdered||0,q);if(act==="received")m.qtyReceived=q;});
-  matSel=new Set();save();rerender();toast(sel.length+" line"+(sel.length>1?"s":"")+" marked "+act);
+  sel.forEach(m=>{const q=+m.qtyReq||1;m.qtyOrdered=Math.max(+m.qtyOrdered||0,q);if(!m.orderedDate)m.orderedDate=todayISO();if(act==="received"){m.qtyReceived=q;m.receivedDate=todayISO();}});
+  const moved=act==="received"?autoProd(sel.map(m=>m.jobRef)):[];
+  matSel=new Set();save();rerender();const msg=sel.length+" line"+(sel.length>1?"s":"")+" marked "+act;if(!autoProdToast(moved,msg))toast(msg);
 }
 function priceAll(jobId){const r=autoPriceMaterials(jobMats(jobId));save();rerender();toast(r.linked?`${r.linked} line${r.linked>1?"s":""} priced from the price book`+(r.unsure?` · ${r.unsure} need a manual pick (tap 💲 Find price)`:""):"No confident matches — tap 💲 Find price on a line");}
 
@@ -1761,38 +1878,7 @@ function saveRfqFromMaterials(){
   matSel=new Set();purSel=new Set();if(current==="purchasing"&&!detailJob)purStage="waiting";save();closeForm();rerender();
   showRfqText(rfq.id);toast("RFQ "+rfq.rfqNumber+" created — copy the text into your email");
 }
-function rfqText(rfq){
-  const mats=(rfq.materialRefs||[]).map(id=>(DB.materials||[]).find(m=>m.id===id)).filter(Boolean);
-  const job=rfq.jobRef?refName("jobs",rfq.jobRef):"";
-  let lines;
-  if(mats.length){
-    const rows=[["#","Description","Size","Grade","Qty","Unit"]].concat(mats.map((m,i)=>[String(i+1),m.description||"",m.size||"",m.grade||"",String(m.qtyReq??""),m.unit||""]));
-    const w=rows[0].map((_,c)=>Math.min(40,Math.max(...rows.map(r=>r[c].length))));
-    lines=rows.map((r,i)=>r.map((v,c)=>v.padEnd(w[c])).join("  ")).join("\n");
-    const sep=w.map(x=>"-".repeat(x)).join("  ");lines=lines.replace("\n","\n"+sep+"\n");
-  }else lines=rfq.item||"";
-  return `Subject: Request for Quotation ${rfq.rfqNumber||""}${job?" — "+job:""}
-
-Good day,
-
-Kindly quote the items below. Please state:
- - unit price excl. VAT and your unit (per length / sheet / each)
- - stock length / sheet size and availability
- - lead time, and whether MTRs (mill certs) can be supplied
-${rfq.replyBy?`\nWe would appreciate your reply by ${fmtDate(rfq.replyBy)}.\n`:""}
-${lines}
-
-Thank you,
-`;
-}
 function rfqTSV(rfq){const mats=(rfq.materialRefs||[]).map(id=>(DB.materials||[]).find(m=>m.id===id)).filter(Boolean);return [["Item","Description","Size","Grade","Qty","Unit","Unit price excl. VAT","Availability / lead time"]].concat(mats.map((m,i)=>[i+1,m.description||"",m.size||"",m.grade||"",m.qtyReq??"",m.unit||"","",""])).map(r=>r.join("\t")).join("\n");}
-function showRfqText(id){
-  const r=(DB.procurement||[]).find(x=>x.id===id);if(!r)return;formMode="view";
-  const txt=rfqText(r);
-  openModal("RFQ "+(r.rfqNumber||"")+" — ready to send",`<div class="imp"><div class="impnote">Copy this into your email to each supplier. "Copy as table" gives a grid you can paste into Excel or an email table so suppliers can type prices straight in.</div>
-    <textarea class="copybox" id="rfqtxt" readonly>${esc(txt)}</textarea>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="copyText(document.getElementById('rfqtxt').value,'RFQ text copied')">📋 Copy email text</button>${(r.materialRefs||[]).length?`<button class="btn" onclick="copyText(rfqTSV(DB.procurement.find(x=>x.id==='${id}')),'Table copied — paste into Excel or email')">⊞ Copy as table</button>`:""}<button class="btn" onclick="closeForm()">Done</button></div></div>`,{wide:true,noFooter:true});
-}
 
 /* ============ v2: QC ============ */
 function qcSummary(j){const q=j.qc||{};let done=0,fail=0;QC_STAGES.forEach(([k])=>{const s=(q[k]||{}).s;if(s)done++;if(s==="Fail")fail++;});return{done,fail};}
@@ -1825,24 +1911,25 @@ function renderJobQC(j){
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${items.length?`<button class="btn xs" onclick="qcPassAll('${j.id}','${k}')">✓ Pass all remaining</button>`:""}<button class="btn xs" onclick="qcAddStd('${j.id}','${k}')">+ Add standard checks</button></div></div></details>`;
     return `<div class="qcrow s-${cls}"><div><div class="qcname">${esc(label)}</div><div class="qcmeta">${meta}</div></div><div class="qcbtns">${btn("Pass","Pass")}${btn("Fail","Fail")}${btn("N/A","N/A")}</div>${det}</div>`;
   }).join("");
-  const sm=qcSummary(j);
-  return `<div class="dsection"><h3><span class="ic">✅</span> QC <span class="chkprog">${sm.done}/4 recorded</span>${sm.fail?`<span class="chkprog" style="background:var(--bad-bg);color:var(--bad)">${sm.fail} fail</span>`:""}</h3>
+  const sm=qcSummary(j),fin=((j.qc||{}).final||{}).s;
+  const deliver=!isClosed(j)&&EXEC.includes(j.phase)&&(fin==="Pass"||fin==="N/A")?`<div class="nudge">✅ Final inspection ${fin==="Pass"?"passed":"marked N/A"}. <button class="btn sm primary" onclick="openPhaseAction('${j.id}','done')">🚚 Mark delivered</button></div>`:"";
+  return deliver+`<div class="dsection"><h3><span class="ic">✅</span> QC <span class="chkprog">${sm.done}/4 recorded</span>${sm.fail?`<span class="chkprog" style="background:var(--bad-bg);color:var(--bad)">${sm.fail} fail</span>`:""}</h3>
     <div class="impnote" style="margin-bottom:12px">One tap per stage — date and sign-off (${esc(inspector())}) are stamped automatically. Tap again to undo. Item-by-item checks are optional.</div>${rows}</div>`;
 }
 function renderQC(c){
   const list=(DB.jobs||[]).filter(j=>j.phase!==PH.LOST&&(EXEC.includes(j.phase)||j.phase===PH.DONE||qcSummary(j).done));
   const filt={"":()=>true,fail:j=>qcSummary(j).fail>0,final:j=>!isClosed(j)&&!["Pass","N/A"].includes(((j.qc||{}).final||{}).s),done:j=>((j.qc||{}).final||{}).s==="Pass"}[qcFilter]||(()=>true);
   const qq=listQ.trim().toLowerCase();
-  const rows=list.filter(filt).filter(j=>!qq||[j.jobName,j.jobId,j.client,j.poNumber].join(" ").toLowerCase().includes(qq));
+  const rows=jobQ(list.filter(filt),listQ,j=>[j.jobName,j.jobId,j.client,j.poNumber].join(" "));
   const chip=(j,k)=>{const r=(j.qc||{})[k]||{},s=r.s;return `<span class="qcchip qc-${s==="N/A"?"NA":s||"none"}" title="${esc(s?(s+" · "+fmtShort(r.date)+(r.note?" — "+r.note:"")):"not inspected")}" onclick="openJob('${j.id}','checklist')">${s==="Pass"?"✓":s==="Fail"?"✗":s==="N/A"?"N/A":"—"}</span>`;};
   const fails=(DB.jobs||[]).flatMap(j=>QC_STAGES.filter(([k])=>((j.qc||{})[k]||{}).s==="Fail").map(([k,l])=>({j,l,r:j.qc[k]})));
   c.innerHTML=`<div class="cards">
       <div class="statcard clickable c-bad" onclick="qcFilter='fail';render()"><div class="n">${fails.length}</div><div class="l">Open QC fails</div></div>
       <div class="statcard clickable c-warn" onclick="qcFilter='final';render()"><div class="n">${list.filter(j=>!isClosed(j)&&!["Pass","N/A"].includes(((j.qc||{}).final||{}).s)).length}</div><div class="l">Awaiting final inspection</div></div>
       <div class="statcard clickable c-ok" onclick="qcFilter='done';render()"><div class="n">${list.filter(j=>((j.qc||{}).final||{}).s==="Pass").length}</div><div class="l">Final inspection passed</div></div></div>
-    ${fails.length?`<div class="panel" style="margin-bottom:14px"><h3>Open fails</h3>${fails.map(f=>`<div class="tlrow" style="cursor:pointer" onclick="openJob('${f.j.id}','checklist')"><span class="tll"><b>${esc(f.j.jobName)}</b></span><span class="qcchip qc-Fail">${esc(f.l)}</span><span class="tln">${esc(fmtShort(f.r.date))} — ${esc(f.r.note||"no note")}</span></div>`).join("")}</div>`:""}
+    ${fails.length?`<div class="panel" style="margin-bottom:14px"><h3>Open fails</h3>${fails.map(f=>`<div class="tlrow" style="cursor:pointer" onclick="openJob('${f.j.id}','checklist')"><span class="tll"><b>${esc(jobLabel(f.j))}</b></span><span class="qcchip qc-Fail">${esc(f.l)}</span><span class="tln">${esc(fmtShort(f.r.date))} — ${esc(f.r.note||"no note")}</span></div>`).join("")}</div>`:""}
     <div class="pchips">${[["","All"],["fail","Open fails"],["final","Awaiting final"],["done","Final passed"]].map(([k,l])=>`<button class="pchip ${qcFilter===k?'on':''}" onclick="qcFilter='${k}';render()">${l}</button>`).join("")}</div>${listSearch("Search by job name, job ID or client…")}
-    ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Job</th><th>Phase</th>${QC_STAGES.map(([,l])=>`<th style="text-align:center">${esc(l.replace(" / ","/"))}</th>`).join("")}</tr></thead><tbody>${rows.map(j=>`<tr><td><button class="joblink" onclick="openJob('${j.id}','checklist')">${esc(j.jobName)}</button><div class="resp">${esc(j.client||"")}</div></td><td><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span></td>${QC_STAGES.map(([k])=>`<td style="text-align:center">${chip(j,k)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">No jobs here.</div>`}
+    ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Job</th><th>Phase</th>${QC_STAGES.map(([,l])=>`<th style="text-align:center">${esc(l.replace(" / ","/"))}</th>`).join("")}</tr></thead><tbody>${rows.map(j=>`<tr><td><button class="joblink" onclick="openJob('${j.id}','checklist')">${esc(jobLabel(j))}</button><div class="resp">${esc(j.client||"")}</div></td><td><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span></td>${QC_STAGES.map(([k])=>`<td style="text-align:center">${chip(j,k)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">No jobs here.</div>`}
     <div class="impnote" style="margin-top:8px">Jobs appear here once a PO is received. Tap any cell to open that job's QC.</div>`;
 }
 
@@ -1851,11 +1938,11 @@ function searchBox(){return `<div class="gsearch"><input id="gsq" placeholder="S
 function globalSearch(q){
   const el=document.getElementById("gsres");if(!el)return;q=(q||"").trim().toLowerCase();if(q.length<2){el.innerHTML="";return;}
   const has=(...v)=>v.join(" ").toLowerCase().includes(q);
-  const jobs=(DB.jobs||[]).filter(j=>has(j.jobName,j.jobId,j.client,j.poNumber,j.notes)).slice(0,6);
+  const jobs=jobQ(DB.jobs||[],q,j=>[j.jobName,j.jobId,j.client,j.poNumber,j.notes].join(" ")).slice(0,6);
   const mats=(DB.materials||[]).filter(m=>has(m.description,m.size,m.grade,m.lineNo)).slice(0,5);
   const prices=searchPrices(q,{strict:true}).slice(0,5);
   const it=(on,a,b)=>`<div class="gsitem" onclick="${on}"><span>${a}</span><span class="s">${b}</span></div>`;
-  el.innerHTML=(jobs.length?`<div class="gsgrp">Jobs</div>`+jobs.map(j=>it(`openJob('${j.id}')`,esc(j.jobName),esc(j.phase)+" · "+esc(jobDueMeta(j).txt))).join(""):"")
+  el.innerHTML=(jobs.length?`<div class="gsgrp">Jobs</div>`+jobs.map(j=>it(`openJob('${j.id}')`,esc(jobLabel(j)),esc(j.phase)+" · "+esc(jobDueMeta(j).txt))).join(""):"")
     +(mats.length?`<div class="gsgrp">Materials</div>`+mats.map(m=>it(`openJob('${m.jobRef}','materials')`,esc(m.description+" "+(m.size||"")),esc(refName("jobs",m.jobRef)))).join(""):"")
     +(prices.length?`<div class="gsgrp">Price book</div>`+prices.map(({it:p})=>{const b=bestPrice(p);return it(`openPriceItem('${p.id}')`,esc(p.description),b?money(b.price)+" · "+esc(b.supplier):"no price");}).join(""):"")
     ||`<div class="gsitem">No matches for “${esc(q)}”</div>`;
@@ -2052,14 +2139,14 @@ function importPriceWorkbook(){pickXl(async f=>{
       if(b&&!qlS){qlS=s;qlH=b;}
     });
     if(!pbS){toast("Couldn't find a 'Price Book' sheet (needs Item ID, Item Description and supplier Latest price columns)");return;}
-    const col=(H,...names)=>{for(const n of names){const i=H.h.indexOf(n);if(i>=0)return i;}for(const n of names){const i=H.h.findIndex(x=>x.startsWith(n));if(i>=0)return i;}return -1;};
+    const col=(H,...names)=>{for(const n of names){const i=H.h.indexOf(n);if(i>=0)return i;}for(const n of names){const i=H.h.findIndex(x=>x.startsWith(n));if(i>=0)return i;}for(const n of names){if(!n.includes(" "))continue;const i=H.h.findIndex(x=>x.includes(n));if(i>=0)return i;}return -1;};
     const g=(row,i)=>i>=0?((row[i]??"")+"").trim():"";
     const C={code:col(pbH,"item id"),cat:col(pbH,"category"),desc:col(pbH,"item description","description"),tags:col(pbH,"size search tags","size"),stock:col(pbH,"stock length sheet size","stock length"),grade:col(pbH,"grade spec","grade"),uom:col(pbH,"uom","unit"),notes:col(pbH,"notes flags","notes"),syn:col(pbH,"synonyms search","synonyms")};
     const items=[],byCode={};
     pbS.rows.slice(pbH.r+1).forEach(r=>{const code=g(r,C.code),desc=g(r,C.desc);if(!code||!desc)return;const it={id:uid(),code,category:g(r,C.cat),description:desc,tags:g(r,C.tags),stockLength:g(r,C.stock),grade:g(r,C.grade),uom:g(r,C.uom),notes:g(r,C.notes),synonyms:g(r,C.syn)};items.push(it);byCode[code]=it;});
     const quotes=[];let seq=0;
     if(qlS){
-      const Q={date:col(qlH,"quote date","date"),sup:col(qlH,"supplier"),ref:col(qlH,"sonriz rfq ref","rfq ref","ref"),code:col(qlH,"item id"),price:col(qlH,"unit price excl vat ttd","unit price excl vat","unit price"),resp:col(qlH,"response"),note:col(qlH,"notes"),reply:col(qlH,"supplier reply as written","supplier reply")};
+      const Q={date:col(qlH,"quote date","date"),sup:col(qlH,"supplier"),ref:col(qlH,"rfq ref","ref"),code:col(qlH,"item id"),price:col(qlH,"unit price excl vat ttd","unit price excl vat","unit price"),resp:col(qlH,"response"),note:col(qlH,"notes"),reply:col(qlH,"supplier reply as written","supplier reply")};
       qlS.rows.slice(qlH.r+1).forEach(r=>{const it=byCode[g(r,Q.code)];if(!it||!g(r,Q.sup))return;const p=parseFloat(g(r,Q.price).replace(/[$,]/g,""));
         quotes.push({id:uid(),itemRef:it.id,supplier:g(r,Q.sup),date:g(r,Q.date),price:isNaN(p)?"":p,response:g(r,Q.resp),note:[g(r,Q.note),g(r,Q.reply)&&"Reply: "+g(r,Q.reply)].filter(Boolean).join(" · "),ref:g(r,Q.ref),seq:++seq});});
     }else{
@@ -2111,11 +2198,12 @@ function purCounts(){
   const recOpen=by("received").filter(m=>{const j=(DB.jobs||[]).find(x=>x.id===m.jobRef);return !j||!isClosed(j);});
   return {toorder:by("toorder").length,waiting:(DB.procurement||[]).filter(rfqOpen).length,ordered:by("ordered").length,received:recOpen.length,_ms:ms,_rec:recOpen};
 }
-function purMatch(m){if(!purQ)return true;const q=purQ.toLowerCase();const j=(DB.jobs||[]).find(x=>x.id===m.jobRef)||{};const hay=[m.description,m.size,m.grade,m.notes,m.poRef,j.jobName,j.jobId,j.client,j.poNumber,refName("suppliers",m.supplierRef)].join(" ").toLowerCase();return q.split(/\s+/).every(w=>hay.includes(w));}
+function jobNoFilter(q,jobRef){const n=jobNoQuery(q);if(n==null||!(DB.jobs||[]).some(j=>jobNoHit(j,n)))return null;const j=(DB.jobs||[]).find(x=>x.id===jobRef);return !!j&&jobNoHit(j,n);}
+function purMatch(m){if(!purQ)return true;{const r=jobNoFilter(purQ,m.jobRef);if(r!=null)return r;}const q=purQ.toLowerCase();const j=(DB.jobs||[]).find(x=>x.id===m.jobRef)||{};const hay=[m.description,m.size,m.grade,m.notes,m.poRef,j.jobName,j.jobId,j.client,j.poNumber,refName("suppliers",m.supplierRef)].join(" ").toLowerCase();return q.split(/\s+/).every(w=>hay.includes(w));}
 function jobHead(j,extra){
   if(!j)return `<div class="pghead"><span class="t">No job</span><span class="sp"></span>${extra||""}</div>`;
   const dm=jobDueMeta(j);
-  return `<div class="pghead"><span class="t"><button onclick="openJob('${j.id}','materials')">${esc(j.jobName)}</button></span><span class="m">${esc(j.client||"")}</span><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span><span class="m ${dm.cls}">${esc(dm.txt)}</span><span class="sp"></span>${extra||""}</div>`;
+  return `<div class="pghead"><span class="t"><button onclick="openJob('${j.id}','materials')">${esc(jobLabel(j))}</button></span><span class="m">${esc(j.client||"")}</span><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span><span class="m ${dm.cls}">${esc(dm.txt)}</span><span class="sp"></span>${extra||""}</div>`;
 }
 function renderPurchasing(c){
   const C=purCounts();
@@ -2162,7 +2250,7 @@ function renderPurBody(){
   }
   else if(purStage==="waiting"){
     const q=(purQ||"").toLowerCase();
-    const list=(DB.procurement||[]).filter(rfqOpen).filter(r=>!q||[r.rfqNumber,r.item,refName("jobs",r.jobRef),((DB.jobs||[]).find(x=>x.id===r.jobRef)||{}).jobId,...(r.suppliers||[]).map(s=>refName("suppliers",s.supplierRef))].join(" ").toLowerCase().includes(q))
+    const list=(DB.procurement||[]).filter(rfqOpen).filter(r=>{const jn=jobNoFilter(q,r.jobRef||(rfqMats(r)[0]||{}).jobRef);return jn!=null?jn:!q||[r.rfqNumber,r.item,refName("jobs",r.jobRef),((DB.jobs||[]).find(x=>x.id===r.jobRef)||{}).jobId,...(r.suppliers||[]).map(s=>refName("suppliers",s.supplierRef))].join(" ").toLowerCase().includes(q);})
       .sort((a,b)=>(a.date||"").localeCompare(b.date||""));
     html=list.length?list.map(r=>rfqCard2(r)).join(""):empty(q?"No RFQs match that filter.":"No RFQs waiting. Send one from <b>To order</b>.");
   }
@@ -2190,7 +2278,7 @@ function purRfq(){matSel=new Set(Array.from(purSel));const first=(DB.materials||
 function pickJobThen(what){
   formMode="view";
   const js=(DB.jobs||[]).filter(j=>!isClosed(j)).sort((a,b)=>a.jobName.localeCompare(b.jobName));
-  openModal(what==="add"?"Add materials to which job?":"Paste material list into which job?",`<div class="imp"><div class="jobpick">${js.map(j=>`<button onclick="closeForm();${what==="add"?`openJob('${j.id}','materials');startGrid('${j.id}')`:`openImport('materials','${j.id}')`}"><b>${esc(j.jobName)}</b><div class="resp">${esc(j.client||"")} · ${esc(j.phase)}</div></button>`).join("")||'<div class="minimsg">No open jobs.</div>'}</div></div>`,{noFooter:true});
+  openModal(what==="add"?"Add materials to which job?":"Paste material list into which job?",`<div class="imp"><div class="jobpick">${js.map(j=>`<button onclick="closeForm();${what==="add"?`openJob('${j.id}','materials');startGrid('${j.id}')`:`openImport('materials','${j.id}')`}"><b>${esc(jobLabel(j))}</b><div class="resp">${esc(j.client||"")} · ${esc(j.phase)}</div></button>`).join("")||'<div class="minimsg">No open jobs.</div>'}</div></div>`,{noFooter:true});
 }
 function matAction(id){
   const m=(DB.materials||[]).find(x=>x.id===id);if(!m)return;const st=matStage(m);
@@ -2220,8 +2308,10 @@ function receiveMats(ids){
   const t=todayISO(),jobs=new Set();
   ids.forEach(id=>{const m=DB.materials.find(x=>x.id===id);if(!m)return;const q=+m.qtyReq||+m.qtyOrdered||1;m.qtyOrdered=Math.max(+m.qtyOrdered||0,q);m.qtyReceived=q;m.receivedDate=t;jobs.add(m.jobRef);
     const r=matRfq(m);if(r){(r.suppliers||[]).forEach(s=>{if(s.supplierRef===m.supplierRef&&s.status==="Ordered"){const mine=(r.materialRefs||[]).map(x=>DB.materials.find(y=>y.id===x)).filter(y=>y&&y.supplierRef===s.supplierRef);if(mine.every(y=>matStage(y)==="received"))s.status="Received";}});}});
+  const moved=autoProd(Array.from(jobs));
   save();rerender();
-  const ready=Array.from(jobs).map(id=>DB.jobs.find(j=>j.id===id)).filter(j=>j&&(j.phase===PH.PROC||j.phase===PH.PO)&&jobMats(j.id).every(m=>matStage(m)==="received"));
+  if(autoProdToast(moved,ids.length+" line"+(ids.length>1?"s":"")+" received"))return;
+  const ready=[];
   toast(ids.length+" line"+(ids.length>1?"s":"")+" received"+(ready.length?` — all materials in for ${ready[0].jobName}; move it to production from the job page`:""));
 }
 
@@ -2565,13 +2655,13 @@ function planSteps(j,steps){
   let qScale=1;if(dl&&qTot){const avail=Math.max(1,workDaysBetween(start,dl)+1);if(qTot>avail)qScale=avail/qTot;}
   lay(q,start,qScale);
   if(out.rfq&&j.rfqDate)out.rfq={s:j.rfqDate,e:j.rfqDate};
-  const quoted=j.quoteSentDate||(out.quoted?out.quoted.s:start);
-  const anchor=j.poDate||addWorkingDays(quoted,followUpDays()+3);
-  const rTot=rest.reduce((a,s)=>a+(+s.days||0),0),lead=j.poDate?(leadWD(j,"leadMax")||leadWD(j,"leadMin")):0;
+  const pod=jd(j,"poDate"),quoted=jd(j,"quoteSentDate")||(out.quoted?out.quoted.s:start);
+  const anchor=pod||addWorkingDays(quoted,followUpDays()+3);
+  const rTot=rest.reduce((a,s)=>a+(+s.days||0),0),lead=pod?(leadWD(j,"leadMax")||leadWD(j,"leadMin")):0;
   let rScale=1;if(lead&&rTot)rScale=Math.max(.5,Math.min(3,(lead)/rTot));
   lay(rest,anchor,rScale);
   // finishing milestones land on the promised date when we have one
-  const due=execDue(j);if(due&&out.delivered){out.delivered={s:due,e:due};if(out.final&&out.final.s>due)out.final={s:due,e:due};}
+  const due=pod||j.dueOverride?execDue(j):"";if(due&&out.delivered){out.delivered={s:due,e:due};if(out.final&&out.final.s>due)out.final={s:due,e:due};}
   return out;
 }
 function buildSchedule(j,keep){
@@ -2607,8 +2697,8 @@ function stepEvent(j,key){
   switch(key){
     case "rfq":return j.rfqDate||"";
     case "suprfq":{const ids=new Set(mats.map(m=>m.id));const rs=(DB.procurement||[]).filter(p=>p.jobRef===j.id||(p.materialRefs||[]).some(x=>ids.has(x)));const ds=rs.map(r=>r.date).filter(Boolean).sort();const pre=j.quoteSentDate?ds.filter(d=>d<=j.quoteSentDate):ds;return pre[0]||"";}
-    case "quoted":return j.quoteSentDate||"";
-    case "po":return j.poDate||"";
+    case "quoted":return jd(j,"quoteSentDate");
+    case "po":return jd(j,"poDate");
     case "order":if(mats.length&&mats.every(m=>["ordered","received"].includes(matStage(m))))return maxOf(mats.map(m=>m.orderedDate))||j.procStartDate||j.poDate||"";if(!mats.length&&(j.phase===PH.PROD||j.phase===PH.DONE))return j.procStartDate||j.poDate||"";return "";
     case "received":if(mats.length&&mats.every(m=>matStage(m)==="received"))return maxOf(mats.map(m=>m.receivedDate))||j.prodStartDate||"";if(!mats.length&&(j.phase===PH.PROD||j.phase===PH.DONE))return j.prodStartDate||"";return "";
     case "fab":return qp("weld");
@@ -2617,7 +2707,7 @@ function stepEvent(j,key){
     case "coat":return qp("paint");
     case "qcpaint":return qp("paint");
     case "final":return qp("final");
-    case "delivered":return j.deliveredDate||"";
+    case "delivered":return j.phase===PH.DONE?(j.deliveredDate||""):"";
   }
   return "";
 }
@@ -2639,7 +2729,7 @@ function syncSchedule(j){
   });
   (DB.tasks||[]).filter(t=>t.jobRef===j.id&&t.stepKey&&t.stepKey.startsWith("sec:")).forEach(p=>{const k=taskKids(p.id);if(!k.length)return;const d=k.filter(x=>x.status==="Done").length;p.status=d===k.length?"Done":d?"In Progress":"Not Started";p.percent=Math.round(d/k.length*100);});
 }
-function syncAllSchedules(){(DB.jobs||[]).forEach(j=>{try{syncSchedule(j);}catch(e){}});}
+function syncAllSchedules(){(DB.jobs||[]).forEach(j=>{try{qcAutoNA(j);}catch(e){}try{syncSchedule(j);}catch(e){}});}
 function tickStep(id){
   const t=(DB.tasks||[]).find(x=>x.id===id);if(!t)return;
   if(t.auto){toast("This step "+(AUTO_HINT[t.auto]||"is tracked automatically"));return;}
@@ -2693,7 +2783,7 @@ function renderWorkflow(j,tree,gantt){
         <div class="wfa"><button class="icobtn" title="Edit step" onclick="openForm('${t.id}','tasks')">✏️</button><button class="icobtn del" title="Remove step" onclick="del('${t.id}','tasks')">🗑</button></div></div>`).join("")}</div>`;
   }).join("");
   return `<div class="dsection"><h3><span class="ic">🗓️</span> Schedule <span class="chkprog">${esc(j.jobType||"Custom")}${opts.length?" · "+esc(opts.join(", ")):""}</span>
-      <span class="hbtns"><button class="btn sm" onclick="openForm('${j.id}','jobs')">Workflow options</button><button class="btn sm" onclick="rebuildSchedule('${j.id}')">↻ Rebuild from template</button></span></h3>
+      <span class="hbtns"><button class="btn sm" onclick="openWfOpts('${j.id}')">Workflow options</button><button class="btn sm" onclick="rebuildSchedule('${j.id}')">↻ Rebuild from template</button></span></h3>
     ${strip?`<div class="wflabel">Timeline so far</div>${strip}`:""}
     <div class="wfhead"><span></span><span>Step</span><span>Planned</span><span>Actual / status</span><span></span></div>
     ${secHtml}
@@ -2806,7 +2896,7 @@ function saveSupItem(){
 }
 
 /* ============ THEME ============ */
-function initTheme(){ let t=null; try{t=localStorage.getItem(THEMEKEY)||localStorage.getItem(LEGACY_THEME);}catch(e){} if(t!=="dark"&&t!=="light"){const a=document.documentElement.getAttribute("data-theme");t=(a==="dark"||a==="light")?a:((window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light");} document.documentElement.setAttribute("data-theme",t); updThemeBtn(t); }
+function initTheme(){ let t=null; try{t=localStorage.getItem(THEMEKEY);}catch(e){} if(t!=="dark"&&t!=="light"){const a=document.documentElement.getAttribute("data-theme");t=(a==="dark"||a==="light")?a:((window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light");} document.documentElement.setAttribute("data-theme",t); updThemeBtn(t); }
 function toggleTheme(){ const cur=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark"; document.documentElement.setAttribute("data-theme",cur); try{localStorage.setItem(THEMEKEY,cur);}catch(e){} updThemeBtn(cur); }
 function updThemeBtn(t){ const sw=document.getElementById("tswitch"); if(sw){sw.setAttribute("aria-checked",t==="dark"?"true":"false");sw.title=t==="dark"?"Switch to light mode":"Switch to dark mode";} const lb=document.getElementById("themelbl"); if(lb)lb.textContent=t==="dark"?"Dark":"Light"; }
 
@@ -2846,25 +2936,24 @@ function render(){
     vt.innerHTML="";return PAGES[current][1](c);
   }
   const sch=SCHEMA[current];
-  document.getElementById("viewtitle").textContent=current==="procurement"?"Supplier RFQs":sch.label;
+  document.getElementById("viewtitle").textContent=sch.label;
   document.getElementById("addbtn").style.display="";
   document.getElementById("csvbtn").style.display="";
   document.getElementById("searchwrap").style.display="";
-  if(current==="procurement"){vt.innerHTML="";return renderProcurement(c);}
   vt.innerHTML=sch.views.length<2?"":sch.views.map(v=>`<button class="${v===currentView?'active':''}" onclick="setView('${v}')">${viewLabel(v)}</button>`).join("");
   if(currentView==="grid")return renderGrid(c);
   if(currentView==="kanban")return renderKanban(c);
   if(currentView==="calendar")return renderCalendar(c);
-  if(currentView==="schedule")return renderSchedule(c);
 }
-function viewLabel(v){return{grid:"Grid",kanban:"Board",calendar:"Calendar",schedule:"Schedule"}[v];}
+function viewLabel(v){return{grid:"Grid",kanban:"Board",calendar:"Calendar"}[v];}
 function setView(v){currentView=v;render();pageAnim();}
 
 /* ============ FILTER ============ */
 function filteredRows(){
   let rows=(DB[current]||[]).slice();
   const q=listQ.trim().toLowerCase();
-  if(q)rows=rows.filter(r=>{const hay=SCHEMA[current].fields.map(f=>{let v=r[f.k];if(f.t==="link")v=refName(f.to,v);if(Array.isArray(v))v=v.join(" ");return (v??"").toString();}).join(" ").toLowerCase();return q.split(/\s+/).every(w=>hay.includes(w));});
+  const hayOf=r=>SCHEMA[current].fields.map(f=>{let v=r[f.k];if(f.t==="link")v=refName(f.to,v);if(Array.isArray(v))v=v.join(" ");return (v??"").toString();}).join(" ");
+  if(q)rows=current==="jobs"?jobQ(rows,q,hayOf):rows.filter(r=>{const hay=hayOf(r).toLowerCase();return q.split(/\s+/).every(w=>hay.includes(w));});
   Object.keys(gridFilters).forEach(k=>{const v=gridFilters[k];if(v)rows=rows.filter(r=>(r[k]||"")===v);});
   if(current==="jobs"&&jobFilter){
     const F={quoteover:j=>{const s=jobState(j);return s.kind==="quote"&&s.overdue;},jobover:j=>{const s=jobState(j);return s.kind==="delivery"&&s.overdue;},
@@ -2872,12 +2961,14 @@ function filteredRows(){
       onhold:j=>!isClosed(j)&&isOnHold(j),nodue:j=>{const s=jobState(j);return(s.kind==="quote"||s.kind==="delivery")&&!s.due;},nochecklist:jobNeedsChecklist}[jobFilter];
     if(F)rows=rows.filter(F);
   }
-  if(current==="materials"&&matFilter){
-    const F={out:m=>matStatus(m)!=="Received",unpriced:m=>!matPrice(m)||matPrice(m).price==null,received:m=>matStatus(m)==="Received",nomtr:m=>matStatus(m)==="Received"&&!m.mtr}[matFilter];
-    if(F)rows=rows.filter(F);
-  }
   if(sortKey==="_due"){
     const key=j=>{const s=jobState(j);return isClosed(j)?"9999-12-31":(s.due||s.followUp||"9999-12-30");};
+    rows.sort((a,b)=>{const x=key(a),y=key(b);return x<y?-sortDir:x>y?sortDir:0;});
+  }else if(sortKey==="_pct"||sortKey==="_step"){
+    const key=sortKey==="_pct"?jobPct:j=>currentStep(j).toLowerCase();
+    rows.sort((a,b)=>{const x=key(a),y=key(b);return x<y?-sortDir:x>y?sortDir:0;});
+  }else if(sortKey==="jobName"&&current==="jobs"){
+    const key=j=>{const m=/^\s*(\d+)\s*$/.exec(j.jobId||"");return m?String(+m[1]).padStart(8,"0"):"~"+(j.jobName||"").toLowerCase();};
     rows.sort((a,b)=>{const x=key(a),y=key(b);return x<y?-sortDir:x>y?sortDir:0;});
   }else if(sortKey){
     const f=SCHEMA[current].fields.find(x=>x.k===sortKey);
@@ -2889,7 +2980,7 @@ function filteredRows(){
 /* ============ GRID ============ */
 function renderGrid(c){
   const sch=SCHEMA[current];
-  const cols=sch.gridCols?sch.gridCols.map(k=>({_due:{k:"_due",l:"Due / next action"},_price:{k:"_price",l:"Best price"},_mstatus:{k:"_mstatus",l:"Status"}})[k]||sch.fields.find(f=>f.k===k)):sch.fields.filter(f=>f.t!=="textarea"&&f.t!=="heading").slice(0,9);
+  const cols=sch.gridCols?sch.gridCols.map(k=>({_due:{k:"_due",l:"Due / next action"},_price:{k:"_price",l:"Best price"},_mstatus:{k:"_mstatus",l:"Status"},_step:{k:"_step",l:"Current step"},_pct:{k:"_pct",l:"Progress"}})[k]||sch.fields.find(f=>f.k===k)):sch.fields.filter(f=>f.t!=="textarea"&&f.t!=="heading").slice(0,9);
   const selFields=sch.fields.filter(f=>f.t==="select"&&!f.noFilter);
   const fbar=selFields.length?`<div class="filters"><span class="lbl">Filter</span>`+selFields.map(f=>{const ops=optsFor(f);const cur=gridFilters[f.k]||"";return `<select data-filter="${f.k}" onchange="gridFilters['${f.k}']=this.value;render()" class="${cur?"on":""}"><option value="">${f.l}: All</option>${ops.map(o=>`<option ${cur===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;}).join("")+`</div>`:"";
   const rows=filteredRows();
@@ -2900,7 +2991,7 @@ function renderGrid(c){
     const isJobs=current==="jobs";
     const trs=rows.map(r=>{
       const tds=cols.map(f=>{
-        if(isJobs&&f.k===sch.primary)return `<td><button class="joblink" onclick="openJob('${r.id}')">${esc(r[f.k]||"(untitled)")}</button></td>`;
+        if(isJobs&&f.k===sch.primary)return `<td><button class="joblink" onclick="openJob('${r.id}')">${jobNo(r)?`<span class="jno">${esc(jobNo(r))}</span> · `:""}${esc(r[f.k]||"(untitled)")}</button></td>`;
         if(f.quick)return `<td>${quickCell(f,r,current)}</td>`;
         return `<td>${cellHTML(f,r)}</td>`;
       }).join("");
@@ -2914,22 +3005,23 @@ function renderGrid(c){
     }).join("");
     body=`<div class="tablewrap"><table><thead><tr>${head}</tr></thead><tbody>${trs}</tbody></table></div>`;
   }
-  const mchips=current==="materials"?`<div class="pchips">${[["","All"],["out","Outstanding"],["unpriced","Unpriced"],["received","Received"],["nomtr","Received, no MTR"]].map(([k,l])=>`<button class="pchip ${matFilter===k?'on':''}" onclick="matFilter='${k}';render()">${l}</button>`).join("")}</div>`:"";
   const chip=(current==="jobs"&&jobFilter)?`<div class="filterbanner">Showing <b>${JOBFILTER_LABEL[jobFilter]||jobFilter}</b> <span class="cnt">${filteredRows().length}</span><button onclick="clearJobFilter()" title="Clear filter">✕ Clear</button></div>`:"";
-  c.innerHTML=mchips+chip+(current==="materials"?"":fbar)+listSearch()+body;
+  c.innerHTML=chip+fbar+listSearch()+body;
 }
 function setSort(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=1;}render();}
 function cellHTML(f,r){
   if(f.k==="_due"){const m=jobDueMeta(r);return `<span class="${m.cls}">${esc(m.txt)}</span>`;}
   if(f.k==="_price")return priceCell(r);
   if(f.k==="_mstatus")return matChip(r);
+  if(f.k==="_step"){const s=currentStep(r);return s?`<span class="stepcell">${esc(s)}</span>`:"<span style='color:var(--ink-soft)'>—</span>";}
+  if(f.k==="_pct"){if(r.phase===PH.LOST)return "<span style='color:var(--ink-soft)'>—</span>";const p=jobPct(r);return `<div class="pbar" title="${p}% of schedule steps done"><span class="ptrack"><span class="pf ${p>=100?'full':''}" style="width:${p}%"></span></span><em>${p}%</em></div>`;}
   let v=r[f.k];
   if(f.phase&&v)return `<span class="badge" style="${tokStyle(PHASE_TOK[v]||"idle")}">${esc(v)}</span>`;
   if(f.t==="link")return v?`<span class="linktag">${esc(refName(f.to,v))}</span>`:"<span style='color:var(--ink-soft)'>—</span>";
   if(f.t==="checkbox")return v?"✅":"—";
   if(f.bar){const p=Math.min(100,Math.max(0,Math.round(+v||0)));return `<div class="pbar" title="${p}% complete"><span class="ptrack"><span class="pf ${p>=100?'full':''}" style="width:${p}%"></span></span><em>${p}%</em></div>`;}
   if(f.t==="multiselect")return(v&&v.length)?`<div class="chiprow">${v.map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</div>`:"—";
-  if(f.badge&&v)return `<span class="badge${f.dyn==="stages"?"":" "+badgeClass(v)}"${f.dyn==="stages"?` style="${tokStyle(stageTok(v))}"`:""}>${esc(v)}</span>`;
+  if(f.badge&&v)return `<span class="badge ${badgeClass(v)}">${esc(v)}</span>`;
   if(f.pri&&v)return `<span class="badge" style="${tokStyle(priTok(v))}">${esc(v)}</span>`;
   if(f.due&&v){const m=dueMeta(v,r.status);return `<span class="${m.cls}">${esc(m.txt)}</span>`;}
   if(f.t==="date")return v?fmtDate(v):"—";
@@ -2942,15 +3034,12 @@ const TOK={ok:["--ok-bg","--ok"],prog:["--info-bg","--info"],info:["--info-bg","
 const PRI_TOK={Urgent:"bad",High:"warn",Medium:"info",Low:"idle"};
 const COLOR_TOKENS=[["idle","Grey"],["prog","Blue"],["ok","Green"],["warn","Amber"],["bad","Red"],["hold","Purple"]];
 function metaArr(kind){return (DB.meta&&Array.isArray(DB.meta[kind]))?DB.meta[kind]:[];}
-function statusNames(){return metaArr("statuses").map(s=>s.name);}
 function priorityNames(){return metaArr("priorities").map(p=>p.name);}
-function stageNames(){return metaArr("stages").map(s=>s.name);}
 function checklistTypeNames(){return metaArr("checklistTemplates").map(t=>t.type);}
-function statusTok(name){const s=metaArr("statuses").find(x=>x.name===name);return s?s.tok:(STATUS_COLOR[name]||"idle");}
+function statusTok(name){return STATUS_COLOR[name]||"idle";}
 function priTok(name){const p=metaArr("priorities").find(x=>x.name===name);return p?p.tok:(PRI_TOK[name]||"idle");}
-function stageTok(name){const s=metaArr("stages").find(x=>x.name===name);return s?s.tok:"idle";}
-function fieldTok(f,v){if(f.phase)return PHASE_TOK[v]||"idle";return (f.pri||f.dyn==="priorities")?priTok(v):f.dyn==="stages"?stageTok(v):statusTok(v);}
-function optsFor(f){if(f.phase)return PHASES;if(f.dyn==="clients")return (DB.meta&&DB.meta.clients)||f.opts;if(f.dyn==="statuses")return statusNames().length?statusNames():f.opts;if(f.dyn==="priorities")return priorityNames().length?priorityNames():f.opts;if(f.dyn==="stages")return stageNames().length?stageNames():f.opts;if(f.dyn==="checklistTypes")return checklistTypeNames().length?checklistTypeNames():f.opts;return f.opts;}
+function fieldTok(f,v){if(f.phase)return PHASE_TOK[v]||"idle";return (f.pri||f.dyn==="priorities")?priTok(v):statusTok(v);}
+function optsFor(f){if(f.phase)return PHASES;if(f.dyn==="clients")return (DB.meta&&DB.meta.clients)||f.opts;if(f.dyn==="priorities")return priorityNames().length?priorityNames():f.opts;if(f.dyn==="checklistTypes")return checklistTypeNames().length?checklistTypeNames():f.opts;return f.opts;}
 function tokStyle(tok){const cv=TOK[tok]||TOK.idle;return `background-color:var(${cv[0]});color:var(${cv[1]})`;}
 function quickCell(f,r,tbl){
   const v=r[f.k]||"";
@@ -2964,40 +3053,121 @@ function quickSet(tbl,id,k,val){
   const r=(DB[tbl]||[]).find(x=>x.id===id); if(!r)return;
   if(tbl==="jobs"&&k==="phase")return changePhase(r,val);
   r[k]=val;
-  if(tbl==="jobs"&&k==="status"&&val==="Completed")r.percent=100;
   save(); rerender();
   const f=SCHEMA[tbl].fields.find(x=>x.k===k); toast((f?f.l:k)+" → "+val);
 }
 
-/* ============ KANBAN ============ */
+/* ============ BOARD (jobs by phase) ============
+   Lanes fill the screen height and scroll on their own. Desktop: ‹ › arrows (one lane per click) over edge fades;
+   wheel over a lane scrolls its cards, elsewhere it scrolls the board sideways; Shift+wheel / touchpad swipe = sideways.
+   Drag a card (mouse, or press-and-hold on a phone) onto another lane — the phase dialog opens as usual. */
 function renderKanban(c){
   const sch=SCHEMA[current],kf=sch.kanbanField;
   const opts=optsFor(sch.fields.find(f=>f.k===kf));
   const rows=filteredRows();
-  c.innerHTML=listSearch()+`<div class="kanban">`+opts.map(st=>{
+  const lanes=opts.map(st=>{
     const items=rows.filter(r=>(r[kf]||opts[0])===st);
-    return `<div class="kcol"><h3><span class="dot" style="background:var(${dotVar(st)})"></span>${st}<span class="n">${items.length}</span></h3><div class="kbody" data-status="${esc(st)}" ondragover="kOver(event)" ondragleave="kLeave(event)" ondrop="kDrop(event)">${items.map(r=>kCard(r,sch)).join("")}</div></div>`;
-  }).join("")+`</div>`;
+    const add=current==="jobs"&&st===PH.RFQ?`<button class="laneadd" onclick="openForm(null,'jobs')">+ Add job</button>`:"";
+    return `<section class="lane" data-status="${esc(st)}"><header class="lanehd"><span class="dot" style="background:var(${dotVar(st)})"></span><span class="ln">${esc(st)}</span><span class="lcnt">${items.length}</span></header><div class="lanebody">${items.map(r=>kCard(r,sch)).join("")||`<div class="laneempty">No jobs</div>`}</div>${add}</section>`;
+  }).join("");
+  c.innerHTML=listSearch()+`<div class="board kanban" id="board"><div class="boardscroll" id="boardscroll">${lanes}</div><button class="barrow l" aria-label="Previous lane" onclick="boardStep(-1)">‹</button><button class="barrow r" aria-label="Next lane" onclick="boardStep(1)">›</button></div>`;
+  initBoard();
 }
-function kCard(r,sch){
-  const title=r[sch.primary]||"(untitled)";
-  let meta="",openBtn="",bar="";
-  if(current==="jobs"){
-    const m=jobDueMeta(r);
-    openBtn=`<button class="kopen" title="Open job" onclick="openJob('${r.id}')">↗</button>`;
-    meta=`<div class="meta">${r.client?`<span class="chip">${esc(r.client)}</span>`:""}${r.priority?`<span class="badge pri-${r.priority}">${r.priority}</span>`:""}</div><div class="due ${m.cls}">📅 ${esc(m.txt)}</div>`;
-    const p=Math.min(100,Math.max(0,Math.round(+r.percent||0)));
-    bar=`<div class="pbar kbar" title="${p}% complete"><span class="ptrack"><span class="pf ${p>=100?'full':''}" style="width:${p}%"></span></span><em>${p}%</em></div>`;
+function kCard(r){
+  const m=jobDueMeta(r),p=jobPct(r);
+  return `<div class="kcard" data-id="${r.id}" onpointerdown="kDown(event,'${r.id}')" oncontextmenu="return false">
+    <div class="kc-top">${r.priority?`<span class="badge" style="${tokStyle(priTok(r.priority))}">${esc(r.priority)}</span>`:""}<span class="kno">${esc(jobNo(r))}</span></div>
+    <div class="t">${esc(r.jobName||"(untitled)")}</div>
+    ${r.client?`<div class="kc-cl">${esc(r.client)}</div>`:""}
+    <div class="kc-ft"><span class="due ${m.cls}">${esc(m.txt)}</span>${r.phase===PH.LOST?"":`<span class="kpct">${p}%</span>`}</div>
+    ${r.phase===PH.LOST?"":`<div class="kbar"><span style="width:${p}%"></span></div>`}</div>`;
+}
+let _boardWired=false;
+function boardSize(){
+  const b=document.getElementById("board");if(!b||!b.getBoundingClientRect)return;
+  const top=b.getBoundingClientRect().top+(window.scrollY||0);
+  b.style.height=Math.max(340,(window.innerHeight||800)-top-18)+"px";
+  boardUpd();
+}
+function boardUpd(){
+  const b=document.getElementById("board"),sc=document.getElementById("boardscroll");if(!b||!sc)return;
+  const max=sc.scrollWidth-sc.clientWidth;
+  b.classList.toggle("can-l",sc.scrollLeft>2);b.classList.toggle("can-r",sc.scrollLeft<max-2);
+}
+function boardStep(d){
+  const sc=document.getElementById("boardscroll");if(!sc)return;
+  const lanes=Array.from(sc.querySelectorAll(".lane"));if(!lanes.length)return;
+  const x=sc.scrollLeft,base=lanes[0].offsetLeft;
+  const pos=lanes.map(l=>l.offsetLeft-base);
+  let i=pos.findIndex(p=>p>=x-4);if(i<0)i=pos.length-1;
+  if(d<0&&Math.abs(pos[i]-x)<=4)i--;else if(d>0)i++;
+  if(d<0&&pos[i]===undefined)i=0;
+  i=Math.max(0,Math.min(pos.length-1,i));
+  if(sc.scrollTo)sc.scrollTo({left:pos[i],behavior:"smooth"});else sc.scrollLeft=pos[i];
+}
+function initBoard(){
+  const sc=document.getElementById("boardscroll");if(!sc)return;
+  sc.addEventListener("scroll",boardUpd,{passive:true});
+  sc.addEventListener("wheel",e=>{
+    if(e.ctrlKey)return;
+    const dx=e.deltaX||0,dy=e.deltaY||0;
+    if(e.shiftKey){sc.scrollLeft+=dy||dx;e.preventDefault();return;}
+    if(Math.abs(dx)>Math.abs(dy))return;                       // touchpad sideways swipe: native
+    const lb=e.target&&e.target.closest?e.target.closest(".lanebody"):null;
+    if(lb&&lb.scrollHeight>lb.clientHeight+1)return;            // over a lane with more cards: scroll that lane
+    if(sc.scrollWidth>sc.clientWidth+1){sc.scrollLeft+=dy;e.preventDefault();}
+  },{passive:false});
+  if(!_boardWired&&window.addEventListener&&document.addEventListener){_boardWired=true;window.addEventListener("resize",boardSize);
+    document.addEventListener("touchmove",e=>{if(kdrag&&kdrag.active&&e.cancelable)e.preventDefault();},{passive:false});}
+  boardSize();setTimeout(boardSize,60);
+}
+let kdrag=null;
+function kDown(e,id){
+  if(e.button>0||(e.target.closest&&e.target.closest("button")))return;
+  const card=e.currentTarget;
+  kdrag={id,card,x0:e.clientX,y0:e.clientY,x:e.clientX,y:e.clientY,touch:e.pointerType!=="mouse",active:false,moved:false,timer:null};
+  if(kdrag.touch)kdrag.timer=setTimeout(()=>{if(kdrag&&!kdrag.moved)kStartDrag();},300);
+  document.addEventListener("pointermove",kMove,{passive:false});
+  document.addEventListener("pointerup",kUp);
+  document.addEventListener("pointercancel",kCancel);
+}
+function kStartDrag(){
+  if(!kdrag)return;kdrag.active=true;
+  const r=kdrag.card.getBoundingClientRect(),g=kdrag.card.cloneNode(true);
+  g.className="kcard kghost";g.removeAttribute("onpointerdown");g.style.width=r.width+"px";
+  kdrag.dx=kdrag.x-r.left;kdrag.dy=kdrag.y-r.top;
+  document.body.appendChild(g);kdrag.ghost=g;kdrag.card.classList.add("dragging");document.body.classList.add("kdragging");
+  {const sc=document.getElementById("boardscroll");if(sc)sc.style.scrollSnapType="none";}   // snap would fight the edge auto-scroll
+  kPlace();
+  try{if(kdrag.touch&&navigator.vibrate)navigator.vibrate(12);}catch(_){}
+  kdrag.auto=setInterval(()=>{const sc=document.getElementById("boardscroll");if(!sc||!kdrag)return;const b=sc.getBoundingClientRect();
+    if(kdrag.x<b.left+48)sc.scrollLeft-=14;else if(kdrag.x>b.right-48)sc.scrollLeft+=14;
+    const lb=kLaneAt()&&kLaneAt().querySelector(".lanebody");if(lb){const lr=lb.getBoundingClientRect();if(kdrag.y<lr.top+30)lb.scrollTop-=10;else if(kdrag.y>lr.bottom-30)lb.scrollTop+=10;}},16);
+}
+function kPlace(){if(!kdrag||!kdrag.ghost)return;kdrag.ghost.style.transform=`translate(${kdrag.x-kdrag.dx}px,${kdrag.y-kdrag.dy}px) rotate(2deg)`;
+  const ln=kLaneAt();document.querySelectorAll(".lane.drop").forEach(x=>{if(x!==ln)x.classList.remove("drop");});if(ln)ln.classList.add("drop");}
+function kLaneAt(){if(!kdrag)return null;const el=document.elementFromPoint(kdrag.x,kdrag.y);return el&&el.closest?el.closest(".lane"):null;}
+function kMove(e){
+  if(!kdrag)return;kdrag.x=e.clientX;kdrag.y=e.clientY;const dist=Math.hypot(e.clientX-kdrag.x0,e.clientY-kdrag.y0);
+  if(!kdrag.active){
+    if(kdrag.touch){if(dist>8){kdrag.moved=true;kEndDrag();}return;}   // finger moved before the hold: it's a scroll
+    if(dist>5)kStartDrag();else return;
   }
-  const dbl=current==="jobs"?`ondblclick="openJob('${r.id}')"`:`ondblclick="openForm('${r.id}')"`;
-  return `<div class="kcard" draggable="true" data-id="${r.id}" ondragstart="kStart(event)" ondragend="kEnd(event)" ${dbl}>${openBtn}<div class="t">${esc(title)}</div>${meta}${bar}</div>`;
+  if(e.cancelable)e.preventDefault();kPlace();
 }
-let dragId=null;
-function kStart(e){dragId=e.target.dataset.id;e.target.classList.add("dragging");e.dataTransfer.effectAllowed="move";}
-function kEnd(e){e.target.classList.remove("dragging");dragId=null;document.querySelectorAll(".kbody.drop").forEach(x=>x.classList.remove("drop"));}
-function kOver(e){e.preventDefault();e.currentTarget.classList.add("drop");}
-function kLeave(e){e.currentTarget.classList.remove("drop");}
-function kDrop(e){e.preventDefault();e.currentTarget.classList.remove("drop");if(!dragId)return;const st=e.currentTarget.dataset.status,kf=SCHEMA[current].kanbanField;const r=DB[current].find(x=>x.id===dragId);if(r&&current==="jobs"&&kf==="phase"){if(r.phase!==st)changePhase(r,st);return;}if(r&&r[kf]!==st){r[kf]=st;if(current==="jobs"&&st==="Completed")r.percent=100;save();render();buildNav();toast("Moved to "+st);}}
+function kUp(){
+  if(!kdrag)return;const d=kdrag;
+  if(d.active){const ln=kLaneAt();kEndDrag();if(ln){const st=ln.dataset.status,r=(DB.jobs||[]).find(x=>x.id===d.id);if(r&&r.phase!==st)changePhase(r,st);}return;}
+  kEndDrag();if(!d.moved)openJob(d.id);   // a plain tap / click opens the job
+}
+function kCancel(){kEndDrag();}
+function kEndDrag(){
+  if(!kdrag)return;clearTimeout(kdrag.timer);clearInterval(kdrag.auto);
+  if(kdrag.ghost)kdrag.ghost.remove();if(kdrag.card)kdrag.card.classList.remove("dragging");
+  document.body.classList.remove("kdragging");{const sc=document.getElementById("boardscroll");if(sc)sc.style.scrollSnapType="";}document.querySelectorAll(".lane.drop").forEach(x=>x.classList.remove("drop"));
+  document.removeEventListener("pointermove",kMove);document.removeEventListener("pointerup",kUp);document.removeEventListener("pointercancel",kCancel);
+  kdrag=null;
+}
 
 /* ============ CALENDAR ============ */
 function renderCalendar(c){
@@ -3005,12 +3175,12 @@ function renderCalendar(c){
   const y=calMonth.getFullYear(),m=calMonth.getMonth();
   const first=new Date(y,m,1),start=new Date(first);start.setDate(1-((first.getDay()+6)%7));
   const monthName=calMonth.toLocaleDateString(undefined,{month:"long",year:"numeric"});
-  const evs={},cq=listQ.trim().toLowerCase();(DB.jobs||[]).filter(j=>!cq||[j.jobName,j.jobId,j.client,j.poNumber].join(" ").toLowerCase().includes(cq)).forEach(j=>{const s=jobState(j);const d=s.due||(s.kind==="followup"&&!s.paused?s.followUp:"");if(d)(evs[d]=evs[d]||[]).push({j,s});});
+  const evs={},cq=listQ.trim().toLowerCase();jobQ(DB.jobs||[],cq,j=>[j.jobName,j.jobId,j.client,j.poNumber].join(" ")).forEach(j=>{const s=jobState(j);const d=s.due||(s.kind==="followup"&&!s.paused?s.followUp:"");if(d)(evs[d]=evs[d]||[]).push({j,s});});
   let cells="";
   for(let i=0;i<42;i++){
     const d=new Date(start);d.setDate(start.getDate()+i);
     const iso=ymd(d),dim=d.getMonth()!==m,isToday=iso===todayISO();
-    const dayEvs=(evs[iso]||[]).map(({j,s})=>`<div class="calev ${s.overdue?'od':''}" onclick="openJob('${j.id}')" title="${esc(j.jobName)} — ${esc(s.label)}">${s.kind==="quote"?"Q · ":s.kind==="followup"?"☎ ":""}${esc(j.jobName)}</div>`).join("");
+    const dayEvs=(evs[iso]||[]).map(({j,s})=>`<div class="calev ${s.overdue?'od':''}" onclick="openJob('${j.id}')" title="${esc(jobLabel(j))} — ${esc(s.label)}">${s.kind==="quote"?"Q · ":s.kind==="followup"?"☎ ":""}${esc(jobLabel(j))}</div>`).join("");
     cells+=`<div class="calcell ${dim?'dim':''} ${isToday?'today':''}"><div class="dn">${d.getDate()}</div>${dayEvs}</div>`;
   }
   const dows=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div class="dow">${d}</div>`).join("");
@@ -3105,52 +3275,6 @@ function ganttSVG(jobFilter,opts){
   return `<svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">${g}</svg>`;
 }
 const GANTT_LEGEND=`<div class="glegend"><span>◆ milestone</span><span>▭ section (rolled up)</span><span style="color:var(--ok)">■ done</span><span style="color:var(--info)">■ in progress</span><span style="color:var(--idle)">■ planned</span><span style="color:var(--bad)">■ QC fail</span><span>● actual date</span><span style="color:var(--weld)">┊ today</span></div>`;
-function renderSchedule(c){
-  const q=listQ.trim().toLowerCase();
-  let tasks=(DB.tasks||[]).slice();
-  if(q)tasks=tasks.filter(t=>[t.taskName,refName("jobs",t.jobRef),t.status,t.assignee,refName("tasks",t.parentTask)].join(" ").toLowerCase().includes(q));
-  const today=todayISO();
-  const B={overdue:[],week:[],two:[],later:[],none:[],done:[]};
-  tasks.forEach(t=>{
-    if(t.status==="Done"){B.done.push(t);return;}
-    const end=taskSpan(t).end;
-    if(!end){B.none.push(t);return;}
-    const d=daysBetween(today,end);
-    if(d<0)B.overdue.push(t); else if(d<=7)B.week.push(t); else if(d<=14)B.two.push(t); else B.later.push(t);
-  });
-  const endOf=t=>taskSpan(t).end||"9999-12-31";
-  Object.values(B).forEach(a=>a.sort((x,y)=>endOf(x)<endOf(y)?-1:1));
-  const statusF=SCHEMA.tasks.fields.find(f=>f.k==="status");
-  const row=t=>{
-    const sp=taskSpan(t),job=refName("jobs",t.jobRef),parent=t.parentTask?refName("tasks",t.parentTask):"";
-    const pct=taskPct(t);
-    const dd=sp.end?dueMeta(sp.end,t.status):{txt:"",cls:""};
-    const dates=(sp.start||sp.end)?`${fmtShort(sp.start)} – ${fmtShort(sp.end)}`:"no dates";
-    return `<div class="scrow" ondblclick="openForm('${t.id}','tasks')">
-      <span class="scstat">${quickCell(statusF,t,'tasks')}</span>
-      <span class="scname">${t.milestone?'<span class="msdot" title="Milestone">◆</span> ':''}${esc(t.taskName)}</span>
-      <span class="scchips">${job?`<span class="chip">📋 ${esc(job)}</span>`:'<span class="chip" style="opacity:.6">Unassigned</span>'}${parent?`<span class="chip">↳ ${esc(parent)}</span>`:''}</span>
-      <span class="scdate ${dd.cls}">${esc(dates)}${dd.cls?` · ${esc(dd.txt)}`:''}</span>
-      <span class="pbar scbar"><span class="ptrack"><span class="pf ${pct>=100?'full':''}" style="width:${pct}%"></span></span><em>${pct}%</em></span>
-      <span class="scact rowact"><button class="icobtn" title="Edit task" onclick="openForm('${t.id}','tasks')">✏️</button></span>
-    </div>`;
-  };
-  const sec=(k,label,cls,emoji)=>B[k].length?`<div class="scsec ${cls}"><h3>${emoji} ${label} <span class="sccount">${B[k].length}</span></h3><div class="scbody">${B[k].map(row).join("")}</div></div>`:"";
-  const any=Object.values(B).some(a=>a.length);
-  const sum=`<div class="cards">
-    <div class="statcard c-bad"><div class="n">${B.overdue.length}</div><div class="l">Overdue</div></div>
-    <div class="statcard c-warn"><div class="n">${B.week.length}</div><div class="l">Due this week</div></div>
-    <div class="statcard c-info"><div class="n">${B.two.length+B.later.length}</div><div class="l">Upcoming</div></div>
-    <div class="statcard c-ok"><div class="n">${B.done.length}</div><div class="l">Completed</div></div></div>`;
-  const body=any?(sec("overdue","Overdue","ov","🔴")+sec("week","Due this week","wk","🟠")+sec("two","Next 2 weeks","tw","🟡")+sec("later","Later","lt","🔵")+sec("none","No date set","nd","⚪")+sec("done","Completed","dn","✅"))
-    :`<div class="empty"><div class="big">🗓️</div>No tasks yet. Open a job and add tasks under it — they'll appear here grouped by how soon they're due, so you always know what needs attention next.</div>`;
-  c.innerHTML=sum+body+`<div style="margin-top:10px;font-size:12px;color:var(--ink-soft)">Tasks grouped by due date. Click a status pill to update it, or double-click a row to edit. Per-job timelines live inside each job.</div>`;
-}
-function renderGanttView(c){
-  const svg=ganttSVG(null);
-  if(!svg){c.innerHTML=`<div class="tablewrap"><div class="empty"><div class="big">📊</div>No scheduled tasks yet. Add tasks with start &amp; end dates to build the Gantt chart.</div></div>`;return;}
-  c.innerHTML=`<div class="gantt">${svg}</div>${GANTT_LEGEND}<div style="margin-top:6px;font-size:12px;color:var(--ink-soft)">Click any bar to edit its task. Subtasks roll up into their parent's progress.</div>`;
-}
 
 /* ============ DASHBOARD ============ */
 function renderDashboard(c){
@@ -3187,7 +3311,7 @@ function renderDashboard(c){
   jobs.forEach(j=>(j.updates||[]).forEach((u,idx)=>feed.push({j,u,idx})));
   feed.sort((a,b)=>{const d=(b.u.date||"").localeCompare(a.u.date||"");if(d)return d;return ((b.u.ts||0)-(a.u.ts||0))||(b.idx-a.idx);});
   const recent=feed.slice(0,8);
-  const recentHtml=recent.length?recent.map(({j,u})=>`<div class="rc-item" onclick="openJob('${j.id}')"><div class="rc-top"><span class="rc-job">${esc(j.jobName)}</span><span class="rc-date">${esc(fmtShort(u.date))}</span></div><div class="rc-text">${esc(u.text).replace(/\n/g,"<br>")}</div></div>`).join(""):`<div class="minimsg">No updates logged yet. Open a job and post an update — your latest notes show here so you can pick up where you left off.</div>`;
+  const recentHtml=recent.length?recent.map(({j,u})=>`<div class="rc-item" onclick="openJob('${j.id}')"><div class="rc-top"><span class="rc-job">${esc(jobLabel(j))}</span><span class="rc-date">${esc(fmtShort(u.date))}</span></div><div class="rc-text">${esc(u.text).replace(/\n/g,"<br>")}</div></div>`).join(""):`<div class="minimsg">No updates logged yet. Open a job and post an update — your latest notes show here so you can pick up where you left off.</div>`;
   const recentPanel=`<div class="panel"><h3>🕘 Recent updates</h3><div class="recent">${recentHtml}</div></div>`;
   // Pipeline by phase
   const max=Math.max(1,...PHASES.map(p=>jobs.filter(j=>j.phase===p).length));
@@ -3196,7 +3320,7 @@ function renderDashboard(c){
   // Next deadlines (quote deadlines, delivery dates, client follow-ups)
   const up=S.filter(x=>!isClosed(x.j)&&!x.s.paused&&(x.s.due||x.s.followUp)).sort((a,b)=>{const x=a.s.due||a.s.followUp,y=b.s.due||b.s.followUp;return x<y?-1:x>y?1:0;}).slice(0,8);
   const tag={quote:"Quote",delivery:"Delivery",followup:"Follow-up"};
-  const uphtml=up.length?up.map(({j,s})=>{const m=jobDueMeta(j);return `<div class="u"><span class="kindtag">${tag[s.kind]}</span><span class="nm" onclick="openJob('${j.id}')">${esc(j.jobName)}</span><span class="cl">${esc(fmtShort(s.due||s.followUp))}</span><span class="${m.cls}">${esc(m.txt)}</span></div>`;}).join(""):`<div style="color:var(--ink-soft);padding:8px 0">No upcoming deadlines.</div>`;
+  const uphtml=up.length?up.map(({j,s})=>{const m=jobDueMeta(j);return `<div class="u"><span class="kindtag">${tag[s.kind]}</span><span class="nm" onclick="openJob('${j.id}')">${esc(jobLabel(j))}</span><span class="cl">${esc(fmtShort(s.due||s.followUp))}</span><span class="${m.cls}">${esc(m.txt)}</span></div>`;}).join(""):`<div style="color:var(--ink-soft);padding:8px 0">No upcoming deadlines.</div>`;
   const duePanel=`<div class="panel"><h3>Next deadlines</h3><div class="upnext">${uphtml}</div></div>`;
   const qf=qcOpenFails();
   const qcNudge=qf?`<div class="kpi-sub warn" onclick="qcFilter='fail';go('qc')" style="border-left-color:var(--bad)"><span>✗</span> <b>${qf}</b> open QC fail${qf>1?"s":""} <span class="kpi-go">→</span></div>`:"";
@@ -3242,7 +3366,7 @@ function renderReminders(c){
 /* ============ SETTINGS ============ */
 function setTheme(t){document.documentElement.setAttribute("data-theme",t);try{localStorage.setItem(THEMEKEY,t);}catch(e){}if(typeof updThemeBtn==="function")updThemeBtn(t);if(current==="settings")render();}
 function pillRow(item,i,pfx){
-  const map={st:["setStatusColorAt","statuses","removeStatusAt"],pr:["setPriorityColorAt","priorities","removePriorityAt"],sg:["setStageColorAt","stages","removeStageAt"]};
+  const map={pr:["setPriorityColorAt","priorities","removePriorityAt"]};
   const [colFn,kind,rmFn]=map[pfx];
   const sw=COLOR_TOKENS.map(([t,l])=>`<button class="swatch ${item.tok===t?'on':''}" style="${tokStyle(t)}" title="${l}" onclick="${colFn}(${i},'${t}')"></button>`).join("");
   return `<div class="setrow"><span class="badge setpill" style="${tokStyle(item.tok)}">${esc(item.name)}</span><span class="swrow">${sw}</span><span class="spacer"></span><button class="icobtn" title="Move up" onclick="moveItemAt('${kind}',${i},-1)">↑</button><button class="icobtn" title="Move down" onclick="moveItemAt('${kind}',${i},1)">↓</button><button class="icobtn del" title="Remove" onclick="${rmFn}(${i})">🗑</button></div>`;
@@ -3253,7 +3377,7 @@ function renderSettings(c){
   renderSettingsRaw(c);
   const pick=t=>{t=t.toLowerCase();
     if(/workflow & deadlines|public holidays/.test(t))return "workflow";
-    if(/price-book categories|priorities|job stages|clients/.test(t))return "lists";
+    if(/price-book categories|priorities|clients/.test(t))return "lists";
     if(/qc detailed/.test(t))return "qc";
     if(/data & backup|desktop app/.test(t))return "data";
     return "general";};
@@ -3291,16 +3415,16 @@ function wfAdd(){uiAsk({title:"New template step",msg:"Step name (e.g. Load test
 function wfReset(){uiConfirm("Reset the workflow template to Protrac's default steps?",()=>{DB.meta.wfSteps=JSON.parse(JSON.stringify(WF_DEFAULT));save();render();},{ok:"Reset"});}
 function renderSettingsRaw(c){
   const meta=DB.meta||{};
-  const st=(meta.statuses||[]).map((s,i)=>pillRow(s,i,"st")).join("")||`<div class="minimsg">No statuses.</div>`;
   const pr=(meta.priorities||[]).map((p,i)=>pillRow(p,i,"pr")).join("")||`<div class="minimsg">No priorities.</div>`;
-  const sg=(meta.stages||[]).map((s,i)=>pillRow(s,i,"sg")).join("")||`<div class="minimsg">No stages.</div>`;
   const cl=(meta.clients||[]).map((name,i)=>`<div class="setrow"><span class="chip">${esc(name)}</span><span class="spacer"></span><button class="icobtn del" title="Remove" onclick="removeClientAt(${i})">🗑</button></div>`).join("")||`<div class="minimsg">No clients.</div>`;
   const colSel=id=>`<select id="${id}" class="colsel">${COLOR_TOKENS.map(([t,l])=>`<option value="${t}">${l}</option>`).join("")}</select>`;
   const theme=(document.documentElement.getAttribute("data-theme")||"light");
   c.innerHTML=`<div class="setgrid">
     <div class="panel"><h3>⏱️ Workflow &amp; deadlines</h3><div class="setnote">Every job runs through <b>RFQ → Quoted → PO → Procurement → Production → Delivered</b>. The <b>RFQ</b> clock runs to the client's response deadline and stops when the quote is submitted. <b>Quoted</b> jobs are never overdue — they flag "chase client" instead. From the <b>PO</b>, the due date is PO date + the max quoted lead time in working days. Holds pause the clock and push the due date out.</div>
       <div class="setrow"><span>Quotes are submitted to</span><span class="spacer"></span><input id="mgr-in" style="max-width:190px" value="${esc(managerLabel())}" onchange="setManagerLabel(this.value)"></div>
-      <div class="setrow"><span>Chase client for PO after (working days)</span><span class="spacer"></span><input id="fu-in" type="number" min="1" style="width:80px" value="${followUpDays()}" onchange="setFollowUpDays(this.value)"></div></div>
+      <div class="setrow"><span>Chase client for PO after (working days)</span><span class="spacer"></span><input id="fu-in" type="number" min="1" style="width:80px" value="${followUpDays()}" onchange="setFollowUpDays(this.value)"></div>
+      <div class="setrow"><span>Default client deadline for a new RFQ (working days)</span><span class="spacer"></span><input id="qd-in" type="number" min="1" style="width:80px" value="${quoteDays()}" onchange="DB.meta.quoteDays=Math.max(1,Math.round(+this.value||5));save();toast('New RFQs default to '+DB.meta.quoteDays+' working days')"></div>
+      <div class="setrow" style="align-items:flex-start"><span>Projects folder<br><small style="color:var(--ink-soft)">e.g. <span class="mono">P:\\Projects</span> — new jobs get their File location as this folder + “${esc(folderName({jobId:"006",client:"Client A — Oilfield Services",jobName:"Tank hatch cover"}))}”</small></span><span class="spacer"></span><input id="pp-in" style="max-width:240px" placeholder="P:\\Projects" value="${esc(DB.meta.projectsPath||"")}" onchange="DB.meta.projectsPath=this.value.trim();save();toast('Projects folder saved')"></div></div>
     <div class="panel"><h3>📅 Public holidays <small style="color:var(--ink-soft);text-transform:none;letter-spacing:0">(skipped when counting working days)</small></h3><div class="setnote">Pre-filled with T&amp;T fixed-date holidays plus Good Friday, Easter Monday and Corpus Christi (Sunday holidays move to Monday). <b>Add Eid-ul-Fitr and Divali each year</b> once the dates are gazetted.</div>
       <div class="setlist holist">${holidayRows()}</div>
       <div class="setadd"><input type="date" id="hol-date"><input id="hol-name" placeholder="Holiday name (e.g. Divali)" onkeydown="if(event.key==='Enter')addHoliday()"><button class="btn primary" onclick="addHoliday()">Add</button></div>
@@ -3315,8 +3439,6 @@ function renderSettingsRaw(c){
       <div class="setadd"><button class="btn" onclick="addPriceCat(()=>render())">+ Add category</button></div></div>
     <div class="panel"><h3>⚑ Priorities</h3><div class="setnote">Add or remove priority levels (e.g. Cancelled, Postponed) and set their colour.</div><div class="setlist">${pr}</div>
       <div class="setadd"><input id="pr-name" placeholder="New priority (e.g. Postponed)" onkeydown="if(event.key==='Enter')addPriority()">${colSel("pr-col")}<button class="btn primary" onclick="addPriority()">Add</button></div></div>
-    <div class="panel"><h3>🏭 Job stages</h3><div class="setnote">The physical pipeline a job moves through (Design → Approval → Fabrication → Sandblast → Paint → QC → Complete). This is separate from Phase (the commercial lifecycle), and drives the "where does each job stand" view.</div><div class="setlist">${sg}</div>
-      <div class="setadd"><input id="sg-name" placeholder="New stage" onkeydown="if(event.key==='Enter')addStage()">${colSel("sg-col")}<button class="btn primary" onclick="addStage()">Add</button></div></div>
     <div class="panel"><h3>🏢 Clients</h3><div class="setnote">Manage the client list used across jobs. You can also add a client on the fly from the job form.</div><div class="setlist">${cl}</div>
       <div class="setadd"><input id="cl-name" placeholder="New client name" onkeydown="if(event.key==='Enter')addClientS()"><button class="btn primary" onclick="addClientS()">Add</button></div></div>
     <div class="panel"><h3>🎨 Appearance</h3><div class="setrow"><span>Menu</span><span class="spacer"></span><button class="btn" onclick="toggleSide()">Collapse / expand side menu</button></div><div class="setrow"><span>Theme</span><span class="spacer"></span><button class="btn ${theme==='light'?'primary':''}" onclick="setTheme('light')">☀️ Light</button><button class="btn ${theme==='dark'?'primary':''}" onclick="setTheme('dark')">🌙 Dark</button></div></div>
@@ -3327,11 +3449,10 @@ function renderSettingsRaw(c){
       <div class="setrow"><span>Reload the demo data</span><span class="spacer"></span><button class="btn" onclick="clearAll()">↺ Demo data</button></div>
       <div class="setrow"><span>Start with an empty tracker</span><span class="spacer"></span><button class="btn danger" onclick="startEmpty()">🗑 Start empty</button></div>
       <div class="setrow"><span>Show the "How Protrac works" guide</span><span class="spacer"></span><button class="btn" onclick="DB.meta.hideGuide=false;save();go('dashboard')">Show</button></div></div>
-    <div class="panel"><h3>🖥️ Use as a desktop app</h3><div class="setinfo">
-      <p>This tracker already runs fully offline in your browser. To make it feel like a proper desktop app on your work laptop:</p>
-      <p><b>Chrome / Edge:</b> open this file, then the browser menu (⋮) → <b>Save and share</b> → <b>Install page as app</b> (Edge: <b>Apps → Install this site as an app</b>). You'll get a Protrac icon in your Start menu &amp; taskbar that opens in its own window — no address bar.</p>
-      <p>Keep <b>Protrac.html</b> inside your <b>Documents\\Tracker</b> folder so it stays put, and set that same folder as your save folder above.</p>
-      <p style="color:var(--ink-soft)">A true installable <i>.exe</i> (via Electron/Tauri) is possible later, but for a single-user offline tool this is simpler and there's nothing to maintain.</p>
+    <div class="panel"><h3>🖥️ Use it like an app</h3><div class="setinfo">
+      <p><b>Phone:</b> open Protrac in Chrome or Safari, then <b>Add to Home screen</b> (Chrome menu ⋮, or Safari's Share button). It opens full-screen like an app.</p>
+      <p><b>Windows desktop (Chrome / Edge):</b> browser menu ⋮ → <b>Cast, save and share</b> → <b>Install page as app</b> (Edge: <b>Apps → Install this site as an app</b>). You get a Protrac icon on the taskbar.</p>
+      <p style="color:var(--ink-soft)">Each device keeps its own data — use <b>Backup</b> / <b>Restore</b> to move it between them.</p>
     </div></div>
     <div class="panel wide"><h3>✅ QC detailed checks (optional, per stage)</h3><div class="setnote">Each job has four one-tap QC stages: Welding / Fabrication, Sandblasting, Painting and Final Inspection. If you want item-by-item checks too, they come from these lists — tap "Add standard checks" inside a stage on the job's QC tab.</div>
       <div class="tplgrid">${(meta.checklistTemplates||[]).map((t,i)=>`<div class="tplcard"><div class="tplhead"><b>${esc(t.type)}</b><span class="cnt">${t.items.length}</span><span class="spacer"></span><button class="icobtn del" title="Delete template" onclick="removeChecklistTypeAt(${i})">🗑</button></div><div class="tplitems">${t.items.map((it,ii)=>`<div class="tplitem"><span>${esc(it)}</span><button class="rem-x" title="Remove" onclick="removeChecklistItemAt(${i},${ii})">×</button></div>`).join("")||'<div class="minimsg">No items yet.</div>'}</div><div class="tpladd"><input id="ct-item-${i}" placeholder="Add check item…" onkeydown="if(event.key==='Enter')addChecklistItem(${i})"><button class="btn sm primary" onclick="addChecklistItem(${i})">Add</button></div></div>`).join("")||'<div class="minimsg">No templates yet.</div>'}</div>
@@ -3348,25 +3469,18 @@ function removeHoliday(d){DB.meta.holidays=(DB.meta.holidays||[]).filter(h=>h.da
 function addTTYear(){const y=parseInt((document.getElementById("hol-year")||{}).value,10);if(!(y>2000&&y<2100)){toast("Enter a valid year");return;}const have=new Set((DB.meta.holidays||[]).map(h=>h.date));const add=ttHolidays(y).filter(h=>!have.has(h.date));DB.meta.holidays=(DB.meta.holidays||[]).concat(add);save();render();toast(add.length+" holiday"+(add.length===1?"":"s")+" added for "+y+" — add Eid and Divali manually");}
 function setManagerLabel(v){DB.meta.managerLabel=(v||"").trim()||"Manager";save();toast("Quotes now go to “"+DB.meta.managerLabel+"”");}
 function setFollowUpDays(v){const n=Math.max(1,Math.round(+v||5));DB.meta.followUpDays=n;save();toast("Follow-up after "+n+" working days");}
-function addStatus(){const nm=(document.getElementById("st-name").value||"").trim();const tok=(document.getElementById("st-col")||{}).value||"idle";if(!nm)return;DB.meta.statuses=DB.meta.statuses||[];if(DB.meta.statuses.some(s=>s.name.toLowerCase()===nm.toLowerCase())){toast("That status already exists");return;}DB.meta.statuses.push({name:nm,tok});save();render();toast("Status “"+nm+"” added");}
-function removeStatusAt(i){const s=(DB.meta.statuses||[])[i];if(!s)return;const used=(DB.jobs||[]).filter(j=>j.status===s.name).length;uiConfirm(`Remove status “${s.name}”?`+(used?` ${used} job(s) use it — they keep the label but you won't be able to pick it again.`:""),()=>{DB.meta.statuses.splice(i,1);save();render();toast("Status removed");});}
-function setStatusColorAt(i,tok){if(DB.meta.statuses&&DB.meta.statuses[i]){DB.meta.statuses[i].tok=tok;save();render();}}
 function addPriority(){const nm=(document.getElementById("pr-name").value||"").trim();const tok=(document.getElementById("pr-col")||{}).value||"idle";if(!nm)return;DB.meta.priorities=DB.meta.priorities||[];if(DB.meta.priorities.some(p=>p.name.toLowerCase()===nm.toLowerCase())){toast("That priority already exists");return;}DB.meta.priorities.push({name:nm,tok});save();render();toast("Priority “"+nm+"” added");}
 function removePriorityAt(i){const p=(DB.meta.priorities||[])[i];if(!p)return;const used=(DB.jobs||[]).filter(j=>j.priority===p.name).length;uiConfirm(`Remove priority “${p.name}”?`+(used?` ${used} job(s) use it.`:""),()=>{DB.meta.priorities.splice(i,1);save();render();toast("Priority removed");});}
 function setPriorityColorAt(i,tok){if(DB.meta.priorities&&DB.meta.priorities[i]){DB.meta.priorities[i].tok=tok;save();render();}}
-function addStage(){const nm=(document.getElementById("sg-name").value||"").trim();const tok=(document.getElementById("sg-col")||{}).value||"idle";if(!nm)return;DB.meta.stages=DB.meta.stages||[];if(DB.meta.stages.some(s=>s.name.toLowerCase()===nm.toLowerCase())){toast("That stage already exists");return;}DB.meta.stages.push({name:nm,tok});save();render();toast("Stage “"+nm+"” added");}
-function removeStageAt(i){const s=(DB.meta.stages||[])[i];if(!s)return;const used=(DB.jobs||[]).filter(j=>j.stage===s.name).length;uiConfirm(`Remove stage “${s.name}”?`+(used?` ${used} job(s) use it — they keep the label but you won't be able to pick it again.`:""),()=>{DB.meta.stages.splice(i,1);save();render();toast("Stage removed");});}
-function setStageColorAt(i,tok){if(DB.meta.stages&&DB.meta.stages[i]){DB.meta.stages[i].tok=tok;save();render();}}
-function durationDays(a,b){if(!a||!b)return"";const d=daysBetween(a,b);if(d<0)return"";return d===0?"same day":d+" day"+(d===1?"":"s");}
-function jobNeedsChecklist(j){return !isClosed(j)&&(j.phase===PH.PROD||PROD_STAGES.includes(j.stage))&&qcSummary(j).done===0;}
-function applyTemplate(jobId){
-  const sel=document.getElementById("apply-tpl");if(!sel)return;
-  const type=sel.value;if(!type){toast("Pick a checklist type first");return;}
-  const tpl=(DB.meta.checklistTemplates||[]).find(t=>t.type===type);if(!tpl){toast("Template not found");return;}
-  const existing=new Set((DB.checklists||[]).filter(c=>c.jobRef===jobId).map(c=>((c.type||"")+"|"+(c.item||"")).toLowerCase()));
-  let added=0;
-  tpl.items.forEach(it=>{const key=(type+"|"+it).toLowerCase();if(!existing.has(key)){DB.checklists.push({id:uid(),item:it,jobRef:jobId,type,status:"Pending",inspector:"",startDate:"",date:"",signedBy:""});added++;}});
-  save();renderDetail();toast(added?`Added ${added} check${added>1?"s":""} from ${type}`:"Those checks are already on this job");
+function jobNeedsChecklist(j){const q=j.qc||{};return !isClosed(j)&&j.phase===PH.PROD&&!QC_STAGES.some(([k])=>q[k]&&q[k].s&&!q[k].auto);}
+/* QC stages the job's workflow leaves out are set to N/A once (tap again to clear; it won't come back) */
+function qcAutoNA(j){
+  if(!j.jobType)return;j.qc=j.qc||{};if(!j.qcAuto||typeof j.qcAuto!=="object")j.qcAuto={};
+  const out={weld:!j.optFab,blast:!j.optCoat,paint:!j.optCoat};
+  Object.keys(out).forEach(k=>{const r=j.qc[k];
+    if(out[k]){if(!j.qcAuto[k]){if(!(r&&r.s))j.qc[k]={s:"N/A",date:j.rfqDate||todayISO(),by:"auto",note:"Not in this job's scope",auto:true};j.qcAuto[k]=true;}}
+    else{if(r&&r.auto)j.qc[k]={s:"",date:"",by:"",note:""};if(j.qcAuto[k])delete j.qcAuto[k];}
+  });
 }
 function addChecklistType(){const nm=(document.getElementById("ct-name").value||"").trim();if(!nm)return;DB.meta.checklistTemplates=DB.meta.checklistTemplates||[];if(DB.meta.checklistTemplates.some(t=>t.type.toLowerCase()===nm.toLowerCase())){toast("That type already exists");return;}DB.meta.checklistTemplates.push({id:uid(),type:nm,items:[]});save();render();toast("Template “"+nm+"” added");}
 function removeChecklistTypeAt(i){const t=(DB.meta.checklistTemplates||[])[i];if(!t)return;uiConfirm(`Delete template “${t.type}” and its ${t.items.length} item(s)? Checklist items already added to jobs are not affected.`,()=>{DB.meta.checklistTemplates.splice(i,1);save();render();toast("Template deleted");});}
@@ -3377,59 +3491,6 @@ function addClientS(){const nm=(document.getElementById("cl-name").value||"").tr
 function removeClientAt(i){const name=(DB.meta.clients||[])[i];if(name==null)return;const used=(DB.jobs||[]).filter(j=>j.client===name).length;uiConfirm(`Remove client “${name}”?`+(used?` ${used} job(s) use it — they keep the label.`:""),()=>{DB.meta.clients.splice(i,1);save();render();toast("Client removed");});}
 
 /* ============ PROCUREMENT (RFQ) ============ */
-function renderProcurement(c){
-  const q=listQ.trim().toLowerCase();
-  let rfqs=(DB.procurement||[]).slice();
-  if(q)rfqs=rfqs.filter(r=>[r.rfqNumber,r.item,refName("jobs",r.jobRef),(r.suppliers||[]).map(s=>refName("suppliers",s.supplierRef)).join(" ")].join(" ").toLowerCase().includes(q));
-  const lines=allLines();
-  const awaiting=lines.filter(x=>x.s.status==="RFQ Sent");
-  const quoted=lines.filter(x=>x.s.status==="Quote Received");
-  const awarded=lines.filter(x=>x.s.awarded);
-  const cards=[["c-info",(DB.procurement||[]).length,"RFQs"],["c-warn",awaiting.length,"Awaiting quote"],["c-ok",quoted.length,"Quotes received"],["c-info",awarded.length,"Awarded lines"]].map(([cl,n,l])=>`<div class="statcard ${cl}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
-  const waits=awaiting.map(x=>({name:refName("suppliers",x.s.supplierRef)||"(no supplier)",item:x.r.item||x.r.rfqNumber||"RFQ",job:refName("jobs",x.r.jobRef),days:lineWait(x.s)||0})).sort((a,b)=>b.days-a.days);
-  const waitPanel=waits.length?`<div class="panel waitpanel"><h3>Awaiting quotes — longest first</h3><div class="waitlist">${waits.map(w=>`<div class="w"><span class="sup">${esc(w.name)}</span><span class="it">${esc(w.item)}${w.job?" · "+esc(w.job):""}</span><span class="dd ${w.days>7?'overdue':w.days>3?'duesoon':''}">${w.days}d</span></div>`).join("")}</div></div>`:"";
-  const list=rfqs.length?rfqs.map(rfqCard).join(""):`<div class="empty"><div class="big">📦</div>No RFQs yet. Click <b>+ Add</b> to raise one, then add the suppliers you sent it to.</div>`;
-  c.innerHTML=`<div class="cards">${cards}</div>${waitPanel}${list}`;
-}
-function rfqCard(rfq){
-  const job=rfq.jobRef?refName("jobs",rfq.jobRef):"";
-  const lines=rfq.suppliers||[];
-  const body=lines.length?lines.map(ln=>{
-    const wait=lineWait(ln);
-    const waitHtml=wait!=null?`<span class="${wait>7?'overdue':wait>3?'duesoon':''}">${wait}d</span>`:(ln.status==="Quote Received"?`<span style="color:var(--ok);font-weight:700">quoted ✓</span>`:(ln.status==="Will Not Supply"?`<span style="color:var(--bad)">declined</span>`:"—"));
-    const sel=`<select class="linesel" onchange="setLineStatus('${rfq.id}','${ln.id}',this.value)">${LINE_STATUS.map(o=>`<option ${ln.status===o?'selected':''}>${o}</option>`).join("")}</select>`;
-    return `<tr>
-      <td><b>${esc(refName("suppliers",ln.supplierRef))||'<span style="color:var(--ink-soft)">— none —</span>'}</b>${ln.notes?`<div style="font-size:11px;color:var(--ink-soft);margin-top:2px;white-space:pre-wrap">${esc(ln.notes)}</div>`:""}</td>
-      <td>${sel}</td>
-      <td class="cellmono">${ln.dateSent?fmtShort(ln.dateSent):"—"}</td>
-      <td>${waitHtml}</td>
-      <td class="cellmono">${ln.eta?fmtShort(ln.eta):"—"}</td>
-      <td style="text-align:center"><input class="awcb" type="checkbox" ${ln.awarded?"checked":""} onchange="toggleAwarded('${rfq.id}','${ln.id}',this.checked)" title="Awarded — taking items from this supplier"></td>
-      <td><div class="rowact"><button class="icobtn" title="Edit line" onclick="openLine('${rfq.id}','${ln.id}')">✏️</button><button class="icobtn del" title="Remove" onclick="delLine('${rfq.id}','${ln.id}')">🗑</button></div></td>
-    </tr>`;
-  }).join(""):`<tr><td colspan="7" style="padding:9px;color:var(--ink-soft)">No suppliers yet — add the suppliers you sent this RFQ to.</td></tr>`;
-  return `<div class="rfqcard">
-    <div class="rfqhead">
-      <div class="rfqtitle">${rfq.rfqNumber?`<span class="rfqnum">${esc(rfq.rfqNumber)}</span>`:""}<span class="rfqitem">${esc(rfq.item||"(items not specified)")}</span></div>
-      <div class="rfqmeta">${job?`<span class="chip">📋 ${esc(job)}</span>`:""}${(rfq.qtyRequested||rfq.qtyRequested===0)&&rfq.qtyRequested!==""?`<span class="chip">Qty ${esc(rfq.qtyRequested)}</span>`:""}${rfq.date?`<span class="chip">📅 ${esc(fmtShort(rfq.date))}</span>`:""}</div>
-      <div class="rfqacts"><button class="btn sm" onclick="showRfqText('${rfq.id}')">✉️ RFQ text</button><button class="btn sm" onclick="openForm('${rfq.id}','procurement')">Edit</button><button class="icobtn del" title="Delete RFQ" onclick="del('${rfq.id}','procurement')">🗑</button></div>
-    </div>
-    ${(rfq.materialRefs||[]).length?`<div class="rfqnotes">🔩 ${rfq.materialRefs.length} material line${rfq.materialRefs.length>1?"s":""} linked — setting a supplier to Ordered / Received updates them.</div>`:""}${rfq.notes?`<div class="rfqnotes">${esc(rfq.notes)}</div>`:""}
-    <table class="rfqtable"><thead><tr><th>Supplier</th><th>Status</th><th>Sent</th><th>Waiting</th><th>ETA</th><th>Awarded</th><th></th></tr></thead><tbody>${body}</tbody></table>
-    <button class="miniadd" onclick="openLine('${rfq.id}')">+ Add supplier to this RFQ</button>
-  </div>`;
-}
-function setLineStatus(rfqId,lineId,val){const r=DB.procurement.find(x=>x.id===rfqId);const ln=r.suppliers.find(s=>s.id===lineId);if(!ln)return;ln.status=val;if(val==="Ordered"||val==="Received")ln.awarded=true;save();rerender();
-  const mats=(r.materialRefs||[]).map(id=>(DB.materials||[]).find(m=>m.id===id)).filter(Boolean);
-  if((val==="Ordered"||val==="Received")&&mats.length){
-    const sup=refName("suppliers",ln.supplierRef)||"this supplier";
-    uiConfirm(`Mark the ${mats.length} material line${mats.length>1?"s":""} on this RFQ as ${val.toLowerCase()} from ${sup}?`,()=>{
-      mats.forEach(m=>{const q=+m.qtyReq||0;m.supplierRef=ln.supplierRef;if(val==="Ordered")m.qtyOrdered=Math.max(+m.qtyOrdered||0,q);else{m.qtyOrdered=Math.max(+m.qtyOrdered||0,q);m.qtyReceived=q;}});
-      save();rerender();toast("Materials updated");
-    },{ok:"Yes, update",danger:false});
-  }
-}
-function toggleAwarded(rfqId,lineId,val){const r=DB.procurement.find(x=>x.id===rfqId);const ln=r.suppliers.find(s=>s.id===lineId);if(!ln)return;ln.awarded=val;save();rerender();}
 function delLine(rfqId,lineId){const r=DB.procurement.find(x=>x.id===rfqId);const ln=r.suppliers.find(s=>s.id===lineId);uiConfirm(`Remove ${refName("suppliers",ln.supplierRef)||"this supplier"} from the RFQ?`,()=>{r.suppliers=r.suppliers.filter(s=>s.id!==lineId);save();rerender();toast("Removed");});}
 function openLine(rfqId,lineId){
   formMode="line"; lineCtx={rfqId,lineId:lineId||null};
@@ -3460,88 +3521,67 @@ function saveLine(){
 /* ============ JOB DETAIL ============ */
 function openJob(id,tab){ setTimeout(pageAnim,0); matSel=new Set(); detailJob=id; detailTab=tab||"overview"; renderDetail(); buildNav(); }
 function setDetailTab(t){ detailTab=t; renderDetail(); }
+const TAB_ALIAS={updates:"overview",procurement:"materials"};
 function renderDetail(){
   const j=(DB.jobs||[]).find(x=>x.id===detailJob);
   if(!j){go("jobs");return;}
-  document.getElementById("viewtitle").textContent=j.jobName;
+  detailTab=TAB_ALIAS[detailTab]||detailTab;
+  document.getElementById("viewtitle").textContent=jobLabel(j);
   document.getElementById("viewtabs").innerHTML="";
   document.getElementById("addbtn").style.display="none";
   document.getElementById("csvbtn").style.display="none";
   document.getElementById("searchwrap").style.display="none";
-  const m=jobDueMeta(j);
-  const oh=openHold(j);
+  const m=jobDueMeta(j),oh=openHold(j),step=currentStep(j),pct=jobPct(j);
   const meta=`<span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase||"—")}</span>
     ${oh?`<span class="badge b-hold">⏸ On hold</span>`:""}
-    ${j.stage?`<span class="badge" style="${tokStyle(stageTok(j.stage))}">${esc(j.stage)}</span>`:""}
     ${j.priority?`<span class="badge" style="${tokStyle(priTok(j.priority))}">${esc(j.priority)}</span>`:""}
     ${j.client?`<span class="chip">${esc(j.client)}</span>`:""}
-    ${j.jobId?`<span class="chip">Job ID ${esc(j.jobId)}</span>`:""}
     <span class="${m.cls}">📅 ${esc(m.txt)}</span>${m.s.target&&!m.s.paused?`<span class="chip">🎯 target ${esc(fmtShort(m.s.target))}</span>`:""}
+    ${step?`<span class="chip nextchip" title="Next open step on the schedule">▸ Next: ${esc(step)}</span>`:""}
     ${j.fileLocation?`<button class="chipbtn" onclick="openJobFile('${j.id}')">📁 Open file</button>`:""}
-    ${j.materialListLoc?`<button class="chipbtn" onclick="openMatList('${j.id}')">📋 Material list</button>`:""}`;
+    ${j.materialListLoc?`<button class="chipbtn" onclick="openMatList('${j.id}')">📋 Material list</button>`:""}
+    <button class="chipbtn" title="Copy “${esc(folderName(j))}” for the job folder" onclick="copyFolderName('${j.id}')">⧉ Copy folder name</button>`;
   const head=`<button class="backbtn" onclick="go('jobs')">← Back to Jobs</button>
     <div class="dhead">
-      <div class="dtoprow"><div class="dt">${esc(j.jobName)}</div><button class="btn sm" onclick="openForm('${j.id}','jobs')">Edit job</button></div>
+      <div class="dtoprow"><div class="dt">${esc(jobLabel(j))}</div><button class="btn sm" onclick="openForm('${j.id}','jobs')">Edit job</button></div>
       <div class="dmeta">${meta}</div>
       ${phaseStepper(j)}
-      <div class="phacts">${phaseActions(j)}${isClosed(j)?"":`<button class="btn sm" onclick="toggleHold('${j.id}')">${oh?"▶ Resume (restart clock)":"⏸ Put on hold"}</button>`}</div>
+      <div class="phacts">${phaseActions(j)}${isClosed(j)?"":`<button class="btn sm" onclick="toggleHold('${j.id}')">${oh?"▶ Resume (restart clock)":"⏸ Put on hold"}</button>`}${undoRedoBtns(j)}</div>
       ${oh?`<div class="holdbanner">⏸ <b>On hold</b> since ${esc(fmtShort(oh.start))} — ${holdDays(oh)} working day${holdDays(oh)===1?"":"s"} so far${oh.reason?" · "+esc(oh.reason):""}. The clock is paused and the due date moves out by every working day held.</div>`:""}
-      <div class="dprog"><span>Progress</span><span class="track"><span class="f" style="width:${Math.min(100,Math.max(0,+j.percent||0))}%"></span></span><span>${(+j.percent||0)}%</span></div>
+      <div class="dprog" title="Share of schedule steps done"><span>Progress</span><span class="track"><span class="f" style="width:${pct}%"></span></span><span>${pct}%</span></div>
     </div>`;
 
   const ups=(j.updates||[]).map((u,i)=>({u,i})).sort((a,b)=>{const d=(b.u.date||"").localeCompare(a.u.date||"");if(d)return d;return ((b.u.ts||0)-(a.u.ts||0))||(b.i-a.i);}).map(x=>x.u);
   const tops=topTasks(j.id);
   const procRfqs=(DB.procurement||[]).filter(r=>r.jobRef===j.id);
   const matRows=(DB.materials||[]).filter(x=>x.jobRef===j.id);
-  const chkRows=(DB.checklists||[]).filter(x=>x.jobRef===j.id);
-  const chkDone=chkRows.filter(r=>r.status==="Pass"||r.status==="N/A").length;
-  const presetJob=JSON.stringify({jobRef:j.id});
-  const sf=SCHEMA.jobs.fields;
-  const factCell=k=>quickCell(sf.find(f=>f.k===k),j,"jobs");
 
-  const overview=`<div class="ovgrid">
-      <div class="ovfact"><label>Client</label><div>${j.client?esc(j.client):"—"}</div></div>
-      <div class="ovfact"><label>Stage</label><div>${factCell("stage")}</div></div>
-      <div class="ovfact"><label>Phase</label><div>${factCell("phase")}</div></div>
-      <div class="ovfact"><label>Priority</label><div>${factCell("priority")}</div></div>
-      <div class="ovfact"><label>${esc(m.s.label||"Status")}</label><div class="${m.cls}">${esc(m.txt)}${m.s.due?`<div style="font-size:11.5px;color:var(--ink-soft);font-weight:500">${esc(fmtDate(m.s.due))}${m.s.ext?" (+"+m.s.ext+" wd held)":""}</div>`:""}</div></div>
-      ${m.s.target?`<div class="ovfact"><label>Target (min lead)</label><div>${esc(fmtDate(m.s.target))}</div></div>`:""}
-    </div>
-    <div class="ovbars"><div class="dprog wide"><span>Progress</span><span class="track"><span class="f" style="width:${Math.min(100,Math.max(0,+j.percent||0))}%"></span></span><span>${(+j.percent||0)}%</span></div></div>
-    ${jobNeedsChecklist(j)?`<div class="nudge click" onclick="setDetailTab('checklist')">⚠️ This job is in production but no QC is recorded yet — tap to record it.</div>`:""}
-    ${procReadyNudge(j)}
-    <div class="ovcounts">
-      <button class="ovcount" onclick="setDetailTab('checklist')"><b>${qcSummary(j).done}/4${qcSummary(j).fail?` <span style="color:var(--bad)">· ${qcSummary(j).fail}✗</span>`:""}</b><span>QC stages</span></button>
-      <button class="ovcount" onclick="setDetailTab('schedule')"><b>${tops.length}</b><span>Tasks</span></button>
-      <button class="ovcount" onclick="setDetailTab('materials')"><b>${matRows.length}</b><span>Materials</span></button>
-      <button class="ovcount" onclick="setDetailTab('procurement')"><b>${procRfqs.length}</b><span>Supplier RFQs</span></button>
-    </div>
-    ${jobTimeline(j)}
-    ${j.notes?`<div class="dsection"><h3><span class="ic">🗒️</span> Notes</h3><div class="dnotes">${esc(j.notes).replace(/\n/g,"<br>")}</div></div>`:""}
-    <div class="dsection"><h3><span class="ic">📝</span> Latest updates <button class="btn sm" onclick="setDetailTab('updates')">View all</button></h3>
-      ${ups.length?ups.slice(0,3).map(u=>`<div class="upditem"><span class="ud">${esc(fmtShort(u.date))}</span><span class="ut">${esc(u.text)}</span></div>`).join(""):`<div class="minimsg">No updates yet.</div>`}</div>`;
-
-  const upHtml=ups.length?ups.map(u=>`<div class="upditem"><span class="ud">${esc(fmtShort(u.date))}</span><span class="ut">${esc(u.text)}</span><button class="ux" title="Delete" onclick="delUpdate('${j.id}','${u.id}')">×</button></div>`).join(""):`<div class="minimsg">No updates yet. Add the first one above.</div>`;
-  const updates=`<div class="dsection"><h3><span class="ic">📝</span> Updates log</h3>
+  const upRow=u=>`<div class="upditem"><span class="ud">${esc(fmtShort(u.date))}</span><span class="ut">${esc(u.text)}</span><button class="ux" title="Delete" onclick="delUpdate('${j.id}','${u.id}')">×</button></div>`;
+  const updates=`<div class="dsection"><h3><span class="ic">📝</span> Updates <span class="chkprog">${ups.length}</span></h3>
     <div class="updbox"><textarea id="updtext" placeholder="Type an update… (e.g. Sent follow-up RFQ to Supplier A)"></textarea><button class="btn primary" onclick="postUpdate('${j.id}')">Post</button></div>
-    <div class="updlist">${upHtml}</div></div>`;
+    <div class="updlist">${ups.length?ups.slice(0,5).map(upRow).join(""):`<div class="minimsg">No updates yet. Add the first one above.</div>`}
+    ${ups.length>5?`<details class="olderups"><summary>Show ${ups.length-5} older update${ups.length-5>1?"s":""}</summary>${ups.slice(5).map(upRow).join("")}</details>`:""}</div></div>`;
+  const overview=`${jobNeedsChecklist(j)?`<div class="nudge click" onclick="setDetailTab('checklist')">⚠️ This job is in production but no QC is recorded yet — tap to record it.</div>`:""}
+    ${procReadyNudge(j)}
+    ${updates}
+    ${jobTimeline(j)}
+    ${j.notes?`<div class="dsection"><h3><span class="ic">🗒️</span> Notes</h3><div class="dnotes">${esc(j.notes).replace(/\n/g,"<br>")}</div></div>`:""}`;
 
   const legacyTops=tops.filter(t=>!t.stepKey);
   let tree=legacyTops.length?`<div class="tasktree">`+legacyTops.map(t=>{
-    const pct=taskPct(t),kids=taskKids(t.id);
-    return taskNode(t,false,pct)+kids.map(s=>taskNode(s,true,+s.percent||0)).join("")+`<button class="miniadd sub" onclick="addSubtask('${j.id}','${t.id}')">+ Add subtask under “${esc(t.taskName.slice(0,26))}”</button>`;
+    const tp=taskPct(t),kids=taskKids(t.id);
+    return taskNode(t,false,tp)+kids.map(s=>taskNode(s,true,+s.percent||0)).join("")+`<button class="miniadd sub" onclick="addSubtask('${j.id}','${t.id}')">+ Add subtask under “${esc(t.taskName.slice(0,26))}”</button>`;
   }).join("")+`</div>`:`<div class="minimsg">No tasks yet for this job.</div>`;
   const miniGantt=ganttSVG(j.id,{labelW:230});
   const schedule=renderWorkflow(j,tree,miniGantt);
 
-  const procurement=`<div class="dsection"><h3><span class="ic">📦</span> Procurement / RFQs <button class="btn sm add" onclick="setDetailTab('materials')">+ RFQ from material lines</button></h3>${procRfqs.length?procRfqs.map(r=>rfqCard2(r,true)).join(""):`<div class="minimsg">No RFQs for this job yet.</div>`}</div>`;
-
-  const materials=renderJobMaterials(j);
+  const rfqs=`<div class="dsection"><h3><span class="ic">📦</span> Supplier RFQs <span class="chkprog">${procRfqs.length}</span></h3>${procRfqs.length?procRfqs.map(r=>rfqCard2(r,true)).join(""):`<div class="minimsg">No supplier RFQs yet — tick material lines above and tap <b>Send supplier RFQ</b>.</div>`}</div>`;
+  const materials=renderJobMaterials(j)+(matGrid&&matGrid.jobId===j.id?"":rfqs);
   const checklist=renderJobQC(j);
-  const sections={overview,checklist,schedule,materials,procurement,updates};
-  const tabs=[["overview","Overview","📋",0],["updates","Updates","📝",ups.length],["schedule","Schedule","🗓️",schedCount(j)],["procurement","Procurement","📦",procRfqs.length],["materials","Materials","🔩",matRows.length],["checklist","QC","✅",qcSummary(j).done]];
+  const sections={overview,schedule,materials,checklist};
+  const tabs=[["overview","Overview","📋",0],["schedule","Schedule","🗓️",schedCount(j)],["materials","Materials","🔩",matRows.length],["checklist","QC","✅",qcSummary(j).done]];
   if(!sections[detailTab])detailTab="overview";
-  const tabbar=`<div class="jtabs">`+tabs.map(([id,label,ic,cnt])=>`<button class="${detailTab===id?'active':''}" onclick="setDetailTab('${id}')">${ic} ${label}${cnt?`<span class="tabcnt">${cnt}</span>`:""}</button>`).join("")+`</div>`;
+  const tabbar=`<div class="jtabs">`+tabs.map(([id,label,ic,cnt])=>`<button class="${detailTab===id?'active':''}" onclick="setDetailTab('${id}')"><span class="tic">${ic}</span> ${label}${cnt?`<span class="tabcnt">${cnt}</span>`:""}</button>`).join("")+`</div>`;
 
   document.getElementById("content").innerHTML=head+tabbar+`<div class="jbody">${sections[detailTab]}</div>`;
 }
@@ -3581,48 +3621,6 @@ function copyText(t,msg){ if(navigator.clipboard&&navigator.clipboard.writeText)
 function fallbackCopy(t,msg){ try{const ta=document.createElement("textarea");ta.value=t;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();document.execCommand("copy");document.body.removeChild(ta);toast(msg);}catch(e){toast("Path: "+t);} }
 
 /* ============ MATERIAL CSV IMPORT ============ */
-function triggerMatCSV(jobId){
-  const inp=document.getElementById("matcsv");
-  inp.onchange=e=>importMaterialsCSV(e,jobId);
-  inp.value=""; inp.click();
-}
-function parseCSV(text){
-  const rows=[];let i=0,field="",row=[],inQ=false;
-  text=text.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
-  while(i<text.length){
-    const ch=text[i];
-    if(inQ){ if(ch==='"'){ if(text[i+1]==='"'){field+='"';i+=2;continue;} inQ=false;i++;continue;} field+=ch;i++;continue; }
-    if(ch==='"'){inQ=true;i++;continue;}
-    if(ch===","){row.push(field);field="";i++;continue;}
-    if(ch==="\n"){row.push(field);rows.push(row);row=[];field="";i++;continue;}
-    field+=ch;i++;
-  }
-  if(field.length||row.length){row.push(field);rows.push(row);}
-  return rows.filter(r=>r.some(c=>c.trim()!==""));
-}
-function importMaterialsCSV(e,jobId){
-  const file=e.target.files[0];if(!file)return;
-  const rd=new FileReader();
-  rd.onload=()=>{
-    try{
-      const rows=parseCSV(rd.result);
-      if(rows.length<2){toast("CSV needs a header row plus at least one data row");return;}
-      const hdr=rows[0].map(h=>h.trim().toLowerCase());
-      const find=(...names)=>{for(const n of names){const idx=hdr.indexOf(n);if(idx>=0)return idx;}return -1;};
-      const ci={id:find("material id","mat id","id","item no","item #","item"),desc:find("description","desc","material","material description"),qty:find("qty on hand","quantity on hand","qty","quantity"),thk:find("thickness","thk"),len:find("length","len")};
-      let n=0;
-      rows.slice(1).forEach(r=>{
-        const get=k=>ci[k]>=0?(r[ci[k]]||"").trim():"";
-        const id=get("id"),desc=get("desc");
-        if(!id&&!desc)return;
-        DB.materials.push({id:uid(),materialId:id,description:desc,thickness:Number(get("thk"))||0,length:Number(get("len"))||0,qtyOnHand:Number(get("qty"))||0,receivedFromRef:"",mtr:false,jobRef:jobId,jobDone:false});
-        n++;
-      });
-      save();renderDetail();buildNav();toast(n+" material"+(n===1?"":"s")+" imported");
-    }catch(err){toast("Could not read that CSV file");}
-  };
-  rd.readAsText(file);
-}
 
 /* ============ FORM ============ */
 let formPreset=null;
@@ -3631,7 +3629,8 @@ function openForm(id,table,preset){
   formMode="record";{const sb=document.getElementById("mainsave");if(sb)sb.textContent="Save";}document.getElementById("mainmodal").className="modal";{const ft=document.querySelector("#mainmodal footer");if(ft)ft.style.display="";} formTable=table||current; editingId=id||null;
   const sch=SCHEMA[formTable];
   let rec=id?DB[formTable].find(r=>r.id===id):Object.assign({},preset||{});
-  if(!id&&formTable==="jobs")rec=Object.assign({phase:PH.RFQ,rfqDate:todayISO(),leadUnit:"working days",jobType:"Build to client drawing"},JOB_TYPES["Build to client drawing"],rec);
+  if(!id&&formTable==="jobs"){const jt=JOB_TYPES[DB.meta.lastJobType]?DB.meta.lastJobType:"Build to client drawing";const cl=(DB.meta.clients||[]).includes(DB.meta.lastClient)?DB.meta.lastClient:"";
+    rec=Object.assign({phase:PH.RFQ,rfqDate:todayISO(),rfqDueDate:addWorkingDays(todayISO(),quoteDays()),leadUnit:"working days",jobType:jt,client:cl,priority:"Medium",jobId:nextJobNo()},JOB_TYPES[jt],rec);}
   document.getElementById("mtitle").textContent=(id?"Edit ":"Add ")+sch.label.replace(/s$/,"");
   if(formTable==="materials"){
     const ess=["jobRef","description","size","grade","qtyReq","unit","notes"];
@@ -3642,10 +3641,65 @@ function openForm(id,table,preset){
       +`<details class="more" ${hasMore?"open":""}><summary>Ordering, receiving &amp; price (optional — the Purchasing buttons fill these in)</summary><div class="moregrid">${more.map(f=>fieldHTML(f,rec)).join("")}</div></details>`;
     ["description","size","grade"].forEach(k=>{const el=document.querySelector(`#mbody [data-k="${k}"]`);if(el)el.oninput=formPriceHint;});
     formPriceHint();
-  } else document.getElementById("mbody").innerHTML=sch.fields.map(f=>fieldHTML(f,rec)).join("");
-  if(formTable==="jobs"){const jt=document.querySelector('#mbody [data-k="jobType"]');if(jt)jt.onchange=()=>{const p=JOB_TYPES[jt.value];if(!p)return;Object.keys(p).forEach(k=>{const el=document.querySelector(`#mbody [data-k="${k}"]`);if(el)el.checked=!!p[k];});};document.querySelectorAll('#mbody [data-k^="opt"]').forEach(el=>{const f=el.closest(".field");if(f)f.classList.add("optfield");});}
+  } else if(formTable==="jobs"){document.getElementById("mbody").innerHTML=jobFormHTML(rec,!id);wireJobForm();}
+  else document.getElementById("mbody").innerHTML=sch.fields.map(f=>fieldHTML(f,rec)).join("");
   document.getElementById("scrim").classList.add("show");
   const first=document.querySelector(formTable==="materials"&&rec.jobRef?'#mbody [data-k="description"]':"#mbody [data-k]");if(first&&first.focus)setTimeout(()=>first.focus(),30);
+}
+/* ---- Job form: 5 fields for a new job, everything else under "More" ---- */
+function quoteDays(){return (DB.meta&&+DB.meta.quoteDays>0)?+DB.meta.quoteDays:5;}
+const OPT_LABEL={optSite:"Site visit",optConcept:"Concept design",optFab:"Fabrication / welding",optCoat:"Blast & coating",optAssembly:"Assembly / fit-out"};
+function jobTypeHTML(rec){
+  const jt=rec.jobType||"";
+  return `<div class="field full"><label>Job type</label><input type="hidden" data-k="jobType" value="${esc(jt)}"><div class="segbtns">${Object.keys(JOB_TYPES).map(t=>`<button type="button" class="segbtn ${jt===t?"on":""}" data-jt="${esc(t)}" onclick="pickJobType(this.dataset.jt)">${esc(t)}</button>`).join("")}</div></div>`;
+}
+function optsHTML(rec){return `<div class="field full"><label>Workflow options <span class="lblnote">— the job type ticks these; change them per job</span></label><div class="optchks">${Object.keys(OPT_LABEL).map(k=>`<label class="optchk"><input type="checkbox" data-k="${k}" ${rec[k]?"checked":""}><span>${OPT_LABEL[k]}</span></label>`).join("")}</div></div>`;}
+function jobFormHTML(rec,isNew){
+  const F=k=>SCHEMA.jobs.fields.find(f=>f.k===k),fh=k=>fieldHTML(F(k),rec);
+  const dl=rec.rfqDueDate||rfqBaseDue(rec)||"";
+  const qd=isNew?quoteDays():0;
+  const deadline=`<div class="field"><label>Client's deadline</label><input type="date" data-k="rfqDueDate" value="${esc(dl)}"><div class="qchips">${[3,5,10].map(n=>`<button type="button" class="qchip ${n===qd?"on":""}" data-n="${n}" onclick="pickDeadline(${n})">${n} wd</button>`).join("")}</div></div>`;
+  let html=fh("jobName")+fh("client")+jobTypeHTML(rec)+fh("rfqDate")+deadline;
+  if(!isNew){
+    if(reached(rec,PH.QUOTED))html+=`<div class="fhead">Quotation</div>`+fh("quoteSentDate")+fh("followUpDate");
+    if(reached(rec,PH.PO))html+=`<div class="fhead">Purchase order &amp; lead time</div>`+["poNumber","poDate","leadMin","leadMax","leadUnit","dueOverride"].map(fh).join("");
+    if(rec.phase===PH.DONE)html+=fh("deliveredDate");
+  }
+  const fp=folderPath(rec);
+  const start=isNew?`<div class="field full"><label>Already past RFQ? Start at phase…</label><select data-k="_startPhase"><option value="">RFQ Received (new enquiry)</option>${[PH.QUOTED,PH.PO,PH.PROC,PH.PROD].map(p=>`<option>${esc(p)}</option>`).join("")}</select><div class="lblnote">For a job that's already moving — the next dialog asks for its dates.</div></div>`:"";
+  const more=fh("jobId")+fh("priority")+optsHTML(rec)
+    +`<div class="field full"><label>File location (folder or link)</label><input type="text" data-k="fileLocation" value="${esc(rec.fileLocation||"")}" placeholder="${esc(fp?fp+"  (filled in for you)":"Set your Projects folder in Settings to fill this in")}"></div>`
+    +fh("materialListLoc")+fh("notes")+start;
+  html+=`<details class="more full"><summary>More — job no., priority, workflow options, files, notes${isNew?", starting phase":""}</summary><div class="moregrid">${more}</div></details>`;
+  return html;
+}
+function wireJobForm(){
+  const rd=document.querySelector('#mbody [data-k="rfqDate"]');
+  if(rd)rd.onchange=()=>{const on=document.querySelector("#mbody .qchip.on");if(on)pickDeadline(+on.dataset.n);};
+  const dd=document.querySelector('#mbody [data-k="rfqDueDate"]');
+  if(dd)dd.oninput=()=>document.querySelectorAll("#mbody .qchip").forEach(b=>b.classList.remove("on"));
+}
+function pickJobType(t){
+  const p=JOB_TYPES[t];if(!p)return;
+  const h=document.querySelector('#mbody [data-k="jobType"]');if(h)h.value=t;
+  document.querySelectorAll("#mbody .segbtn").forEach(b=>b.classList.toggle("on",b.dataset.jt===t));
+  Object.keys(p).forEach(k=>{const el=document.querySelector(`#mbody [data-k="${k}"]`);if(el)el.checked=!!p[k];});
+}
+function pickDeadline(n){
+  const rd=document.querySelector('#mbody [data-k="rfqDate"]'),dd=document.querySelector('#mbody [data-k="rfqDueDate"]');if(!dd)return;
+  dd.value=addWorkingDays((rd&&rd.value)||todayISO(),n);
+  document.querySelectorAll("#mbody .qchip").forEach(b=>b.classList.toggle("on",+b.dataset.n===n));
+}
+/* Schedule tab → "Workflow options": job type + the five options only; the schedule rebuilds itself */
+function openWfOpts(jobId){
+  const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;
+  formMode="wfopts";editingId=jobId;
+  openModal("Workflow options — "+jobLabel(j),jobTypeHTML(j)+optsHTML(j)+`<div class="hint full">Saving rebuilds the schedule. Steps you've ticked keep their dates, and dates you've edited by hand are kept.</div>`,{ok:"Save & rebuild"});
+}
+function saveWfOpts(){
+  const j=(DB.jobs||[]).find(x=>x.id===editingId);if(!j){closeForm();return;}
+  document.querySelectorAll("#mbody [data-k]").forEach(el=>{const k=el.dataset.k;j[k]=el.type==="checkbox"?el.checked:el.value;});
+  buildSchedule(j,true);save();closeForm();rerender();toast("Workflow saved — schedule rebuilt");
 }
 function fieldHTML(f,rec){
   if(f.t==="heading")return `<div class="fhead">${esc(f.l)}</div>`;
@@ -3694,15 +3748,18 @@ function saveForm(){
   if(formMode==="quote2")return saveQuote2();
   if(formMode==="compare")return saveCompare();
   if(formMode==="supitem")return saveSupItem();
+  if(formMode==="wfopts")return saveWfOpts();
   if(formMode==="eta"){const m=DB.materials.find(x=>x.id===purCtx.id);document.querySelectorAll("#mbody [data-k]").forEach(el=>{m[el.dataset.k]=el.value;});save();closeForm();rerender();toast("Saved");return;}
   if(formMode==="import"||formMode==="match"||formMode==="view"){closeForm();return;}
   const sch=SCHEMA[formTable],rec=editingId?DB[formTable].find(r=>r.id===editingId):{id:uid()};
   const oldPhase=editingId?rec.phase:null,wasEditing=!!editingId,oldWf=editingId&&formTable==="jobs"?wfSig(rec):"";
   if(formTable==="tasks")_taskWas={s:rec.startDate,e:rec.endDate};
   _supWas=formTable==="suppliers"&&editingId?rec.company:"";
-  let firstReq=null;
+  let firstReq=null;const fx={};
+  const oldRec=formTable==="materials"&&editingId?{q:rec.qtyReceived}:null;
   document.querySelectorAll("#mbody [data-k]").forEach(el=>{
     const k=el.dataset.k,f=sch.fields.find(x=>x.k===k);
+    if(!f){fx[k]=el.value;return;}
     if(el.dataset.mset)rec[k]=Array.from(el.querySelectorAll("input:checked")).map(i=>i.value);
     else if(el.type==="checkbox")rec[k]=el.checked;
     else if(f.t==="number")rec[k]=el.value===""?"":Number(el.value);
@@ -3714,21 +3771,29 @@ function saveForm(){
   if(formTable==="jobs"){
     if(!Array.isArray(rec.updates))rec.updates=[];if(rec.materialListLoc===undefined)rec.materialListLoc="";
     if(!Array.isArray(rec.holds))rec.holds=[];if(!Array.isArray(rec.phaseLog))rec.phaseLog=[];
-    const np=rec.phase||PH.RFQ;
-    if(!editingId){rec.phase=np;rec.phaseLog.push({phase:np,from:"",date:rec.rfqDate||todayISO(),ts:Date.now()});}
-    else if(np!==oldPhase){rec.phase=oldPhase;setPhase(rec,np);}
+    if(!editingId){rec.phase=PH.RFQ;rec.phaseLog.push({phase:PH.RFQ,from:"",date:rec.rfqDate||todayISO(),ts:Date.now()});
+      if(!Array.isArray(rec.phaseRedo))rec.phaseRedo=[];if(!rec.qcAuto)rec.qcAuto={};
+      DB.meta.lastClient=rec.client||"";DB.meta.lastJobType=rec.jobType||"";}
+    rec.rfqDays="";   // the deadline date is the one source of truth (it was pre-filled from any old "within N days")
+    if(!rec.fileLocation&&!wasEditing)rec.fileLocation=folderPath(rec);
   }
   if(formTable==="procurement"&&!Array.isArray(rec.suppliers))rec.suppliers=[];
   if(formTable==="suppliers"&&wasEditing&&_supWas&&_supWas!==rec.company){(DB.priceQuotes||[]).forEach(q=>{if((q.supplier||"").toLowerCase()===_supWas.toLowerCase())q.supplier=rec.company;});}
   if(formTable==="tasks"){if(editingId&&(rec.startDate!==_taskWas.s||rec.endDate!==_taskWas.e))rec.manualDates=true;if(rec.doneDate&&rec.status!=="Done"){rec.status="Done";rec.percent=100;}if(rec.status==="Done"&&!rec.doneDate)rec.doneDate=todayISO();if(rec.status!=="Done"&&!rec.auto)rec.doneDate="";if(!rec.auto)rec.inferred=false;}
-  if(formTable==="materials"){if(rec.qtyOrdered==="")rec.qtyOrdered=0;if(rec.qtyReceived==="")rec.qtyReceived=0;if(!editingId&&!rec.priceItemRef)autoPriceMaterials([rec]);}
+  if(formTable==="materials"){if(rec.qtyOrdered==="")rec.qtyOrdered=0;if(rec.qtyReceived==="")rec.qtyReceived=0;if(!editingId&&!rec.priceItemRef)autoPriceMaterials([rec]);
+    if(+rec.qtyReceived>0&&(!oldRec||+oldRec.q!==+rec.qtyReceived)&&!rec.receivedDate)rec.receivedDate=todayISO();}
   if(!editingId)DB[formTable].push(rec);
-  let extra="";
+  let extra="",moved=[];
+  if(formTable==="materials")moved=autoProd([rec.jobRef]);
   if(formTable==="jobs"){
     if(!wasEditing&&rec.jobType){buildSchedule(rec);extra=" · schedule built from the “"+rec.jobType+"” template";}
-    else if(wasEditing&&wfSig(rec)!==oldWf&&(DB.tasks||[]).some(t=>t.jobRef===rec.id&&t.stepKey)){extra=" · workflow changed — rebuild the schedule from the Schedule tab";}
+    else if(wasEditing&&wfSig(rec)!==oldWf&&(DB.tasks||[]).some(t=>t.jobRef===rec.id&&t.stepKey)){buildSchedule(rec,true);extra=" · schedule rebuilt for the new workflow";}
+    else if(wasEditing)replan(rec);
   }
-  save();closeForm();rerender();toast((wasEditing?"Saved":"Added")+extra);
+  save();closeForm();rerender();
+  if(formTable==="jobs"&&!wasEditing&&fx._startPhase){const sp=fx._startPhase;if(sp===PH.QUOTED)openPhaseAction(rec.id,"quoted");else openPhaseAction(rec.id,"po",{target:sp});return;}
+  if(autoProdToast(moved,"Saved"))return;
+  toast((wasEditing?"Saved":"Added")+extra);
 }
 function closeForm(){document.getElementById("scrim").classList.remove("show");document.getElementById("mainmodal").className="modal";const ft=document.querySelector("#mainmodal footer");if(ft)ft.style.display="";impCtx=null;editingId=null;formMode="record";lineCtx=null;phaseCtx=null;}
 function del(id,table){
@@ -3813,7 +3878,7 @@ function exportCSV(){
   const cols=sch.fields.filter(f=>f.t!=="heading");
   const head=cols.map(f=>f.l);
   const rows=data.map(r=>cols.map(f=>{let v=r[f.k];if(f.t==="link")v=refName(f.to,v);else if(Array.isArray(v))v=v.join("; ");else if(f.t==="checkbox")v=v?"Yes":"No";return v;}));
-  if(current==="jobs"){head.push("Due date","Due / next action");rows.forEach((row,i)=>{const s=jobState(data[i]);row.push(s.due||s.followUp||"",jobDueMeta(data[i]).txt);});}
+  if(current==="jobs"){head.push("Due date","Due / next action","Current step","Progress %");rows.forEach((row,i)=>{const s=jobState(data[i]);row.push(s.due||s.followUp||"",jobDueMeta(data[i]).txt,currentStep(data[i]),jobPct(data[i]));});}
   csvDownload(head,rows,current);
 }
 function csvDownload(head,rows,name){
@@ -3829,6 +3894,16 @@ function startEmpty(){ uiConfirm("Erase ALL data and start with an empty tracker
 document.getElementById("scrim").addEventListener("click",e=>{if(e.target.id==="scrim")closeForm();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeForm();document.getElementById("askscrim").classList.remove("show");}});
 initTheme();load();try{initSide();}catch(e){}buildNav();render();loadSaveDir();
+/* scrollbars show while scrolling; sideways-scrolling areas get edge fades */
+(function(){
+  const sel=".tablewrap,.stepper,.tlstrip,.jtabs,.settabs,.pchips";
+  const fade=el=>{const max=el.scrollWidth-el.clientWidth;el.classList.toggle("fade-l",max>2&&el.scrollLeft>2);el.classList.toggle("fade-r",max>2&&el.scrollLeft<max-2);};
+  const all=()=>document.querySelectorAll(sel).forEach(fade);
+  document.addEventListener("scroll",e=>{const el=e.target&&e.target.nodeType===1?e.target:document.documentElement;el.classList.add("is-scrolling");clearTimeout(el._sbt);el._sbt=setTimeout(()=>el.classList.remove("is-scrolling"),900);if(el.matches&&el.matches(sel))fade(el);},true);
+  let t=0;const later=()=>{clearTimeout(t);t=setTimeout(all,40);};
+  if(typeof MutationObserver!=="undefined"){const c=document.getElementById("content");if(c)new MutationObserver(later).observe(c,{childList:true,subtree:true});}
+  if(window.addEventListener)window.addEventListener("resize",later);later();
+})();
 </script>
 </body>
 </html>

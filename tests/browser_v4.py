@@ -16,7 +16,7 @@ async def main():
     pos=await E("(()=>{const f=document.querySelector('.filters'),s=document.getElementById('lsearch'),t=document.querySelector('table');return [f.getBoundingClientRect().bottom<=s.getBoundingClientRect().top, s.getBoundingClientRect().bottom<=t.getBoundingClientRect().top]})()")
     ok(pos==[True,True],"jobs: search sits below the filters, above the table")
     ok(await E("document.getElementById('search')===null||document.getElementById('search').offsetParent===null"),"old top-bar search gone")
-    await pg.fill("#lsearch","J-26-028"); await pg.wait_for_timeout(50)
+    await pg.fill("#lsearch","004"); await pg.wait_for_timeout(50)
     rows=await E("document.querySelectorAll('tbody tr').length"); ok(rows==1 and "Sand storage" in await pg.inner_text("tbody"),"search by job ID finds one job")
     ok(await E("document.activeElement.id")=="lsearch","search keeps focus while typing")
     await pg.fill("#lsearch","")
@@ -27,9 +27,9 @@ async def main():
     ok(n1==n2 and sel!="","filter survives a re-render (was a bug)")
     for page in ["suppliers","qc","reminders"]:
       await E(f"go('{page}')"); ok(await E("!!document.getElementById('lsearch')"),f"{page}: search bar present")
-    await E("go('qc')"); await pg.fill("#lsearch","J-26-024"); ok("CCU" in await pg.inner_text("#content") and "Sand storage" not in await pg.inner_text("tbody"),"QC search by job ID")
-    await E("go('purchasing');purStage='waiting';render()"); await pg.fill("#purq","Q-26-021"); ok("Tank hatch" in await pg.inner_text("#purbody") and "200 BBL" not in await pg.inner_text("#purbody"),"purchasing search by job ID")
-    await E("setView&&0;go('jobs');setView('kanban')"); await pg.fill("#lsearch","Q-26-013"); ok(await E("document.querySelectorAll('.kcard').length")==1,"board search by job ID")
+    await E("go('qc')"); await pg.fill("#lsearch","001"); ok("CCU" in await pg.inner_text("#content") and "Sand storage" not in await pg.inner_text("tbody"),"QC search by job ID")
+    await E("go('purchasing');purStage='waiting';render()"); await pg.fill("#purq","010"); ok("Tank hatch" in await pg.inner_text("#purbody") and "200 BBL" not in await pg.inner_text("#purbody"),"purchasing search by job ID")
+    await E("setView&&0;go('jobs');setView('kanban')"); await pg.fill("#lsearch","009"); ok(await E("document.querySelectorAll('.kcard').length")==1,"board search by job ID")
     # C4 categories
     await E("go('prices')")
     ok(await E("(()=>{const c=document.querySelector('.pchips'),s=document.getElementById('pq');return c.getBoundingClientRect().bottom<=s.getBoundingClientRect().top})()"),"price book: search below category chips")

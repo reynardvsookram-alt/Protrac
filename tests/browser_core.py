@@ -90,11 +90,11 @@ async def main():
         await E("closeForm()")
         ok(await E(f"jobMats('{jid2}').every(m=>matStatus(m)==='RFQ sent')"),"materials show RFQ sent")
         rid=rq["id"]; lid=rq["suppliers"][0]["id"]
-        await E(f"setLineStatus('{rid}','{lid}','Received')"); await E("document.getElementById('askok').onclick()")
-        ok(await E(f"jobMats('{jid2}').every(m=>matStatus(m)==='Received')"),"supplier Received -> materials received")
+        await E(f"receiveMats(jobMats('{jid2}').map(m=>m.id))")
+        ok(await E(f"jobMats('{jid2}').every(m=>matStatus(m)==='Received')"),"receive -> materials received")
         # material chip advance
-        mid=await E(f"jobMats('{jid}')[0].id"); await E(f"advanceMat('{mid}')"); s1=await E(f"matStatus(DB.materials.find(m=>m.id==='{mid}'))")
-        await E(f"advanceMat('{mid}')"); s2=await E(f"matStatus(DB.materials.find(m=>m.id==='{mid}'))")
+        mid=await E(f"jobMats('{jid}').find(m=>matStage(m)==='toorder').id"); await E(f"matAction('{mid}')"); await E("saveForm()"); s1=await E(f"matStatus(DB.materials.find(m=>m.id==='{mid}'))")
+        await E(f"matAction('{mid}')"); s2=await E(f"matStatus(DB.materials.find(m=>m.id==='{mid}'))")
         ok(s1=="Ordered" and s2=="Received","status chip ordered → received")
         # hold dialog
         await E(f"toggleHold('{jid}')"); await pg.fill("#askin","waiting on drawings"); await E("document.getElementById('askok').onclick()")

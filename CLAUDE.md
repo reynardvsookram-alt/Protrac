@@ -9,9 +9,9 @@ Protrac is a fabrication job tracker built by and for a mechanical engineer runn
 
 ## Hard rules
 1. **Single self-contained file**: `index.html` is the whole app (HTML + CSS + vanilla JS). No frameworks, no build step, **no CDNs or network calls**. It must run offline by double-clicking. Fonts (IBM Plex Sans/Mono) are embedded as base64 woff2.
-2. **No confidential or personal data in this public repo.** Never commit real client names, real supplier or company names, people's names, backups (`*.json` exports) or price workbooks. The demo uses anonymised clients ("Client A — Oilfield Services"). The steel price book (`DEMO_PRICES`) holds **real quotes under the anonymous names "Supplier A" and "Supplier B"**: keep the prices, never the real names.
+2. **No confidential or personal data in this public repo.** Never commit real client names, real supplier or company names, other people's names, backups (`*.json` exports) or price workbooks. The demo uses anonymised clients ("Client A — Oilfield Services"). The steel price book (`DEMO_PRICES`) holds **real quotes under the anonymous names "Supplier A" and "Supplier B"**: keep the prices, never the real names. **Exception: the owner's own name is allowed** ("R. Sookram" as the demo QC sign-off, "Reynard Sookram, Mechanical Engineer" as the demo RFQ email sign-off) — it's his portfolio piece, so keep it.
 3. **An earlier tracker (iteration 1) existed at a previous employer. It is private history.** Don't show, name or reference it in the UI, README, demo or commit messages.
-4. **Never break saved data.** Users' data lives in `localStorage` (`protrac_v1`). Every schema change needs an **idempotent** migration in `migrate()` (`migrateProtrac`, `migrateV2`, `migrateV5` …) and a test proving old data still loads.
+4. **Never break saved data.** Users' data lives in `localStorage` (`protrac_v1`). Every schema change needs an **idempotent** migration in `migrate()` (`migrateProtrac`, `migrateV2`, `migrateV5`, `migrateV6` …) and a test proving old data still loads. Removed fields stay on the record unless there's a reason to delete them (e.g. `job.stage` and `job.percent` are kept but no longer shown).
 5. No `alert/confirm/prompt`: they're blocked in hosted viewers. Use the in-app dialogs `uiAsk`, `uiConfirm`, `openModal`.
 6. Everything works at **phone width (390 px)** with no horizontal page scroll. Wide tables scroll inside `.tablewrap`.
 7. Wrap `localStorage` access in try/catch.
@@ -19,21 +19,18 @@ Protrac is a fabrication job tracker built by and for a mechanical engineer runn
 ## Current goal (agreed with the owner)
 The program will be shown to a software engineering team as a polished, real tool. Work in **two phases, in this order**, and confirm the phase-1 plan with him before building.
 
-**Phase 1: finalise the workflow.**
-- Seamless from RFQ to delivery.
-- **No feature that doesn't make sense** for a fabrication job.
-- **Nothing that adds time to entering a job.**
-
-Start by auditing every page, form and button against "does this help him act on a job, and could it take fewer taps or fields?" Then propose a list to remove, merge, default or automate, for example:
-- smarter defaults;
-- fields filled from what's already known;
-- duplicate controls (e.g. the progress bar shown twice on the job page);
-- legacy remnants (the hidden old Status field, the old-tracker import key `sonriz_pm_v2` and its tests).
-
+**Phase 1: finalise the workflow — built, awaiting his sign-off.**
+Seamless RFQ → delivery, no feature that doesn't make sense for a fabrication job, nothing that adds time to entering a job. What was agreed and built:
+- **New-job form** = 5 fields (name, client, job-type buttons, RFQ received = today, client deadline with 3/5/10 wd chips, default `meta.quoteDays` = 5). Everything else under a collapsed "More", incl. "Already past RFQ? Start at phase…". Edit form = the same plus sections only for phases reached.
+- **Removed** (data kept on records): job Stage (→ "Current step" from the schedule), manual % (→ share of schedule steps done), duplicate progress bar / fact cards / counters / phase dropdowns, the old Status and Stage settings lists, the old-tracker storage key and its tests, dead pages and functions.
+- **Merged**: job tabs → Overview (with updates) · Schedule · Materials (with supplier RFQs) · QC; "Workflow options" is its own small dialog.
+- **Defaults**: running job number `001…` (D1), priority Medium, lead time asked at "Quote submitted" and pre-filled at PO, QC stages outside the job's scope auto N/A.
+- **Automated**: schedule re-plans when PO / lead time / deadline / holds change and rebuilds when workflow options change; all materials fully received → In Production with an Undo toast; final QC pass → "Mark delivered" button.
+- **Undo / Redo** on phase changes (job page), **Board** rework, **thin auto-hiding scrollbars** app-wide.
 Keep every removal behind a migration so saved data survives.
 
 **Phase 2: aesthetics, after phase 1 is signed off.**
-- A professional facelift to a modern software-engineering standard.
+- A professional facelift to a modern software-engineering standard. **Design direction (his choice): the "FlowDeck" kanban reference** — dark, glassy rounded lanes, pill counts, small priority pills, quiet meta text, "+ Add" at the foot of a lane. Apply that look app-wide.
 - Replace the emoji icons with one consistent icon set, inlined as SVG (still offline).
 - Purposeful press/toggle micro-animations.
 - A refined type scale and spacing, and a cohesive light and dark theme.
@@ -44,15 +41,17 @@ Show him before/after screenshots, desktop and phone, for sign-off.
 ```bash
 # syntax gate
 python3 -c "h=open('index.html').read();open('/tmp/app.js','w').write(h[h.find('<script>')+8:h.rfind('</script>')])" && node --check /tmp/app.js
-node tests/node_harness.js            # ~148 checks: migration, working days, phase clocks, holds, filters
+node tests/node_harness.js            # ~183 checks: migration, working days, phase clocks, holds, filters, undo/redo, auto production
 python3 tests/browser_core.py         # Playwright: Excel/xlsx import, price-book import, QC, RFQ, phone layout
 python3 tests/browser_purchasing.py   # purchasing flow end to end (desktop + phone)
 python3 tests/browser_v4.py           # search placement, categories, RFQ email table, material table editor
 python3 tests/browser_v5.py           # templates/auto timeline, suppliers, settings tabs, sidebar, fonts, demo shift
+python3 tests/browser_v6.py           # phase 1: new-job form, job page, undo/redo, automation, board (mouse + touch drag), scrollbars, phone
+node tests/shots_phase1.js after      # before/after screenshots into docs/phase1/ (desktop + phone)
 python3 tests/sweep.py                # clicks every control on every page/tab (~2,400) — slow (~15 min); PHONE=1 for the phone-only layout pass
 grep -nE 'fetch\(|XMLHttpRequest|cdnjs|googleapis|jsdelivr|unpkg|<link |<script src' index.html   # must print nothing
 ```
-Playwright and Chromium are needed (`pip install playwright && playwright install chromium` if missing). Fixtures are in `tests/fixtures/`, all anonymised. Screenshots go to `tests/out/` (git-ignored). Update tests when the demo data changes; don't weaken a test to make it pass. Look at real screenshots of anything visual before saying it's done.
+Playwright and Chromium are needed (`pip install playwright && playwright install chromium` if missing; in a cloud session Chromium is pre-installed — `pip install playwright==<node playwright version>` and set `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`). Fixtures are in `tests/fixtures/`, all anonymised. Screenshots go to `tests/out/` (git-ignored). Update tests when the demo data changes; don't weaken a test to make it pass. Look at real screenshots of anything visual before saying it's done.
 
 ## Architecture
 `DB = { jobs, tasks, procurement, materials, suppliers, checklists, priceItems, priceQuotes, meta }` persisted by `save()`, which also runs `syncAllSchedules()` and invalidates the price index.
@@ -62,7 +61,7 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 
 | Phase (`PH.*`) | Due date | Closes when |
 |---|---|---|
-| RFQ Received | `rfqDueDate`, or `rfqDate` + `rfqDays` working days | quote submitted to manager |
+| RFQ Received | `rfqDueDate` (old data may still use `rfqDate` + `rfqDays`; the edit form converts it to a date) | quote submitted to manager |
 | Quoted – Awaiting PO | **none, never overdue**; after `followUpDate` it flags "chase client" | PO received / lost |
 | PO Received → Procurement → In Production | `dueOverride`, or `poDate` + **max** lead time in working days (min = target) | delivered |
 | Delivered / Lost | clock stopped | — |
@@ -70,6 +69,13 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 - **Working days** skip weekends and `meta.holidays` (`ttHolidays(year)`: T&T fixed holidays, Easter-based ones, Sunday→Monday observed). Eid and Divali are added by hand each year.
 - **Holds** pause the clock and extend the due date by the working days held. Holds are per clock group (`rfq` / `quote` / `exec`).
 - Key functions: `addWorkingDays, workDaysBetween, jobState, jobDueMeta, setPhase, changePhase, openPhaseAction/savePhase, toggleHold`.
+- **Undo / redo**: `undoPhase` pops the last `phaseLog` entry onto `job.phaseRedo` (saved with the job); `redoPhase` re-applies it with its original date; any new `setPhase` clears redo. Typed data (PO no., dates, lead time) is never deleted — `reached(j,phase)` / `jd(j,key)` make dates for phases not reached (after an undo) count as absent.
+- **Automation**: `replan(j)` (= `buildSchedule(j,true)`) after phase actions, job edits and resuming a hold; `autoProd(jobIds)` moves PO/Procurement jobs whose lines are all fully received to In Production (toast with Undo).
+
+### Job numbers and folders
+- `jobId` is a plain running number (`001`, `002`…). `nextJobNo()` = highest numeric ID + 1; non-numeric IDs are left alone. `jobLabel(j)` = "006 · Tank hatch cover" is used everywhere a job is shown (`refName("jobs")` returns it too).
+- Typing just a number in any job search finds that job number (`jobQ`, `jobNoFilter`).
+- `folderName(j)` = "006. Client A Tank hatch cover" (client cut at " — ", Windows-illegal characters replaced). `meta.projectsPath` + folder name pre-fills a new job's File location (`folderPath`). "Copy folder name" is on the job page.
 
 ### Job templates and the auto timeline (Schedule tab)
 - **Job types**: `JOB_TYPES` (Design & build, Build to client drawing, Repair / blast & paint) pre-tick `optSite, optConcept, optFab, optCoat, optAssembly`.
@@ -94,10 +100,13 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 - **Suppliers page**: `renderSuppliers` shows cards; `renderSupplier` is the profile, showing what they sell, stats (`supStats`) and RFQ history. Supplier `rating` is Preferred / Approved / Backup / Avoid.
 
 ### QC
-`job.qc[weld|blast|paint|final] = {s,date,by,note}`, one tap Pass/Fail/N/A. Optional item checks live in `DB.checklists` (with `stage`). There is also a QC register page.
+`job.qc[weld|blast|paint|final] = {s,date,by,note}`, one tap Pass/Fail/N/A. Optional item checks live in `DB.checklists` (with `stage`). There is also a QC register page. `qcAutoNA` (run from `save()`) sets stages the workflow leaves out to N/A once (`auto:true`, tracked in `job.qcAuto`); clearing it by hand sticks, and switching the option back on clears it.
 
 ### UI shell
-- **Navigation**: `buildNav`, `go`, `render` (PAGES map), `renderDetail` (job page; tabs Overview · Updates · Schedule · Procurement · Materials · QC).
+- **Navigation**: `buildNav`, `go`, `render` (PAGES map), `renderDetail` (job page; tabs Overview · Schedule · Materials · QC — old tab ids `updates`/`procurement` alias to `overview`/`materials`).
+- **Job form**: `jobFormHTML` / `wireJobForm` / `pickJobType` / `pickDeadline`; workflow options dialog `openWfOpts`. Job list columns come from `SCHEMA.jobs.gridCols` (`_step` = `currentStep`, `_pct` = `jobPct`).
+- **Board** (`renderKanban`): lanes fill the screen (`boardSize`), arrows step one lane (`boardStep`), wheel rules in `initBoard`, pointer-event drag that works with touch (press-and-hold) in `kDown/kMove/kUp`; dropping calls `changePhase`, so the phase dialog still opens.
+- **Scrollbars**: thin and transparent until hover / scroll (`.is-scrolling`), none on phone; sideways scrollers get `fade-l`/`fade-r` edge fades (observer at the end of the script).
 - **Layout**: collapsible sidebar (`toggleSide`). Settings is split into tabs (`setTab`).
 - **Search**: `listSearch()` sits below the filters on list pages.
 - **Motion**: `pageAnim()` page transition, with `prefers-reduced-motion` respected.
@@ -108,6 +117,7 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 - **Prices**: the demo price book (`DEMO_PRICES`) is real steel quotes under "Supplier A" / "Supplier B". The other demo suppliers and their items are illustrative.
 
 ## Roadmap / ideas (confirm priority with the owner first)
+- **Job ↔ folder linking (future).** He keeps one server folder per job, named "006. Client Job name", with fixed subfolders (email request, quotation, RFQs sent/received, drawings, material list & costing, weld maps, MTRs, additional info). The foundation is in place: running job number, `folderName()` format and `meta.projectsPath`. Next step could be creating the folder + subfolders from the job (File System Access API, desktop Chrome/Edge only; may be blocked on a company server drive) — he chose to skip it for now.
 - Stock-length nesting (cut list → lengths/sheets) so material totals use real stock quantities.
 - Quotation builder (labour by trade, materials from the price book, coatings, margin) feeding the "Prepare quotation" step.
 - Win-rate and turnaround stats across jobs (data already in `phaseLog` and dates).
