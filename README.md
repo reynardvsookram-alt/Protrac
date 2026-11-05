@@ -6,7 +6,7 @@ Protrac tracks a steel-fabrication job from the client's RFQ to delivery: quotin
 
 It is a single offline HTML file. There's no install, no server and no account, and it works on a laptop or a phone.
 
-![Dashboard](screenshot-dash.png)
+![Dashboard](docs/screenshots/screenshot-dash.png)
 
 ---
 
@@ -49,14 +49,14 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
   - A QC register across all jobs.
 - **Also**: search across jobs, materials and prices; reminders; per-job schedule with Gantt; dark mode; JSON backup/restore; CSV export.
 
-![Job schedule built from a template, ticking itself as the job moves](screenshot-schedule.png)
-![Supplier profile](screenshot-supplier.png)
-![Purchasing pipeline](screenshot-purchasing.png)
-![Compare supplier quotes and order](screenshot-compare.png)
-![Material list priced from the price book](screenshot-mat.png)
-![One-tap QC](screenshot-qc.png)
-![Price book](screenshot-prices.png)
-![Phone layout](screenshot-phone.png)
+![Job schedule built from a template, ticking itself as the job moves](docs/screenshots/screenshot-schedule.png)
+![Supplier profile](docs/screenshots/screenshot-supplier.png)
+![Purchasing pipeline](docs/screenshots/screenshot-purchasing.png)
+![Compare supplier quotes and order](docs/screenshots/screenshot-compare.png)
+![Material list priced from the price book](docs/screenshots/screenshot-mat.png)
+![One-tap QC](docs/screenshots/screenshot-qc.png)
+![Price book](docs/screenshots/screenshot-prices.png)
+![Phone layout](docs/screenshots/screenshot-phone.png)
 
 ## Technical notes
 
@@ -67,7 +67,7 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
 
 ## About the demo data
 
-The demo jobs are based on real job *types* I handled. Client names are anonymised, and PO numbers are invented. The price book uses a real item list with **supplier names hidden and prices scaled**, so they are illustrative only.
+The demo jobs are based on real job *types* I handled. Client names are anonymised and PO numbers are invented. The price book holds **real steel quotes** (TTD, excl. VAT) from two local stockists, with the supplier names replaced by "Supplier A" and "Supplier B".
 
 ## Run it
 

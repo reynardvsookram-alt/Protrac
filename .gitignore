@@ -1,0 +1,11 @@
+# personal / confidential — never commit
+*personal*
+*Personal*
+*.xlsx
+!tests/fixtures/*.xlsx
+*backup*.json
+Protrac_backup_*.json
+# test output
+tests/out/
+node_modules/
+__pycache__/
