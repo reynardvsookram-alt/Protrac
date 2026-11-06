@@ -206,8 +206,11 @@ async def desktop(b):
 
     # ---- price book: remove a wrong price; warn on a price that looks off ----
     await E("go('prices')")
-    heads = await E("[...document.querySelectorAll('#prows thead th')].map(t=>t.textContent).slice(2,-1)")
-    ok(heads == sorted(heads) and heads.index("Supplier A") < heads.index("Supplier B"), f"price book supplier columns in A→Z order ({heads})")
+    grp = await E("[...document.querySelectorAll('#prows .pgrp')].map(g=>[g.querySelector('h4').textContent.replace(/\\s*\\d+$/,''),[...g.querySelectorAll('thead th.pcol')].map(t=>t.textContent).slice(0,-1)])")
+    ok(len(grp) > 10 and all(h == sorted(h) for _, h in grp), "price book: one table per category, supplier columns A→Z")
+    gd = dict(grp)
+    ok(gd.get("Angle") == ["Supplier A", "Supplier B"] and gd.get("Abrasives") == ["Coatings Distributor", "Industrial Supply House"], f"each category shows only its own suppliers (Abrasives: {gd.get('Abrasives')})")
+    ok(await E("[...document.querySelectorAll('#prows tbody tr')].every(r=>r.children.length===r.closest('table').querySelectorAll('thead th').length)"), "every row lines up with its headings")
     it9 = await E("DB.priceItems.find(i=>i.code==='RHS-09').id")
     await E(f"openQuoteForm('{it9}')"); await pg.fill("#mbody [data-k=supplier]", "Supplier B"); await pg.fill("#mbody [data-k=price]", "45")
     n0 = await E("DB.priceQuotes.length"); await E("saveForm()"); await pg.wait_for_timeout(50)

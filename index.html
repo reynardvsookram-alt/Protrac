@@ -874,6 +874,16 @@ body.kdragging,body.kdragging *{cursor:grabbing!important}
 .step:focus-visible{outline:2px solid var(--weld-dim);outline-offset:2px}
 .step .sdot{transition:transform .15s,border-color .15s}
 .step.cur{cursor:default}
+.pgrp{margin-bottom:18px}
+.pgrph{display:flex;align-items:center;gap:8px;margin:0 0 8px;font-size:13px;font-weight:800;letter-spacing:.3px}
+.ptab{table-layout:fixed;width:100%;min-width:520px}
+.ptab .pitem{width:auto;min-width:200px}
+.ptab .punit{width:78px}
+.ptab .pcol{width:132px}
+.ptab th.pcol{white-space:normal;line-height:1.3;vertical-align:bottom;overflow-wrap:anywhere}
+.ptab td.pcol .ps{white-space:normal;overflow-wrap:anywhere}
+.ptab td,.ptab th{overflow:hidden}
+@media(max-width:760px){.ptab .pitem{width:190px}.ptab .pcol{width:108px}}
 </style>
 </head>
 <body>
@@ -1783,16 +1793,23 @@ function sortBySize(res){const cats=priceCats(),ci=c=>{const i=cats.indexOf(c);r
   return res.map(x=>({x,c:ci(x.it.category),k:sizeKey(x.it)})).sort((a,b)=>{if(a.c!==b.c)return a.c-b.c;for(let i=0;i<Math.max(a.k.length,b.k.length);i++){const u=a.k[i]??-1,v=b.k[i]??-1;if(u!==v)return u-v;}return (a.x.it.description||"").localeCompare(b.x.it.description||"");}).map(o=>o.x);}
 function renderPriceRows(){
   const el=document.getElementById("prows");if(!el)return;
-  const idx=pbIndex(),sups=idx.suppliers.slice(0,3).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),vat=priceVat?1+vatRate():1;
+  const vat=priceVat?1+vatRate():1;
   const res=sortBySize(searchPrices(priceQ,{cat:priceCat,strict:true}));
   if(!res.length&&priceCat&&!priceQ){el.innerHTML=`<div class="empty">No items in <b>${esc(priceCat)}</b> yet. <button class="linkbtn" onclick="openPriceItemForm(null,priceCat)">+ Add the first item</button></div>`;return;}
-  const rows=res.slice(0,150).map(({it})=>{
+  if(!res.length){el.innerHTML=`<div class="empty">No items match “${esc(priceQ)}”. Try just the size (e.g. 4x4) or one word.</div>`;return;}
+  /* one table per category, with a column for every supplier that has quoted something in it (A→Z) */
+  const groups=[];res.slice(0,200).forEach(({it})=>{let g=groups[groups.length-1];const c=it.category||"Other";if(!g||g.cat!==c){g={cat:c,items:[]};groups.push(g);}g.items.push(it);});
+  const row=(it,sups)=>{
     const L=latestBySupplier(it.id),b=bestPrice(it);
     const flag=/⚠|verify|confirm/i.test(it.notes||"")?`<span class="warnflag" title="${esc(it.notes)}">⚠</span> `:"";
-    const cells=sups.map(s=>{const x=L[s];if(!x)return `<td class="resp">—</td>`;if(x.priced){const stale=x.any&&x.any!==x.priced?`<span class="ps">last: ${esc(x.any.response||"")}</span>`:"";return `<td><span class="pricecell ${b&&b.supplier===s?'best':''}">${money(+x.priced.price*vat)}<span class="ps">${esc(fmtShort(x.priced.date))}</span>${stale}</span></td>`;}return `<td class="resp">${esc(x.any?x.any.response:"")}</td>`;}).join("");
-    return `<tr onclick="openPriceItem('${it.id}')"><td><div style="font-weight:700">${flag}${esc(it.description)}</div><div class="resp">${esc([it.code,it.stockLength,it.grade].filter(x=>x&&x!=="-").join(" · "))}</div></td><td>${esc(it.uom||"")}</td>${cells}<td>${b?`<span class="pricecell best">${money(b.price*vat)}<span class="ps">${esc(b.supplier)}</span></span>`:'<span class="resp">no price</span>'}</td></tr>`;
+    const cells=sups.map(s=>{const x=L[s];if(!x)return `<td class="resp pcol">—</td>`;if(x.priced){const stale=x.any&&x.any!==x.priced?`<span class="ps">last: ${esc(x.any.response||"")}</span>`:"";return `<td class="pcol"><span class="pricecell ${b&&b.supplier===s?'best':''}">${money(+x.priced.price*vat)}<span class="ps">${esc(fmtShort(x.priced.date))}</span>${stale}</span></td>`;}return `<td class="resp pcol">${esc(x.any?x.any.response:"")}</td>`;}).join("");
+    return `<tr onclick="openPriceItem('${it.id}')"><td class="pitem"><div style="font-weight:700">${flag}${esc(it.description)}</div><div class="resp">${esc([it.code,it.stockLength,it.grade].filter(x=>x&&x!=="-").join(" · "))}</div></td><td class="punit">${esc(it.uom||"")}</td>${cells}<td class="pcol pbest">${b?`<span class="pricecell best">${money(b.price*vat)}<span class="ps">${esc(b.supplier)}</span></span>`:'<span class="resp">no price</span>'}</td></tr>`;
+  };
+  const tables=groups.map(g=>{
+    const sups=Array.from(new Set(g.items.flatMap(it=>Object.keys(latestBySupplier(it.id))))).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+    return `<section class="pgrp">${groups.length>1||!priceCat?`<h4 class="pgrph">${esc(g.cat)} <span class="lcnt">${g.items.length}</span></h4>`:""}<div class="tablewrap"><table class="ptab"><thead><tr><th class="pitem">Item</th><th class="punit">Unit</th>${sups.map(s=>`<th class="pcol">${esc(s)}</th>`).join("")}<th class="pcol pbest">Best</th></tr></thead><tbody>${g.items.map(it=>row(it,sups)).join("")}</tbody></table></div></section>`;
   }).join("");
-  el.innerHTML=res.length?`<div class="impnote" style="margin-bottom:8px">${priceCat?"<b>"+esc(priceCat)+"</b> · ":""}${res.length} item${res.length===1?"":"s"} · prices ${priceVat?"incl.":"excl."} VAT · tap a row for history &amp; notes</div><div class="tablewrap"><table class="ptab"><thead><tr><th>Item</th><th>Unit</th>${sups.map(s=>`<th>${esc(s)}</th>`).join("")}<th>Best</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="empty">No items match “${esc(priceQ)}”. Try just the size (e.g. 4x4) or one word.</div>`;
+  el.innerHTML=`<div class="impnote" style="margin-bottom:8px">${priceCat?"<b>"+esc(priceCat)+"</b> · ":""}${res.length} item${res.length===1?"":"s"}${res.length>200?" (first 200 shown — search to narrow)":""} · prices ${priceVat?"incl.":"excl."} VAT · tap a row for history &amp; notes</div>${tables}`;
 }
 function openPriceItem(id){
   const it=priceItem(id);if(!it)return;formMode="view";
