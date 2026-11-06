@@ -34,6 +34,8 @@ async def desktop(b):
     ok(await E(f"document.querySelector('.moneypanel').textContent.includes(money({book}))"), f"work in hand = sum of PO values ({book})")
     await pg.locator(".mblk", has_text="work in hand").click()
     ok(await E("jobFilter") == "active", "order book tile opens the active projects")
+    await E("go('dashboard')"); await pg.locator(".sbrow", has_text="In Production").click()
+    ok(await E("current") == "jobs" and await E("gridFilters.phase") == "In Production" and await E("filteredRows().length>0&&filteredRows().every(j=>j.phase==='In Production')"), "Pipeline by phase: a row opens that phase's projects")
     await E("go('dashboard')"); await pg.locator(".mblk", has_text="Quotes won").click()
     ok(await E("jobFilter") == "winloss" and await E("filteredRows().every(j=>isWon(j)||isLostQuote(j))") and await E("filteredRows().some(j=>j.phase===PH.LOST)"), "Win rate tile opens the won & lost projects")
     await E("go('dashboard')"); await pg.locator(".mblk", has_text="Profit on won work").click()

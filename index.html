@@ -162,7 +162,10 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:var(--raise)}
 .panel h3{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft)}
 .statusbar{display:flex;flex-direction:column;gap:9px}
-.sbrow{display:flex;align-items:center;gap:10px;font-size:13px}
+.sbrow{display:flex;align-items:center;gap:10px;font-size:13px;width:100%;background:none;border:0;padding:4px 6px;margin:0 -6px;border-radius:8px;font-family:inherit;color:var(--ink);cursor:pointer;text-align:left;transition:background .15s}
+.sbrow:hover{background:var(--hover)}.sbrow:hover .nm{color:var(--ink)}
+.sbrow .sbgo{color:var(--ink-soft);opacity:0;transition:opacity .15s}.sbrow:hover .sbgo{opacity:1}
+@media (pointer:coarse){.sbrow .sbgo{opacity:.6}}
 .sbrow .nm{width:130px;flex-shrink:0;color:var(--ink-soft)}
 .sbrow .track{flex:1;background:var(--paper);height:18px;border-radius:9px;overflow:hidden;box-shadow:inset 0 1px 2px var(--emboss-lo)}
 .sbrow .fill{display:block;height:100%;border-radius:9px}
@@ -3215,6 +3218,7 @@ function toggleSide(){const a=document.querySelector(".app");const c=!a.classLis
 function initSide(){let c=false;try{c=localStorage.getItem("protrac_side")==="1";}catch(e){}if(c){document.querySelector(".app").classList.add("collapsed");const b=document.getElementById("sidetog");if(b){b.textContent="›";b.title="Expand menu";}}const w=document.getElementById("sidewho");if(w)w.textContent=(DB.meta&&DB.meta.inspectorName)||"";}
 function go(id){ setTimeout(pageAnim,0); listQ=""; gridFilters={}; supView=null; supCat=""; supRating=""; if(id==="materials"||id==="procurement"){if(id==="procurement")purStage="waiting";id="purchasing";} if(id!=="purchasing"){purQ="";} detailJob=null; current=id; sortKey=id==="jobs"?"jobName":null; sortDir=id==="jobs"?-1:1; jobFilter=null; currentView=SCHEMA[id]?SCHEMA[id].views[0]:id; matFilter=""; window.scrollTo&&window.scrollTo(0,0);  render(); buildNav(); }
 function dashFilter(kind){ setTimeout(pageAnim,0); detailJob=null; current="jobs"; currentView="grid"; sortKey="jobName"; sortDir=-1; jobFilter=kind; listQ=""; gridFilters={}; render(); buildNav(); }
+function phaseGo(i){const p=PHASES[i];if(!p)return;go("jobs");gridFilters={phase:p};render();}
 function dashGo(page){ if(page==="procurement")purStage="waiting"; go(page); }
 function clearJobFilter(){ jobFilter=null; render(); }
 const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Projects overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active projects (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded",delivered:"Delivered this year",winloss:"Won & lost — quotes the client decided on",costed:"Costed projects behind the average margin"};
@@ -3622,7 +3626,7 @@ function renderDashboard(c){
   const recentPanel=`<div class="panel"><h3>🕘 Recent updates</h3><div class="recent">${recentHtml}</div></div>`;
   // Pipeline by phase
   const max=Math.max(1,...PHASES.map(p=>jobs.filter(j=>j.phase===p).length));
-  const bars=PHASES.map(p=>{const v=jobs.filter(j=>j.phase===p).length;return `<div class="sbrow"><span class="nm">${esc(p)}</span><span class="track"><span class="fill" style="width:${v/max*100}%;background:var(${dotVar(p)})"></span></span><span class="v">${v}</span></div>`;}).join("");
+  const bars=PHASES.map((p,pi)=>{const v=jobs.filter(j=>j.phase===p).length;return `<button type="button" class="sbrow" onclick="phaseGo(${pi})" title="Show ${esc(p)} projects"><span class="nm">${esc(p)}</span><span class="track"><span class="fill" style="width:${v/max*100}%;background:var(${dotVar(p)})"></span></span><span class="v">${v}</span><span class="sbgo">›</span></button>`;}).join("");
   const statusPanel=`<div class="panel"><h3>Pipeline by phase</h3><div class="statusbar">${bars}</div></div>`;
   // Next deadlines (quote deadlines, delivery dates, client follow-ups)
   const up=S.filter(x=>!isClosed(x.j)&&!x.s.paused&&(x.s.due||x.s.followUp)).sort((a,b)=>{const x=a.s.due||a.s.followUp,y=b.s.due||b.s.followUp;return x<y?-1:x>y?1:0;}).slice(0,8);
