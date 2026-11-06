@@ -164,6 +164,16 @@ async def desktop(b):
     ok(await E("document.getElementById('board').classList.contains('can-l')"), "left arrow appears")
     await pg.click(".barrow.l"); await pg.wait_for_timeout(600)
     ok(await E("document.getElementById('boardscroll').scrollLeft") < 3, "left arrow goes back one lane")
+    # all the way right (the end isn't on a lane edge), then the left arrow must still step back lane by lane
+    for _ in range(8):
+        if not await E("document.getElementById('board').classList.contains('can-r')"): break
+        await pg.click(".barrow.r"); await pg.wait_for_timeout(650)
+    xs = [await E("document.getElementById('boardscroll').scrollLeft")]
+    ok(not await E("document.getElementById('board').classList.contains('can-r')"), "right arrow reaches the end and hides")
+    for _ in range(8):
+        if not await E("document.getElementById('board').classList.contains('can-l')"): break
+        await pg.click(".barrow.l"); await pg.wait_for_timeout(650); xs.append(await E("document.getElementById('boardscroll').scrollLeft"))
+    ok(len(xs) > 2 and all(b < a for a, b in zip(xs, xs[1:])) and xs[-1] < 3, f"from the far right, left arrow steps back every click to the start ({[round(x) for x in xs]})")
     hb = await pg.locator(".lane[data-status='PO Received'] .lanehd").bounding_box()
     await pg.mouse.move(hb["x"] + 20, hb["y"] + 10); await pg.mouse.wheel(0, 200); await pg.wait_for_timeout(200)
     ok(await E("document.getElementById('boardscroll').scrollLeft") > 100, "wheel over a lane header scrolls the board sideways")

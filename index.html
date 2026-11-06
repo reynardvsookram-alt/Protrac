@@ -3260,13 +3260,12 @@ function boardUpd(){
 function boardStep(d){
   const sc=document.getElementById("boardscroll");if(!sc)return;
   const lanes=Array.from(sc.querySelectorAll(".lane"));if(!lanes.length)return;
-  const x=sc.scrollLeft,base=lanes[0].offsetLeft;
+  const x=sc.scrollLeft,base=lanes[0].offsetLeft,max=Math.max(0,sc.scrollWidth-sc.clientWidth);
   const pos=lanes.map(l=>l.offsetLeft-base);
-  let i=pos.findIndex(p=>p>=x-4);if(i<0)i=pos.length-1;
-  if(d<0&&Math.abs(pos[i]-x)<=4)i--;else if(d>0)i++;
-  if(d<0&&pos[i]===undefined)i=0;
-  i=Math.max(0,Math.min(pos.length-1,i));
-  if(sc.scrollTo)sc.scrollTo({left:pos[i],behavior:"smooth"});else sc.scrollLeft=pos[i];
+  let t;
+  if(d<0){const c=pos.filter(p=>p<x-4);t=c.length?c[c.length-1]:0;}          // the lane start just left of where we are
+  else{const c=pos.find(p=>p>x+4);t=c==null?max:Math.min(c,max);}             // the next lane start, or the very end
+  if(sc.scrollTo)sc.scrollTo({left:t,behavior:"smooth"});else sc.scrollLeft=t;
 }
 function initBoard(){
   const sc=document.getElementById("boardscroll");if(!sc)return;
