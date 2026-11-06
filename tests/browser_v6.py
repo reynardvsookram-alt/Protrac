@@ -282,6 +282,15 @@ async def desktop(b):
     ok("Today is" in await pg.inner_text(".todaypill"), "calendar states today's date")
     await E("calNav(1)"); await E("calNav(-1)"); await E("calToday()")
 
+    # ---- every text field matches the theme (no square white browser-default boxes, e.g. the quick reminder) ----
+    await E("setTheme('dark')")
+    bad = []
+    for code in ["go('dashboard')", "go('reminders')", "go('settings');setTab='lists';render()", "go('settings');setTab='qc';render()", "go('settings');setTab='workflow';render()", "go('prices')", "go('purchasing')"]:
+        await E(code); await pg.wait_for_timeout(60)
+        bad += await E("[...document.querySelectorAll('#content input:not([type=checkbox]):not([type=radio]):not([type=hidden]),#content select,#content textarea')].filter(e=>e.offsetParent).filter(e=>{const c=getComputedStyle(e);return c.backgroundColor==='rgb(255, 255, 255)'||parseFloat(c.borderTopLeftRadius)<4}).map(e=>e.id||e.getAttribute('placeholder')||e.tagName)")
+    ok(not bad, f"all fields styled for the theme in dark mode {bad[:5]}")
+    await E("setTheme('light')")
+
     # ---- scrollbars ----
     await E("go('prices')")
     ok(await E("getComputedStyle(document.querySelector('.tablewrap')).scrollbarWidth") == "thin", "desktop scrollbars are thin")
