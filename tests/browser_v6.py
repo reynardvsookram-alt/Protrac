@@ -185,6 +185,14 @@ async def desktop(b):
     await E("document.querySelector('.lane .lanebody').style.maxHeight=''")
     await pg.keyboard.down("Shift"); await pg.mouse.wheel(0, 200); await pg.keyboard.up("Shift"); await pg.wait_for_timeout(200)
     ok(await E("document.getElementById('boardscroll').scrollLeft") > 100, "Shift+wheel scrolls sideways anywhere")
+    # horizontal wheel (mouse thumb wheel / touchpad) over the cards moves the board both ways
+    await E("document.getElementById('boardscroll').scrollLeft=0"); await pg.wait_for_timeout(100)
+    cb2 = await pg.locator(".lane[data-status='RFQ Received'] .kcard").first.bounding_box()
+    await pg.mouse.move(cb2["x"] + 40, cb2["y"] + 20)
+    for _ in range(6): await pg.mouse.wheel(300, 0); await pg.wait_for_timeout(80)
+    far = await E("document.getElementById('boardscroll').scrollLeft")
+    for _ in range(8): await pg.mouse.wheel(-300, 0); await pg.wait_for_timeout(80)
+    ok(far > 300 and await E("document.getElementById('boardscroll').scrollLeft") < 3, f"thumb wheel scrolls the board right and back left, over the cards too ({round(far)})")
     await E("document.getElementById('boardscroll').scrollLeft=0"); await pg.wait_for_timeout(100)
     # mouse drag RFQ card → Quoted lane opens the phase dialog
     src = await pg.locator(".lane[data-status='RFQ Received'] .kcard").first.bounding_box()
@@ -343,6 +351,19 @@ async def phone(b):
         await cdp.send("Input.dispatchTouchEvent", {"type": "touchMove", "touchPoints": [{"x": card["x"] + 200 - 25 * i, "y": card["y"] + 30}]}); await pg.wait_for_timeout(16)
     await cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []}); await pg.wait_for_timeout(400)
     ok(await E("!document.querySelector('.kghost')") and await E("formMode") != "phase" and await E("!detailJob"), "phone: a quick swipe doesn't pick a card up")
+    # finger swipes: all the way right, then all the way back left, starting on a card
+    async def swipe(x0, x1, y):
+        await cdp.send("Input.dispatchTouchEvent", {"type": "touchStart", "touchPoints": [{"x": x0, "y": y}]})
+        for i in range(1, 11):
+            await cdp.send("Input.dispatchTouchEvent", {"type": "touchMove", "touchPoints": [{"x": x0 + (x1 - x0) * i / 10, "y": y}]}); await pg.wait_for_timeout(16)
+        await cdp.send("Input.dispatchTouchEvent", {"type": "touchEnd", "touchPoints": []}); await pg.wait_for_timeout(450)
+    await E("go('jobs');setView('kanban');document.getElementById('boardscroll').scrollLeft=0"); await pg.wait_for_timeout(250)
+    bx = await E("(()=>{const r=document.getElementById('boardscroll').getBoundingClientRect();return [r.left,r.right]})()")
+    yc = (await pg.locator(".lane .kcard").first.bounding_box())["y"] + 30
+    for _ in range(8): await swipe(bx[1] - 25, bx[0] + 25, yc)
+    right = await E("document.getElementById('boardscroll').scrollLeft")
+    for _ in range(9): await swipe(bx[0] + 25, bx[1] - 25, yc)
+    ok(right > 800 and await E("document.getElementById('boardscroll').scrollLeft") < 3 and await E("!detailJob"), f"phone: swipe all the way right ({round(right)}) and all the way back left")
     await pg.screenshot(path=os.path.join(OUT, "v6_phone_board.png"))
     ok(not errs, "no page errors (phone): " + "; ".join(errs[:3]))
     await ctx.close()

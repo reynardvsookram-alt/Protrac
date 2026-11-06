@@ -804,7 +804,7 @@ html:hover{scrollbar-color:var(--sb) transparent}
 .lanehd .dot{width:8px;height:8px;border-radius:50%;flex:0 0 8px}
 .lanehd .ln{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lcnt{min-width:24px;height:22px;padding:0 7px;border-radius:999px;background:var(--hover);border:1px solid var(--line);font:600 11.5px var(--mono);display:inline-flex;align-items:center;justify-content:center;color:var(--ink-soft)}
-.lanebody{flex:1;min-height:60px;overflow-y:auto;overscroll-behavior:contain;padding:10px;display:flex;flex-direction:column;gap:9px}
+.lanebody{flex:1;min-height:60px;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;overscroll-behavior-x:auto;padding:10px;display:flex;flex-direction:column;gap:9px}
 .laneempty{font-size:12px;color:var(--ink-soft);text-align:center;padding:18px 0;border:1px dashed var(--line);border-radius:10px}
 .laneadd{margin:0 10px 10px;padding:9px;border:1px dashed var(--line);border-radius:10px;background:transparent;color:var(--ink-soft);font:600 12.5px var(--sans);cursor:pointer}
 .laneadd:hover{border-color:var(--weld-dim);color:var(--weld)}
@@ -929,6 +929,7 @@ body.kdragging,body.kdragging *{cursor:grabbing!important}
 .rem-add input:hover,.rcol-add input:hover,.tpladd input:hover,select.colsel:hover{border-color:var(--weld-dim)}
 .rem-add input:focus,.rcol-add input:focus,.tpladd input:focus,select.colsel:focus{outline:none;border-color:var(--weld-dim);background:var(--card);box-shadow:0 0 0 3px var(--weld-soft)}
 .rem-add .btn,.rcol-add .btn,.tpladd .btn{border-radius:10px}
+@media (pointer:fine){.boardscroll{scroll-snap-type:none}}   /* snapping fights mouse thumb-wheels; arrows already land on lane edges */
 </style>
 </head>
 <body>
@@ -3280,7 +3281,7 @@ function initBoard(){
     if(e.ctrlKey)return;
     const dx=e.deltaX||0,dy=e.deltaY||0;
     if(e.shiftKey){sc.scrollLeft+=dy||dx;e.preventDefault();return;}
-    if(Math.abs(dx)>Math.abs(dy))return;                       // touchpad sideways swipe: native
+    if(Math.abs(dx)>Math.abs(dy)){if(sc.scrollWidth>sc.clientWidth+1){sc.scrollLeft+=dx;e.preventDefault();}return;}   // thumb wheel (e.g. MX Master) / touchpad sideways: always moves the board
     const lb=e.target&&e.target.closest?e.target.closest(".lanebody"):null;
     if(lb&&lb.scrollHeight>lb.clientHeight+1)return;            // over a lane with more cards: scroll that lane
     if(sc.scrollWidth>sc.clientWidth+1){sc.scrollLeft+=dy;e.preventDefault();}
