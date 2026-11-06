@@ -4,7 +4,7 @@ Protrac is a fabrication job tracker built by and for a mechanical engineer runn
 
 ## The owner — how to work with him
 - He communicates casually, but wants **polished, professional output**, **direct answers and honest pushback**, and **step-by-step explanations**.
-- He has **no laptop**. He works from a phone and a Windows desktop, and deploys through **GitHub Pages from `main`**. A cloud session pushes a branch, and the live site only updates after he merges it. Tell him that at the end of each task, with the PR link.
+- **Desktop first (his decision, Nov 2026): a Windows desktop computer is how he uses Protrac. Design, polish and review for desktop only.** He looked at the phone layout and wasn't happy with it, and asked to set the phone aside. He has no laptop; he deploys through **GitHub Pages from `main`**. A cloud session pushes a branch, and the live site only updates after he merges it. Tell him that at the end of each task, with the PR link.
 - He writes change requests as numbered items (C1, C2…), often with screenshots. Ask before building when a choice is genuinely his, e.g. layout options or what a field should mean. Otherwise just build.
 
 ## Hard rules
@@ -13,7 +13,7 @@ Protrac is a fabrication job tracker built by and for a mechanical engineer runn
 3. **An earlier tracker (iteration 1) existed at a previous employer. It is private history.** Don't show, name or reference it in the UI, README, demo or commit messages.
 4. **Never break saved data.** Users' data lives in `localStorage` (`protrac_v1`). Every schema change needs an **idempotent** migration in `migrate()` (`migrateProtrac`, `migrateV2`, `migrateV5`, `migrateV6` …) and a test proving old data still loads. Removed fields stay on the record unless there's a reason to delete them (e.g. `job.stage` and `job.percent` are kept but no longer shown).
 5. No `alert/confirm/prompt`: they're blocked in hosted viewers. Use the in-app dialogs `uiAsk`, `uiConfirm`, `openModal`.
-6. Everything works at **phone width (390 px)** with no horizontal page scroll. Wide tables scroll inside `.tablewrap`.
+6. **Desktop is the target** (1366–1920 px wide, plus a narrower ~1024 px window). Wide tables scroll inside `.tablewrap`. **The phone layout is parked**: don't polish it, take phone screenshots or ask him to review it. Keep the existing phone CSS and its regression tests as they are, so the page still loads without horizontal scroll at 390 px, unless he asks for it to be removed.
 7. Wrap `localStorage` access in try/catch.
 
 ## Current goal (agreed with the owner)
@@ -35,7 +35,7 @@ Keep every removal behind a migration so saved data survives.
 - Purposeful press/toggle micro-animations.
 - A refined type scale and spacing, and a cohesive light and dark theme.
 
-Show him before/after screenshots, desktop and phone, for sign-off.
+Show him before/after **desktop** screenshots (light and dark) for sign-off.
 
 ## Build / test loop (run before every push)
 ```bash
