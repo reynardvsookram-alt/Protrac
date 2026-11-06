@@ -24,10 +24,16 @@ It is a single offline HTML file. There's no install, no server and no account, 
 ## How a job moves
 
 ```
-RFQ received ──► Quote submitted ──► PO received ──► Procurement ──► Production ──► Delivered
- due = client's     clock stops;      due = PO date + quoted lead time (working days)
- reply deadline     "chase client"    min = target, max = due date; holds extend it
+RFQ received ──► Quoted – awaiting PO ──► PO received ──► In production ──► Delivered / Collected ──► Documents & handover
+ due = client's     clock stops;           due = PO date + quoted lead time (working days)          due 2–4 working days
+ reply deadline     "chase client"         min = target, max = due date; holds extend it            after delivery
 ```
+
+- **PO received** is the client's answer to the quote. Production starts when you press **Start production**, often on
+  off-cuts or yard stock before any supplier delivery arrives. Materials are tracked alongside production ("Materials 3 of 5 in").
+- **Client requirements** (MPI on welds, load test on the pad eyes, weld maps) are ticked when the job is added or confirmed at the PO.
+  They add the inspection steps in the shop's order (fabricate → MPI → load test → MPI on the pad eye welds → blast & coat),
+  and a **Documents & handover** phase after delivery or collection. A failed inspection blocks the next step.
 
 ## Features
 
@@ -37,8 +43,8 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
 - **Job page**: progress stepper, next-action button, **undo / redo** of phase changes, progress and current step taken from the schedule, turnaround stats (RFQ → quote, quote → PO, delivery vs. promise).
 - **Board**: jobs by phase in full-height lanes; drag a card (or press-and-hold on a phone) to move it on.
 - **Value & costing**: import or paste the costing sheet (cost per line × markup, labour as days × day rate, materials straight from the material list), quoted value and re-quotes (Rev 0, Rev 1 … with the margin impact shown before you agree a discount), PO value, margin per project, and a dashboard value row (quotes out, order book, delivered, average margin, win rate) with a one-tap *Hide values*.
-- **Automation**: the schedule re-plans itself when the PO and lead time come in; the job moves into production when the last material line is received; QC stages outside the job's scope are marked N/A.
-- **Material lists**: type them into a spreadsheet-style table (Enter moves down, paste cells straight from Excel), or import a multi-sheet .xlsx. Lines are priced from the price book as they come in.
+- **Automation**: the schedule re-plans itself when the PO and lead time come in; when the last material line is in, Protrac offers to start production; QC stages and inspections outside the job's scope are marked N/A. Quoting warns when MPI, a load test or transport is required but not costed.
+- **Material lists**: mark lines **in stock** (off-cuts, yard stock) so they skip supplier RFQs but are still costed at the supplier price. Type them into a spreadsheet-style table (Enter moves down, paste cells straight from Excel), or import a multi-sheet .xlsx. Lines are priced from the price book as they come in.
 - **Purchasing pipeline**: one page with four clickable stages: **To order → Waiting on suppliers → Ordered → Received**.
   - Tick lines and send one RFQ to several suppliers. The RFQ copies as a real email table (keeps its columns in Gmail/Outlook) with blank price and lead-time columns for the supplier to fill in.
   - Enter each supplier's reply per item; prices are logged in the price book automatically.
@@ -47,7 +53,7 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
 - **Supplier profiles**: tap a supplier to see everything they sell with their latest prices, the brands they carry, how fast they reply to RFQs and how often they're cheapest. Add a new item they sell (and its price) right there.
 - **Price book**: imports an existing supplier costing workbook (Price Book + Quote Log sheets). Search by size (`4x4x1/4`, `plate 3/8`, `sch40`), compare suppliers, view price history and flags. Prices show excl./incl. VAT.
 - **QC**:
-  - Four stages: Welding/Fabrication, Sandblasting, Painting and Final Inspection.
+  - Stages: Welding/Fabrication, MPI, Load test, MPI after the load test (when the client asks for them), Sandblasting, Painting and Final Inspection.
   - Optional item-by-item checks for each stage.
   - Failed stages carry a defect note.
   - A QC register across all jobs.

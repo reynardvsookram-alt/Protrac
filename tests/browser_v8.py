@@ -1,0 +1,120 @@
+"""v8 flow (desktop): no Procurement phase, Start production, client requirements, MPI → load test → MPI order,
+Delivered / Collected → Documents & handover, in-stock material lines, costing warnings, board / dashboard / calendar.
+Run: python3 tests/browser_v8.py"""
+import os, asyncio
+from playwright.async_api import async_playwright
+APP = "file://" + os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "index.html"))
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out"); os.makedirs(OUT, exist_ok=True)
+res = []
+def ok(c, m): res.append((bool(c), m))
+
+
+async def main():
+    async with async_playwright() as p:
+        b = await p.chromium.launch()
+        ctx = await b.new_context(viewport={"width": 1440, "height": 900})
+        pg = await ctx.new_page(); errs = []; pg.on("pageerror", lambda e: errs.append(str(e))); E = pg.evaluate
+        await pg.goto(APP); await pg.wait_for_timeout(400)
+        await E("DB.meta.hideGuide=true;save()")
+
+        # ---- board: no Procurement lane, Documents & handover before Delivered / Collected ----
+        await E("go('jobs');setView('kanban')"); await pg.wait_for_timeout(100)
+        lanes = await E("[...document.querySelectorAll('.lane .ln')].map(e=>e.textContent)")
+        ok(lanes == ["RFQ Received", "Quoted – Awaiting PO", "PO Received", "In Production", "Documents & Handover", "Delivered / Collected", "Lost / Declined"], f"board lanes ({lanes})")
+        ok(await pg.locator(".kcard .matbadge").count() >= 2, "board cards show the materials badge")
+
+        # ---- new project: requirement ticks + delivery, pre-ticked by project type ----
+        await E("openForm(null,'jobs')")
+        ok(await E("document.querySelector('#mbody [data-k=reqMPI]').checked") and not await E("document.querySelector('#mbody [data-k=reqLoad]').checked"), "Build to client drawing → MPI ticked, load test not")
+        await pg.locator("#mbody .segbtn", has_text="Repair / blast & paint").click()
+        ok(not await E("document.querySelector('#mbody [data-k=reqMPI]').checked"), "Repair / blast & paint → MPI unticked")
+        await pg.locator("#mbody .segbtn", has_text="Design & build").click()
+        await pg.fill("#mbody [data-k=jobName]", "Pad-eye test frame")
+        await pg.locator("#mbody .optchk", has_text="Load test").click()
+        await pg.locator("#mbody .dvbtns .segbtn", has_text="Client collects").click()
+        await E("saveForm()"); await pg.wait_for_timeout(100)
+        jid = await E("DB.jobs.find(j=>j.jobName==='Pad-eye test frame').id")
+        ok(await E(f"(()=>{{const j=DB.jobs.find(x=>x.id==='{jid}');return j.reqMPI&&j.reqLoad&&!j.reqWeldMap&&j.delivery==='client'}})()"), "ticks and 'Client collects' saved on the project")
+        keys = await E(f"DB.tasks.filter(t=>t.jobRef==='{jid}'&&t.stepKey).map(t=>t.stepKey)")
+        ok(all(k in keys for k in ["mpi", "loadtest", "mpi2", "docs"]) and "weldmaps" not in keys, "schedule gets MPI → load test → MPI after → documents (no weld maps)")
+        order = [k for k in keys if k in ("fab", "mpi", "loadtest", "mpi2", "blast", "coat")]
+        ok(order == ["fab", "mpi", "loadtest", "mpi2", "blast", "coat"], f"steps in his order ({order})")
+
+        # ---- quote: warnings for uncosted requirements ----
+        await E(f"openPhaseAction('{jid}','quoted')")
+        txt = await pg.inner_text("#mbody")
+        ok("MPI is required but not costed" in txt and "Load test is required but not costed" in txt and "Transport" not in txt, "quote dialog warns: MPI + load test not costed (client collects → no transport warning)")
+        await E("saveForm()")
+        # ---- PO: confirm requirements (add weld maps) ----
+        await E(f"openPhaseAction('{jid}','po')")
+        ok(await pg.locator("#mbody", has_text="Confirm client requirements").count() == 1, "PO dialog asks to confirm client requirements")
+        await pg.fill("#mbody [data-k=leadMax]", "15"); await pg.locator("#mbody .optchk", has_text="Weld maps").click()
+        await E("saveForm()"); await pg.wait_for_timeout(100)
+        ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').reqWeldMap") and await E(f"DB.tasks.some(t=>t.jobRef==='{jid}'&&t.stepKey==='weldmaps')"), "weld maps added at the PO → step added to the schedule")
+        await E(f"openJob('{jid}')")
+        ok(await pg.locator(".phacts button", has_text="Start production").count() == 1, "PO Received → Start production button")
+        ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').phase") == "PO Received", "still PO Received until he starts production")
+        await pg.locator(".phacts button", has_text="Start production").click(); await E("saveForm()"); await pg.wait_for_timeout(100)
+        ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').phase") == "In Production", "Start production → In Production")
+
+        # ---- QC tab: inspection order is enforced ----
+        await E(f"openJob('{jid}','checklist')")
+        names = await E("[...document.querySelectorAll('.qcname')].map(e=>e.textContent)")
+        ok(names[:4] == ["Welding / Fabrication", "MPI — welds", "Load test — pad eyes", "MPI — pad eyes after load test"], f"QC rows in order ({names[:4]})")
+        await E(f"qcSet('{jid}','mpi','Fail')"); await pg.fill("#askin", "linear indication on pad eye weld"); await pg.click("#askok"); await pg.wait_for_timeout(60)
+        await E(f"qcSet('{jid}','load','Pass')"); await pg.wait_for_timeout(60)
+        ok(await E("document.getElementById('askscrim').classList.contains('show')") and "failed" in (await pg.inner_text("#askbody")), "load test blocked while MPI has failed")
+        await pg.click("#askcancel")
+        ok(not await E(f"(DB.jobs.find(j=>j.id==='{jid}').qc.load||{{}}).s"), "…and not recorded")
+        await E(f"qcSet('{jid}','mpi','Pass');qcSet('{jid}','load','Pass')"); await pg.wait_for_timeout(60)
+        await E(f"qcSet('{jid}','blast','Pass')"); await pg.wait_for_timeout(60)
+        ok("isn't recorded yet" in await pg.inner_text("#askbody"), "blast before the pad-eye MPI asks first")
+        await pg.click("#askcancel")
+        await E(f"qcSet('{jid}','mpi2','Pass');qcSet('{jid}','blast','Pass')"); await pg.wait_for_timeout(60)
+        ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').qc.blast.s") == "Pass", "all inspections passed → blast records")
+        ok(await E(f"DB.tasks.find(t=>t.jobRef==='{jid}'&&t.stepKey==='mpi2').status") == "Done", "schedule ticks the after-load-test MPI itself")
+
+        # ---- collected → documents & handover → closed ----
+        await E(f"openJob('{jid}')"); await pg.locator(".phacts button", has_text="Collected by client").click()
+        ok("Documents & handover" in await pg.inner_text("#mbody"), "collect dialog says the documents phase comes next")
+        await E("saveForm()"); await pg.wait_for_timeout(80)
+        ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').phase") == "Documents & Handover", "collected → Documents & handover")
+        steps = await E("[...document.querySelectorAll('.stepper .slbl')].map(e=>e.textContent)")
+        ok(steps == ["RFQ", "Quoted", "PO", "Production", "Collected", "Documents"], f"stepper: … Production → Collected → Documents ({steps})")
+        ok("Documents due" in await pg.inner_text(".dmeta"), "documents due date shown")
+        await E("go('dashboard')")
+        ok(await pg.locator(".attcard", has_text="Documents to hand over").count() == 1, "dashboard: Documents to hand over card")
+        ok("Hand over documents" in await pg.inner_text(".o-dl"), "upcoming deadlines: hand over documents")
+        await E(f"openJob('{jid}')"); await pg.locator(".phacts button", has_text="Documents handed over").click(); await E("saveForm()"); await pg.wait_for_timeout(80)
+        ok(await E(f"(()=>{{const j=DB.jobs.find(x=>x.id==='{jid}');return j.phase==='Delivered'&&!!j.docsSentDate&&isClosed(j)}})()"), "documents handed over → closed")
+        ok("Collected" in await pg.inner_text(".dmeta"), "closed project reads 'Collected'")
+
+        # ---- in-stock material lines ----
+        await E(f"DB.materials.push({{id:'is1',jobRef:'{jid}',description:'Off-cut 3/8 plate',qtyReq:1}},{{id:'is2',jobRef:'{jid}',description:'Angle 2x2x1/4',qtyReq:2}});save();openJob('{jid}','materials')")
+        await pg.locator("tr", has_text="Off-cut 3/8 plate").locator("button", has_text="In stock").click()
+        ok(await E("DB.materials.find(m=>m.id==='is1').inStock") and await pg.locator("tr", has_text="Off-cut 3/8 plate").locator(".mchip", has_text="In stock").count() >= 1, "In stock toggle on the material row")
+        await E(f"matSel=new Set(['is1','is2']);renderDetail()"); await pg.locator(".bulkbar button", has_text="Send supplier RFQ").click(); await pg.wait_for_timeout(60)
+        ok(await E("impCtx&&impCtx.ids.join()") == "is2", "supplier RFQ leaves the in-stock line out")
+        await E("closeForm()")
+
+        # ---- calendar legend + settings text ----
+        await E("go('jobs');setView('calendar')")
+        ok("Documents due" in await pg.inner_text(".callegend"), "calendar legend has Documents due")
+        await E("go('settings');setTab='workflow';render()")
+        st = await pg.inner_text("#content")
+        ok("Procurement" not in st and "Documents handed over" in st, "Settings: flow text updated, documents target / overdue days editable")
+
+        # ---- nothing anywhere still offers Procurement as a phase ----
+        await E("go('jobs');setView('grid')")
+        opts = await E("[...document.querySelectorAll('select')].flatMap(s=>[...s.options].map(o=>o.textContent))")
+        ok("Procurement" not in opts, "no Procurement option in any phase filter")
+        for theme in ("light", "dark"):
+            await E(f"setTheme('{theme}');openJob('{jid}')"); await pg.wait_for_timeout(150)
+            await pg.screenshot(path=os.path.join(OUT, f"v8_job_{theme}.png"))
+        ok(not errs, "no page errors: " + "; ".join(errs[:3]))
+        await b.close()
+    for c, m in res: print(("PASS " if c else "FAIL ") + m)
+    f = sum(1 for c, _ in res if not c); print(f"\n{len(res) - f} passed, {f} failed")
+    raise SystemExit(1 if f else 0)
+
+asyncio.run(main())
