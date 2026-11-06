@@ -958,6 +958,26 @@ body.kdragging,body.kdragging *{cursor:grabbing!important}
   .costtab tr{display:grid;grid-template-columns:minmax(0,1fr) 84px 96px;gap:6px 8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
   .costtab td{display:block;padding:0!important;border:0!important;min-width:0}.costtab td.cl{grid-column:1/-1;font-weight:700}
   .costtab .cm input{width:52px}.costtab .cdays input{width:58px}}
+/* ---- dashboard money panel ---- */
+.moneypanel{margin:18px 0 4px}
+.mtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.mtop h3{margin:0}
+.mlabel{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);margin:12px 0 8px}
+.mbar{display:flex;gap:3px;height:10px;border-radius:999px;overflow:hidden;background:var(--hover);margin-bottom:10px}
+.mseg{display:block;min-width:6px}.s-wait{background:var(--hold)}.s-hand{background:var(--info)}.s-done{background:var(--ok)}.s-none{flex:1;background:var(--hover)}
+.mgrid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mgrid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mblk{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card-alt);color:var(--ink);cursor:pointer;font:inherit;min-width:0;transition:border-color .15s,transform .12s,box-shadow .15s}
+.mblk:not([disabled]):hover{border-color:var(--weld-dim);box-shadow:var(--raise)}
+.mblk:not([disabled]):active{transform:scale(.985)}
+.mblk[disabled]{cursor:default;opacity:.8}
+.mblk .mh{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;color:var(--ink-soft)}
+.mblk .mdot{width:9px;height:9px;border-radius:50%;flex:0 0 9px}
+.b-wait .mdot{background:var(--hold)}.b-hand .mdot{background:var(--info)}.b-done .mdot{background:var(--ok)}
+.mblk b{font:700 22px var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.mblk b small{font-size:13px;font-weight:600;color:var(--ink-soft);margin-left:4px}
+.mblk .ms{font-size:11.5px;color:var(--ink-soft)}
+@media(max-width:760px){.mgrid3,.mgrid2{grid-template-columns:1fr;gap:7px}.mblk{padding:9px 12px;gap:1px}.mblk b{font-size:18px}.mlabel{margin:10px 0 6px}}
 </style>
 </head>
 <body>
@@ -3184,7 +3204,7 @@ function go(id){ setTimeout(pageAnim,0); listQ=""; gridFilters={}; supView=null;
 function dashFilter(kind){ setTimeout(pageAnim,0); detailJob=null; current="jobs"; currentView="grid"; sortKey="jobName"; sortDir=-1; jobFilter=kind; listQ=""; gridFilters={}; render(); buildNav(); }
 function dashGo(page){ if(page==="procurement")purStage="waiting"; go(page); }
 function clearJobFilter(){ jobFilter=null; render(); }
-const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Projects overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active projects (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded",delivered:"Delivered this year"};
+const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Projects overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active projects (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded",delivered:"Delivered this year",winloss:"Won & lost — quotes the client decided on",costed:"Costed projects behind the average margin"};
 function rerender(){ if(detailJob)renderDetail(); else render(); buildNav(); }
 
 /* ============ ROUTER ============ */
@@ -3221,7 +3241,7 @@ function filteredRows(){
   if(current==="jobs"&&jobFilter){
     const F={quoteover:j=>{const s=jobState(j);return s.kind==="quote"&&s.overdue;},jobover:j=>{const s=jobState(j);return s.kind==="delivery"&&s.overdue;},
       soon:j=>jobState(j).soon,rfq:j=>j.phase===PH.RFQ,awaitingpo:j=>j.phase===PH.QUOTED,chase:j=>jobState(j).chase,active:j=>EXEC.includes(j.phase),
-      onhold:j=>!isClosed(j)&&isOnHold(j),nodue:j=>{const s=jobState(j);return(s.kind==="quote"||s.kind==="delivery")&&!s.due;},nochecklist:jobNeedsChecklist,delivered:j=>j.phase===PH.DONE&&(j.deliveredDate||"").slice(0,4)===todayISO().slice(0,4)}[jobFilter];
+      onhold:j=>!isClosed(j)&&isOnHold(j),nodue:j=>{const s=jobState(j);return(s.kind==="quote"||s.kind==="delivery")&&!s.due;},nochecklist:jobNeedsChecklist,delivered:j=>j.phase===PH.DONE&&(j.deliveredDate||"").slice(0,4)===todayISO().slice(0,4),winloss:j=>isWon(j)||isLostQuote(j),costed:j=>(EXEC.includes(j.phase)||j.phase===PH.DONE)&&!!jobMargin(j)}[jobFilter];
     if(F)rows=rows.filter(F);
   }
   if(sortKey==="_due"){
@@ -3955,22 +3975,39 @@ function saveRequote(){
   save();closeForm();rerender();toast("Rev "+rev+" saved — "+money(v));
 }
 /* ---- dashboard value row ---- */
+/* won = the client sent a PO (even if the project later went Lost); lost = declined before any PO */
+function isWon(j){return (reached(j,PH.PO)&&j.phase!==PH.LOST)||(j.phase===PH.LOST&&(j.phaseLog||[]).some(e=>e.phase===PH.PO));}
+function isLostQuote(j){return j.phase===PH.LOST&&!(j.phaseLog||[]).some(e=>e.phase===PH.PO);}
 function valueRow(){
   const jobs=DB.jobs||[],Y=todayISO().slice(0,4);
-  const sum=f=>jobs.filter(f).reduce((a,j)=>a+(jobValue(j)||0),0);
-  const out=sum(j=>j.phase===PH.QUOTED),book=sum(j=>EXEC.includes(j.phase)),done=sum(j=>j.phase===PH.DONE&&(j.deliveredDate||"").slice(0,4)===Y);
-  const ms=jobs.filter(j=>(EXEC.includes(j.phase)||j.phase===PH.DONE)).map(jobMargin).filter(Boolean);
-  const avg=ms.length?ms.reduce((a,m)=>a+m.amt,0)/ms.reduce((a,m)=>a+m.value,0)*100:null;
-  const won=jobs.filter(j=>reached(j,PH.PO)&&j.phase!==PH.LOST||(j.phase===PH.LOST&&(j.phaseLog||[]).some(e=>e.phase===PH.PO))),lost=jobs.filter(j=>j.phase===PH.LOST&&!(j.phaseLog||[]).some(e=>e.phase===PH.PO));
-  const wr=won.length+lost.length?won.length/(won.length+lost.length)*100:null;
-  const wv=won.reduce((a,j)=>a+(quoteValue(j)||0),0),lv=lost.reduce((a,j)=>a+(quoteValue(j)||0),0),wrv=wv+lv?wv/(wv+lv)*100:null;
-  const tile=(l,v,s,fn)=>`<div class="statcard vstat ${fn?"clickable":""}" ${fn?`onclick="${fn}"`:""}><div class="n">${v}</div><div class="l">${l}</div>${s?`<div class="vs">${s}</div>`:""}</div>`;
-  return `<div class="valhead"><h3>Value <span class="resp">excl. VAT</span></h3><button class="btn sm ghost" onclick="toggleHideVals()" title="Hide money on this device, e.g. when sharing your screen">${hideVals()?"👁 Show values":"🙈 Hide values"}</button></div>
-    <div class="cards vcards">${tile("Quotes out",mv(out),jobs.filter(j=>j.phase===PH.QUOTED).length+" awaiting PO","dashFilter('awaitingpo')")}
-      ${tile("Order book",mv(book),(n=>n+" project"+(n===1?"":"s")+" in hand")(jobs.filter(j=>EXEC.includes(j.phase)).length),"dashFilter('active')")}
-      ${tile("Delivered "+Y,mv(done),(n=>n+" project"+(n===1?"":"s"))(jobs.filter(j=>j.phase===PH.DONE&&(j.deliveredDate||"").slice(0,4)===Y).length),"dashFilter('delivered')")}
-      ${tile("Average margin",avg==null?"—":pct(avg),ms.length?"on "+ms.length+" costed projects":"add costings to see it","")}
-      ${tile("Win rate",wr==null?"—":Math.round(wr)+"%",wr==null?"":won.length+" won · "+lost.length+" lost"+(wrv!=null?" · "+(hideVals()?"••":Math.round(wrv)+"%")+" by value":""),"")}</div>`;
+  const grp=f=>{const l=jobs.filter(f);return {n:l.length,v:l.reduce((a,j)=>a+(jobValue(j)||0),0)};};
+  const wait=grp(j=>j.phase===PH.QUOTED),hand=grp(j=>EXEC.includes(j.phase)),done=grp(j=>j.phase===PH.DONE&&(j.deliveredDate||"").slice(0,4)===Y);
+  const ms=jobs.filter(j=>(EXEC.includes(j.phase)||j.phase===PH.DONE)).map(j=>({j,m:jobMargin(j)})).filter(x=>x.m);
+  const pv=ms.reduce((a,x)=>a+x.m.value,0),pa=ms.reduce((a,x)=>a+x.m.amt,0),pp=pv?pa/pv*100:null;
+  const low=ms.filter(x=>x.m.pct<minMargin()).sort((a,b)=>a.m.pct-b.m.pct);
+  const won=jobs.filter(isWon),lost=jobs.filter(isLostQuote),dec=won.length+lost.length;
+  const wv=won.reduce((a,j)=>a+(quoteValue(j)||0),0),lv=lost.reduce((a,j)=>a+(quoteValue(j)||0),0);
+  const pl=n=>n+" project"+(n===1?"":"s");
+  const tot=wait.v+hand.v+done.v,seg=(x,c)=>tot&&x.v?`<span class="mseg ${c}" style="flex:${x.v}" title="${esc(mv(x.v))}"></span>`:"";
+  const blk=(cls,head,x,sub,fn)=>`<button type="button" class="mblk ${cls}" onclick="${fn}"><span class="mh"><span class="mdot"></span>${head}</span><b>${x.n?mv(x.v):"—"}</b><span class="ms">${x.n?pl(x.n)+(sub?" · "+sub:""):"none right now"}</span></button>`;
+  return `<section class="panel moneypanel">
+    <div class="mtop"><h3>💰 Money <span class="resp">excl. VAT</span></h3><button class="btn sm ghost" onclick="toggleHideVals()" title="Hide every money figure on this device — e.g. when you share your screen">${hideVals()?"👁 Show values":"🙈 Hide values"}</button></div>
+    <div class="mlabel">Where the money is</div>
+    <div class="mbar">${seg(wait,"s-wait")}${seg(hand,"s-hand")}${seg(done,"s-done")}${tot?"":`<span class="mseg s-none"></span>`}</div>
+    <div class="mgrid3">
+      ${blk("b-wait","Quoted — waiting on the client",wait,"no PO yet","dashFilter('awaitingpo')")}
+      ${blk("b-hand","Won — work in hand",hand,"PO received, not delivered","dashFilter('active')")}
+      ${blk("b-done","Delivered in "+Y,done,"","dashFilter('delivered')")}
+    </div>
+    <div class="mlabel">How we're doing</div>
+    <div class="mgrid2">
+      <button type="button" class="mblk b-prof" ${ms.length?`onclick="dashFilter('costed')"`:"disabled"}><span class="mh">Profit on won work</span>
+        <b>${ms.length?`${mv(pa)} <small>${pct(pp)}</small>`:"—"}</b>
+        <span class="ms">${ms.length?`on ${pl(ms.length)} with a costing (${mv(pv)} of work)`+(low.length?` · <span class="late">${low.length} below ${minMargin()}%</span>`:""):"add a costing to a project to see it"}</span></button>
+      <button type="button" class="mblk b-win" ${dec?`onclick="dashFilter('winloss')"`:"disabled"}><span class="mh">Quotes won</span>
+        <b>${dec?`${won.length} of ${dec} <small>${Math.round(won.length/dec*100)}%</small>`:"—"}</b>
+        <span class="ms">${dec?`${hideVals()?"••":Math.round(wv/((wv+lv)||1)*100)+"%"} of the quoted value · ${lost.length} lost`:"no quotes decided yet"}</span></button>
+    </div></section>`;
 }
 
 function openJob(id,tab){ setTimeout(pageAnim,0); matSel=new Set(); detailJob=id; detailTab=tab||"overview"; renderDetail(); buildNav(); }
