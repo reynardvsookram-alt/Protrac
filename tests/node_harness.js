@@ -160,7 +160,7 @@ run(c, 'sortKey=null');
 const smoke = (label, code) => { try { run(c, code); ok(true, label); } catch (e) { ok(false, label + ' threw: ' + e.stack.split('\n').slice(0, 3).join(' | ')); } };
 smoke('dashboard', 'go("dashboard")');
 const dash = N.els.content.innerHTML;
-ok(['Attention required', 'Financial overview', 'Project pipeline', 'Upcoming deadlines', 'At-risk projects', 'My actions', 'This month', 'Recent projects'].every(s => dash.includes(s)) && !dash.includes('Quick stats'), 'dashboard content (v3 cards, "This month" replaces Quick stats)');
+ok(['Attention required', 'Financial overview', 'Project pipeline', 'Upcoming deadlines', 'At-risk projects', 'My actions', 'This month', 'Recent activity'].every(s => dash.includes(s)) && !dash.includes('Quick stats'), 'dashboard content (v3 cards, "This month" replaces Quick stats)');
 smoke('reminders', 'go("reminders")');
 /* settings uses real DOM — covered in browser suites */
 smoke('jobs grid', 'go("jobs")');
@@ -200,7 +200,7 @@ ok(run(F.ctx, 'DB.jobs.map(j=>j.jobId).sort().join(",")') === '001,002,003,004,0
   ok(overIds.every(id => dl.includes(`openJob('${id}')`)) && att.includes("dashFilter('quoteover')"), 'fix 1: overdue projects stay in Attention + Upcoming deadlines');
   ok(/openJob\('/.test(risk) && D('DB.jobs.filter(j=>!isClosed(j)&&!jobState(j).overdue&&(qcSummary(j).fail>0||jobState(j).soon||jobState(j).chase||isOnHold(j))).length') === (risk.match(/class="rrow/g) || []).length, 'fix 1: At-risk = due soon / chase / on hold / QC fail');
   // fix 2: This month
-  const mon = sec('This month', 'Recent projects');
+  const mon = sec('This month', 'Recent activity');
   ok(['Quote', 'PO', 'Delivered', 'Value won'].every(s => mon.includes(s)) && ['mquoted', 'mwon', 'mdelivered'].every(f => mon.includes(`dashFilter('${f}')`)), 'fix 2: This month tiles open filtered lists');
   D(`globalThis.__M=todayISO().slice(0,7);globalThis.__L=isoAdd(__M+"-01",-3);DB.jobs.push({id:"mth1",jobId:"901",jobName:"Month test",phase:PH.PO,holds:[],updates:[],qc:{},quotes:[{rev:0,date:todayISO(),value:1000}],poValue:1234,
      phaseLog:[{phase:PH.RFQ,date:__L},{phase:PH.QUOTED,date:__L},{phase:PH.PO,date:todayISO()}],rfqDate:__L,quoteSentDate:__L,poDate:todayISO()})`);
@@ -208,7 +208,7 @@ ok(run(F.ctx, 'DB.jobs.map(j=>j.jobId).sort().join(",")') === '001,002,003,004,0
   D('current="jobs";jobFilter="mwon";listQ="";gridFilters={}');
   ok(D('filteredRows().some(j=>j.id==="mth1")&&filteredRows().every(j=>inThisMonth(j,"won"))'), 'fix 2: "POs won" filter lists this month\'s POs');
   D('jobFilter="mquoted"'); ok(D('!filteredRows().some(j=>j.id==="mth1")'), 'fix 2: last month\'s quote is not counted this month');
-  D('go("dashboard")'); ok(sec('This month', 'Recent projects').includes('PO'), 'dashboard renders with the month test project');
+  D('go("dashboard")'); ok(sec('This month', 'Recent activity').includes('PO'), 'dashboard renders with the month test project');
   D('DB.jobs=DB.jobs.filter(j=>j.id!=="mth1")');
   // fix 3: attention filter = exactly the projects behind the cards
   D('current="jobs";jobFilter="attention";listQ="";gridFilters={}');

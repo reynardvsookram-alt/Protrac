@@ -40,7 +40,7 @@ async def desktop(b):
     ok("Needs your attention" in await pg.inner_text(".filterbanner"), "fix 3: filter banner names it")
 
     # rows open the project
-    for sel in [".drow", ".rrow", ".rtab tbody tr"]:
+    for sel in [".drow", ".rrow", ".frow"]:
         await open_dash(pg); cnt = await pg.locator(sel).count(); good = 0
         for i in range(cnt):
             await open_dash(pg); jid = await E(f"(document.querySelectorAll('{sel}')[{i}].getAttribute('onclick')||'').match(/openJob\\('([^']+)'/)?.[1]")
@@ -60,10 +60,24 @@ async def desktop(b):
             await pg.locator(sel).nth(i).click(); await pg.wait_for_timeout(30)
             good += f is not None and await E("jobFilter") == f and await E("current") == "jobs"
         ok(cnt > 0 and good == cnt, f"every {sel} opens its filtered list ({good}/{cnt})")
-    for txt, want in [("Calendar", "current==='jobs'&&currentView==='calendar'"), ("All", "current==='reminders'"), ("View all", "current==='jobs'&&!jobFilter")]:
-        await open_dash(pg); sel = ".o-dl .dlink" if txt == "Calendar" else ".o-act .dlink" if txt == "All" else ".o-recent .dlink"
+    for txt, want in [("Calendar", "current==='jobs'&&currentView==='calendar'"), ("All", "current==='reminders'")]:
+        await open_dash(pg); sel = ".o-dl .dlink" if txt == "Calendar" else ".o-act .dlink"
         await pg.locator(sel).click(); await pg.wait_for_timeout(30)
         ok(await E(want), f"'{txt}' link goes to its page")
+    # Recent activity = project updates and changes, newest first (replaced the Recent projects table, which repeated the Projects page)
+    await open_dash(pg)
+    ok(await pg.locator(".rtab").count() == 0 and "Recent activity" in await pg.inner_text(".o-recent"), "Recent activity replaces the Recent projects table")
+    want = await E("(()=>{const f=[];DB.jobs.forEach(j=>(j.updates||[]).forEach((u,idx)=>f.push({u,idx})));f.sort((a,b)=>(b.u.date||'').localeCompare(a.u.date||'')||((b.u.ts||0)-(a.u.ts||0))||(b.idx-a.idx));return f.slice(0,3).map(x=>x.u.text.replace(/\\n/g,' '))})()")
+    got = await E("[...document.querySelectorAll('.frow .fmsg')].slice(0,3).map(e=>e.textContent)")
+    ok(want == got and len(got) == 3, f"feed shows the newest updates first ({got[:1]})")
+    ok(await E("document.querySelector('.fday').textContent.length>0"), "feed is grouped by day")
+    total = await E("DB.jobs.reduce((a,j)=>a+(j.updates||[]).length,0)"); n0 = await pg.locator(".frow").count()
+    if total > n0:
+        await pg.locator(".fmore").click(); await pg.wait_for_timeout(40)
+        ok(await pg.locator(".frow").count() == min(total, n0 + 20), "Show more loads 20 more updates")
+    await E("DB.jobs[0].updates.push({id:uid(),date:todayISO(),ts:Date.now(),text:'Test update from the shop floor'});save();go('dashboard')")
+    ok((await pg.locator(".frow .fmsg").first.inner_text()) == "Test update from the shop floor" and (await pg.locator(".fday").first.inner_text()).lower() == "today", "a new update appears at the top under Today")
+    await E("DB.jobs[0].updates.pop();save()")
     await open_dash(pg); await pg.locator(".dnew").click(); await pg.wait_for_timeout(60)
     ok(await E("formMode") is not None and await E("!!document.querySelector('#mbody [data-k=jobName]')"), "New project opens the project form")
     await E("closeForm()")

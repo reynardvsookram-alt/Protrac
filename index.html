@@ -1001,8 +1001,6 @@ svg.ic{width:18px;height:18px;flex:0 0 18px}
 .qgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .qtile{display:grid;grid-template-columns:40px 1fr;grid-template-rows:auto auto;gap:0 10px;align-items:center;font:inherit;color:var(--ink);background:var(--card-alt);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;text-align:left}
 .qtile:hover{border-color:var(--weld-dim)}.qtile b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.qtile b small{font:600 11px var(--sans);color:var(--ink-soft);margin-right:3px}.qtile .atic{grid-row:1/3;width:40px;height:40px}.qtile b{font:700 22px var(--mono)}.qtile>span:last-child{font-size:12px;color:var(--ink-soft)}
-.rtab{width:100%;min-width:900px}.rtab tr{cursor:pointer}.rtab td{vertical-align:middle;font-size:13px}
-.schip2{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:7px;white-space:nowrap}.s-ok{background:var(--ok-bg);color:var(--ok)}.s-bad{background:var(--bad-bg);color:var(--bad)}.s-warn{background:var(--warn-bg);color:var(--warn)}.s-mute{background:var(--hover);color:var(--ink-soft)}
 @media(max-width:1180px){.dg3{grid-template-columns:repeat(2,minmax(0,1fr))}.dg3>.dcard:last-child{grid-column:1/-1}}
 @media(max-width:760px){
   .dg3{grid-template-columns:1fr}.dg3>.dcard:last-child{grid-column:auto}
@@ -1020,6 +1018,17 @@ svg.ic{width:18px;height:18px;flex:0 0 18px}
 .prow,.drow,.rrow,.qtile,.fmini,.attcard{transition:transform .12s,border-color .15s,box-shadow .15s}.prow:active,.drow:active,.rrow:active,.qtile:active,.fmini:active{transform:scale(.985)}
 .rrow:hover,.fmini:hover{border-color:var(--weld-dim)}.flegend button:hover em{color:var(--ink)}
 .dcard .minimsg{padding:8px 2px}
+.flist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 18px}
+.fday{grid-column:1/-1;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink-soft);padding:10px 2px 4px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.fday:first-child{padding-top:0}
+.frow{display:grid;grid-template-columns:32px minmax(0,1fr);gap:10px;align-items:start;text-align:left;font:inherit;color:var(--ink);background:none;border:1px solid transparent;border-radius:10px;padding:7px 8px;cursor:pointer;transition:background .12s,border-color .12s}
+.frow:hover{background:var(--card-alt);border-color:var(--line)}.frow:active{transform:scale(.99)}
+.fic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center}.fic svg.ic{width:16px;height:16px;flex-basis:16px}
+.ftx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fmsg{font-size:13px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fjob{font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fmore{margin-top:8px}
+@media(max-width:1100px){.flist{grid-template-columns:1fr}}
 /* phone order (≤760px): the two card grids dissolve into one column so each card can be placed */
 @media(max-width:760px){
   .dash3{display:flex;flex-direction:column;gap:12px}.dash3>*{margin:0!important}.dash3 .dg3{display:contents}
@@ -3634,7 +3643,7 @@ const DI={ // small inline icon set (stroke icons, currentColor)
   quote:'<path d="M5 4h10l4 4v12H5z"/><path d="M9 12h6M9 16h4"/>',truck:'<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
   box:'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
   ok:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>',plus:'<path d="M12 5v14M5 12h14"/>',arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>',
-  coin:'<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.8-1.7-1.2-3-1.2-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.3 0-2.4-.4-3-1.2M12 6v2M12 16v2"/>'};
+  pulse:'<path d="M3 12h4l3-7 4 14 3-7h4"/>',coin:'<circle cx="12" cy="12" r="9"/><path d="M15 9.2c-.6-.8-1.7-1.2-3-1.2-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.3 0-2.4-.4-3-1.2M12 6v2M12 16v2"/>'};
 function ic(n,cls){return `<svg class="ic ${cls||""}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${DI[n]||""}</svg>`;}
 function firstName(){const s=((DB.meta&&DB.meta.emailSignoff)||"").split("\n")[0].trim();const w=s.split(/\s+/)[0]||"";return /^[A-Z][a-z]+$/.test(w)?w:"";}
 /* Attention required: one list used by the dashboard cards AND the "attention" project filter, so "View all" shows exactly the projects behind the cards */
@@ -3657,6 +3666,16 @@ function attentionJobIds(){const s=new Set();attentionItems().forEach(a=>a.jobs.
 const MONTH_EVT={quoted:[PH.QUOTED,"quoteSentDate"],won:[PH.PO,"poDate"],delivered:[PH.DONE,"deliveredDate"]};
 function inThisMonth(j,kind){const [ph,f]=MONTH_EVT[kind],M=todayISO().slice(0,7),hit=d=>(d||"").slice(0,7)===M;
   return (j.phaseLog||[]).some(e=>e.phase===ph&&hit(e.date))||hit(jd(j,f));}
+let dashFeedN=12;
+/* what kind of change an update is, for its icon in Recent activity */
+function actKind(t){
+  if(/^QC\b|QC passed|QC fail/i.test(t))return ["wrench",/fail/i.test(t)?"t-bad":"t-ok"];
+  if(/^(On hold|Resumed)/.test(t))return ["pause","t-slate"];
+  if(/^(Phase →|↩ Undo|↪ Redo|PO received|Quote submitted|Delivered|Lost|RFQ received)/.test(t))return ["flow","t-info"];
+  if(/value|Costing|costing|re-quote|Re-quote/.test(t))return ["coin","t-warn"];
+  if(/^✓/.test(t))return ["check","t-ok"];
+  return ["doc","t-slate"];
+}
 function renderDashboard(c){
   const jobs=DB.jobs||[],T=todayISO(),S=jobs.map(j=>({j,s:jobState(j)}));
   const hr=new Date().getHours(),greet=hr<12?"Good morning":hr<17?"Good afternoon":"Good evening",nm=firstName();
@@ -3715,12 +3734,17 @@ function renderDashboard(c){
     [md.length,"Delivered","truck","t-ok","mdelivered"],[mwv?"<small>TTD</small>"+short(mwv):"—","Value won","coin","t-ok","mwon"]];
   const month=`<section class="dcard o-month"><header><span class="dhic t-info">${ic("chart")}</span><div><h3>This month</h3><p>${esc(monthName)} so far</p></div></header>
     <div class="qgrid">${qs.map(([n,l,i,t,f])=>`<button type="button" class="qtile" onclick="dashFilter('${f}')"${l==="Value won"&&mwv&&!hideVals()?` title="${esc(mv(mwv))} of POs received this month"`:""}><span class="atic ${t}">${ic(i)}</span><b>${n}</b><span>${l}</span></button>`).join("")}</div></section>`;
-  // ---- recent projects table ----
-  const recent=jobs.slice().sort((a,b)=>(+b.jobId||0)-(+a.jobId||0)).slice(0,6);
-  const status=(j,s)=>j.phase===PH.DONE?["s-ok","Delivered"]:j.phase===PH.LOST?["s-mute","Lost"]:s.paused?["s-mute","On hold"]:s.overdue?["s-bad","Overdue"]:s.chase?["s-warn","Chase client"]:s.soon?["s-warn","Due soon"]:["s-ok","On track"];
-  const rows=recent.map(j=>{const s=jobState(j),[sc,stx]=status(j,s),p=jobPct(j),d=s.due||s.followUp;return `<tr onclick="openJob('${j.id}')"><td class="cellmono">${esc(jobNo(j))}</td><td><b>${esc(j.jobName)}</b></td><td>${esc(j.client||"")}</td><td><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span></td><td>${esc(currentStep(j)||"—")}</td><td class="${s.overdue?"late":""}">${d?esc(fmtShort(d)):"—"}</td><td class="cellmono">${jobValue(j)!=null?mv(jobValue(j)):"—"}</td><td><div class="pbar" style="min-width:110px"><span class="ptrack"><span class="pf ${p>=100?'full':''}" style="width:${p}%"></span></span><em>${p}%</em></div></td><td><span class="schip2 ${sc}">${stx}</span></td></tr>`;}).join("");
-  const table=`<section class="dcard o-recent"><header><span class="dhic t-info">${ic("folder")}</span><div><h3>Recent projects</h3><p>Newest first</p></div><button type="button" class="dlink" onclick="go('jobs')">View all ${ic("arrow")}</button></header>
-    ${recent.length?`<div class="tablewrap"><table class="rtab"><thead><tr><th>#</th><th>Project</th><th>Client</th><th>Phase</th><th>Current step</th><th>Due</th><th>Value</th><th>Progress</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`:`<div class="minimsg">No projects yet. Tap <b>New project</b> to log your first RFQ.</div>`}</section>`;
+  // ---- recent activity: the latest updates and changes across every project (what changed, not what's already on the Projects page) ----
+  const feed=[];jobs.forEach(j=>(j.updates||[]).forEach((u,idx)=>feed.push({j,u,idx})));
+  feed.sort((a,b)=>{const d=(b.u.date||"").localeCompare(a.u.date||"");if(d)return d;return ((b.u.ts||0)-(a.u.ts||0))||(b.idx-a.idx);});
+  const shown=feed.slice(0,dashFeedN),Y=isoAdd(T,-1);
+  const dayLbl=d=>d===T?"Today":d===Y?"Yesterday":d?new Date(d+"T00:00:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"}):"No date";
+  let lastDay=null;
+  const fitems=shown.map(({j,u})=>{const [k,t]=actKind(u.text||""),day=u.date||"",head=day!==lastDay?`<div class="fday">${esc(dayLbl(day))}</div>`:"";lastDay=day;
+    return head+`<button type="button" class="frow" onclick="openJob('${j.id}')"><span class="fic ${t}">${ic(k)}</span><span class="ftx"><span class="fmsg">${esc(u.text||"").replace(/\n/g," ")}</span><span class="fjob">${esc(jobLabel(j))}${j.client?" · "+esc(j.client):""}</span></span></button>`;}).join("");
+  const table=`<section class="dcard o-recent"><header><span class="dhic t-info">${ic("pulse")}</span><div><h3>Recent activity</h3><p>Updates and changes across all projects, newest first</p></div></header>
+    ${feed.length?`<div class="flist">${fitems}</div>${feed.length>shown.length?`<button type="button" class="dmore fmore" onclick="dashFeedN+=20;render()">Show ${Math.min(20,feed.length-shown.length)} more of ${feed.length-shown.length}</button>`:""}`
+      :`<div class="minimsg">${jobs.length?"No updates logged yet. Post an update on a project and it shows here.":"No projects yet. Tap <b>New project</b> to log your first RFQ."}</div>`}</section>`;
   c.innerHTML=`<div class="dash3"><div class="dhead3"><div class="dhl"><h1>${greet}${nm?", "+esc(nm):""} 👋</h1><p>Here's what you need to know today.</p></div>
       <div class="dhr"><button class="btn primary dnew" onclick="openForm(null,'jobs')">${ic("plus")} New project</button><div class="ddate"><b>${esc(dateTxt)}</b><span>${att.length?att.length+" thing"+(att.length>1?"s":"")+" need"+(att.length>1?"":"s")+" your attention":"All clear today"}</span></div></div></div>
     ${searchBox()}${guideCard()}
