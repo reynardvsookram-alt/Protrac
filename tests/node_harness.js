@@ -291,5 +291,26 @@ ok(!g('R.qc.weld.s'), 'turning the option back on clears an automatic N/A');
   const order = p('sortBySize(searchPrices("rhs",{strict:true})).map(x=>x.it.description.replace(/^(RHS|SHS) /,"").split(" x ").slice(0,2).join("x"))');
   ok(order.indexOf('2"x2"') < order.indexOf('3"x2"') && order.indexOf('3"x2"') < order.indexOf('4"x2"') && order.indexOf('4"x4"') < order.indexOf('6"x4"'), 'price book lists sizes smallest first: ' + order.slice(0, 6).join(', '));
 }
+
+// ---- 12. saved DEMO data picks up the demo price-book revisions; real data is never touched ----
+{ const D = makeCtx({}); vm.runInContext(appCode, D.ctx); const d = s => run(D.ctx, s);
+  // make it look like a demo saved before the revision: old categories/items, no estimates, rev unset
+  d(`DB.meta.demoRev=0;DB.priceQuotes=DB.priceQuotes.filter(q=>q.response!=="Estimate");
+     ["AB-01","HO-01","CN-01","PL-10"].forEach((c,i)=>{const it={id:"old"+i,code:c,category:c[0]=="A"?"Abrasives":c[0]=="H"?"Hoses":c[0]=="C"?"Consumables":"Plate",description:"old "+c,tags:"",stockLength:"",grade:"",uom:"Each",notes:"",synonyms:""};DB.priceItems.push(it);DB.priceQuotes.push({id:"oq"+i,itemRef:it.id,supplier:"Supplier A",date:todayISO(),price:10,response:"Quoted",note:"",seq:1});});
+     DB.priceItems.filter(i=>i.category==="Miscellaneous").forEach(i=>i.category="Consumables");
+     DB.materials.push({id:"oldm1",jobRef:DB.jobs[0].id,description:"Garnet abrasive 30/60",qtyReq:3},{id:"oldm2",jobRef:DB.jobs[0].id,description:"Masking tape",qtyReq:3});DB.procurement[0].materialRefs.push("oldm1");DB.procurement[0].item="Garnet abrasive, masking";
+     DB.suppliers[4].supplies=["Abrasives","Hoses","Consumables"];DB.suppliers[4].notes="Garnet and copper-slag abrasives, blast hose, masking.";
+     DB.priceItems.find(i=>i.code==="RHS-10").userNote=1; DB.priceQuotes.push({id:"mine",itemRef:DB.priceItems.find(i=>i.code==="FT-01").id,supplier:"Supplier A",date:todayISO(),price:333,response:"Quoted",note:"typed by me",seq:2});
+     migrate();`);
+  ok(d('!priceCats().some(c=>["Abrasives","Hoses","Consumables"].includes(c))') && d('priceCats().includes("Miscellaneous")'), 'saved demo: Abrasives / Hoses gone, Consumables → Miscellaneous');
+  ok(d('!DB.priceItems.some(i=>["AB-01","HO-01","CN-01","PL-10"].includes(i.code))') && d('!DB.priceQuotes.some(q=>/^oq/.test(q.id))'), 'saved demo: removed items and their prices gone');
+  ok(d('bestPrice(DB.priceItems.find(i=>i.code==="RHS-10")).est===true'), 'saved demo: estimates added where there was no price');
+  ok(d('!/garnet|abrasive|masking tape|poly sheet|blast hose/i.test(JSON.stringify([DB.materials,DB.procurement.map(r=>r.item),DB.suppliers,DB.jobs.map(j=>j.updates)]))'), 'saved demo: no abrasive / hose / masking / poly sheeting left in projects, RFQs, suppliers or updates');
+  ok(d('DB.suppliers.every(s=>!(s.supplies||[]).some(x=>["Abrasives","Hoses","Consumables"].includes(x)))'), 'saved demo: supplier specialities cleaned (Consumables → Miscellaneous)');
+  ok(d('DB.priceQuotes.some(q=>q.id==="mine")') && d('!DB.priceQuotes.some(q=>q.itemRef===DB.priceItems.find(i=>i.code==="FT-01").id&&q.response==="Estimate")'), 'saved demo: your own prices kept, no estimate added over them');
+  { const a = JSON.stringify(d('DB')); d('DB.meta.demoRev=0;migrate()'); ok(JSON.stringify(d('DB.priceQuotes.length')) === JSON.stringify(JSON.parse(a).priceQuotes.length), 'demo revision is idempotent'); }
+  d(`DB.meta.isDemo=false;DB.meta.demoRev=0;DB.priceItems.push({id:"real1",code:"AB-01",category:"Abrasives",description:"my garnet",tags:"",stockLength:"",grade:"",uom:"Bag",notes:"",synonyms:""});migrate();`);
+  ok(d('DB.priceItems.some(i=>i.id==="real1")'), 'real (non-demo) data is never changed by demo revisions');
+}
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
