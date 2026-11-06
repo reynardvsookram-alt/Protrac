@@ -4125,8 +4125,11 @@ function valueCard(j){
       <span class="hbtns">${j.phase===PH.QUOTED&&q!=null?`<button class="btn sm" onclick="openRequote('${j.id}')">Re-quote</button>`:""}<button class="btn sm primary" onclick="openCosting('${j.id}')">${c.has?"Costing":"+ Costing"}</button></span></h3>
     <div class="vgrid">${cell("Quoted"+(q!=null&&quoteRev(j)?" · Rev "+quoteRev(j):""),q!=null?mv(q):"—",(j.quotes||[]).length>1?"was "+mv(+(j.quotes[0].value)):"",`openQuotesEdit('${j.id}')`,q!=null?"Revisions":"Add the quote")}
       ${cell("PO value",po!=null?mv(po):"—",po!=null&&q!=null&&Math.abs(po-q)>0.5?(po<q?"below":"above")+" quote":"",`openPoEdit('${j.id}')`,reached(j,PH.PO)?"Edit PO":"Record PO")}
-      ${cell("Cost",c.has?mv(c.cost):"—",c.has?"materials "+mv(c.lines.find(l=>l.key==="mat").cost):"add a costing",`openCosting('${j.id}')`,c.has?"Costing":"Add costing")}
-      ${cell("Margin",m?`<span class="${low?"late":"ontime"}">${mv(m.amt)}</span>`:"—",m?pct(m.pct)+(low?" — below "+minMargin()+"%":""):"",`openMarginInfo('${j.id}')`,"Breakdown")}</div>
+      ${(()=>{const mc=(c.lines.find(l=>l.key==="mat")||{}).cost||0;   // priced material list counts even before the rest of the costing is in
+        return c.has?cell("Cost",mv(c.cost),"materials "+mv(mc),`openCosting('${j.id}')`,"Costing")
+          :mc>0?cell("Cost",mv(mc),"materials only — add labour, coatings &amp; the rest",`openCosting('${j.id}')`,"Add costing")
+          :cell("Cost","—","add a costing",`openCosting('${j.id}')`,"Add costing");})()}
+      ${cell("Margin",m?`<span class="${low?"late":"ontime"}">${mv(m.amt)}</span>`:"—",m?pct(m.pct)+(low?" — below "+minMargin()+"%":""):!c.has&&(c.lines.find(l=>l.key==="mat")||{}).cost>0?"needs the full costing":"",`openMarginInfo('${j.id}')`,"Breakdown")}</div>
     ${(j.quotes||[]).length>1?`<div class="revlist">${j.quotes.map(x=>`<button type="button" class="chip chipbtn" onclick="openQuotesEdit('${j.id}')">Rev ${x.rev} · ${esc(fmtShort(x.date))} · ${mv(x.value)}${x.note?" · "+esc(x.note):""}</button>`).join("")}</div>`:""}
   </div>`;
 }

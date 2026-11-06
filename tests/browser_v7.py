@@ -122,6 +122,13 @@ async def desktop(b):
     ok(await E("(()=>{go('settings');setTab='general';render();return document.querySelector('#content').textContent.includes('Costing defaults')})()"), "Settings: costing defaults (day rates, minimum margin, markups)")
     await E("setCostMarkup(6,25)")
     ok(await E("costLines()[6].markup") == 25, "default markup editable")
+    # a priced material list shows on the Cost box before the rest of the costing is in (his comment)
+    mj = await E("(()=>{const j=DB.jobs.find(j=>!jobCosting(j).has&&(jobCosting(j).lines.find(l=>l.key==='mat')||{}).cost>0);return j&&j.id})()")
+    if mj:
+        await E(f"openJob('{mj}')")
+        cost = await E("[...document.querySelectorAll('.vcell')].find(c=>/Cost/i.test(c.querySelector('label').textContent)).innerText")
+        mc = await E(f"jobCosting(DB.jobs.find(j=>j.id==='{mj}')).lines.find(l=>l.key==='mat').cost")
+        ok(await E(f"money({mc})") in cost and "materials only" in cost, "Cost box shows the material cost before a full costing")
     ok(not errs, "no page errors (desktop): " + "; ".join(errs[:3]))
     await ctx.close()
 
