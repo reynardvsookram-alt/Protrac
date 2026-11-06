@@ -978,6 +978,19 @@ body.kdragging,body.kdragging *{cursor:grabbing!important}
 .mblk b small{font-size:13px;font-weight:600;color:var(--ink-soft);margin-left:4px}
 .mblk .ms{font-size:11.5px;color:var(--ink-soft)}
 @media(max-width:760px){.mgrid3,.mgrid2{grid-template-columns:1fr;gap:7px}.mblk{padding:9px 12px;gap:1px}.mblk b{font-size:18px}.mlabel{margin:10px 0 6px}}
+.vcell{text-align:left;font:inherit;color:var(--ink);cursor:pointer;transition:border-color .15s,box-shadow .15s,transform .12s;position:relative}
+.vcell:hover{border-color:var(--weld-dim);box-shadow:var(--raise)}
+.vcell:active{transform:scale(.985)}
+.vcell .vgo{font-size:11px;font-weight:700;color:var(--weld);margin-top:4px}
+.qrevtab{width:100%;min-width:620px}.qrevtab input{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--card);color:var(--ink);font:13px var(--sans)}
+.qrevtab td{vertical-align:middle}
+.mtab2{width:100%;min-width:520px}.mtab2 .num{text-align:right;font-family:var(--mono);white-space:nowrap}.mtab2 tfoot th{border-top:2px solid var(--line)}
+.mtab2 tfoot th{text-align:left;padding:10px 12px}.mtab2 tfoot th.num{text-align:right}
+@media(max-width:760px){.qrevtab{min-width:0}.qrevtab thead{display:none}
+  .qrevtab tr{display:grid;grid-template-columns:52px minmax(0,1fr) minmax(0,1fr) 34px;gap:6px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .qrevtab td{display:block;padding:0!important;border:0!important;min-width:0}
+  .qrevtab td:nth-child(4),.qrevtab td:nth-child(5){grid-column:2/4}
+  .qrevtab td:nth-child(6){grid-column:4;grid-row:1}}
 </style>
 </head>
 <body>
@@ -3858,14 +3871,14 @@ function pct(n){return hideVals()?"••%":(Math.round(n*10)/10)+"%";}
 /* Overview card */
 function valueCard(j){
   const q=quoteValue(j),po=poValue(j),c=jobCosting(j),m=jobMargin(j),low=m&&m.pct<minMargin();
-  const cell=(l,v,s)=>`<div class="vcell"><label>${l}</label><b>${v}</b>${s?`<span class="resp">${s}</span>`:""}</div>`;
+  const cell=(l,v,s,fn,tip)=>`<button type="button" class="vcell" onclick="${fn}" title="${esc(tip)}"><label>${l}</label><b>${v}</b>${s?`<span class="resp">${s}</span>`:""}<span class="vgo">${esc(tip)} ›</span></button>`;
   return `<div class="dsection valcard"><h3><span class="ic">💲</span> Value &amp; costing <span class="resp" style="font-weight:500;text-transform:none;letter-spacing:0">excl. VAT</span>
       <span class="hbtns">${j.phase===PH.QUOTED&&q!=null?`<button class="btn sm" onclick="openRequote('${j.id}')">Re-quote</button>`:""}<button class="btn sm primary" onclick="openCosting('${j.id}')">${c.has?"Costing":"+ Costing"}</button></span></h3>
-    <div class="vgrid">${cell("Quoted"+(q!=null&&quoteRev(j)?" · Rev "+quoteRev(j):""),q!=null?mv(q):"—",(j.quotes||[]).length>1?"was "+mv(+(j.quotes[0].value)):"")}
-      ${cell("PO value",po!=null?mv(po):"—",po!=null&&q!=null&&Math.abs(po-q)>0.5?(po<q?"below":"above")+" quote":"")}
-      ${cell("Cost",c.has?mv(c.cost):"—",c.has?"materials "+mv(c.lines.find(l=>l.key==="mat").cost):"add a costing")}
-      ${cell("Margin",m?`<span class="${low?"late":"ontime"}">${mv(m.amt)}</span>`:"—",m?pct(m.pct)+(low?" — below "+minMargin()+"%":""):"")}</div>
-    ${(j.quotes||[]).length>1?`<div class="revlist">${j.quotes.map(x=>`<span class="chip">Rev ${x.rev} · ${esc(fmtShort(x.date))} · ${mv(x.value)}${x.note?" · "+esc(x.note):""}</span>`).join("")}</div>`:""}
+    <div class="vgrid">${cell("Quoted"+(q!=null&&quoteRev(j)?" · Rev "+quoteRev(j):""),q!=null?mv(q):"—",(j.quotes||[]).length>1?"was "+mv(+(j.quotes[0].value)):"",`openQuotesEdit('${j.id}')`,q!=null?"Revisions":"Add the quote")}
+      ${cell("PO value",po!=null?mv(po):"—",po!=null&&q!=null&&Math.abs(po-q)>0.5?(po<q?"below":"above")+" quote":"",`openPoEdit('${j.id}')`,reached(j,PH.PO)?"Edit PO":"Record PO")}
+      ${cell("Cost",c.has?mv(c.cost):"—",c.has?"materials "+mv(c.lines.find(l=>l.key==="mat").cost):"add a costing",`openCosting('${j.id}')`,c.has?"Costing":"Add costing")}
+      ${cell("Margin",m?`<span class="${low?"late":"ontime"}">${mv(m.amt)}</span>`:"—",m?pct(m.pct)+(low?" — below "+minMargin()+"%":""):"",`openMarginInfo('${j.id}')`,"Breakdown")}</div>
+    ${(j.quotes||[]).length>1?`<div class="revlist">${j.quotes.map(x=>`<button type="button" class="chip chipbtn" onclick="openQuotesEdit('${j.id}')">Rev ${x.rev} · ${esc(fmtShort(x.date))} · ${mv(x.value)}${x.note?" · "+esc(x.note):""}</button>`).join("")}</div>`:""}
   </div>`;
 }
 /* ---- costing editor ---- */
@@ -3947,6 +3960,50 @@ function saveCosting(){
   save();closeForm();rerender();toast("Costing saved");
 }
 /* ---- re-quote: tap a discount or type the new total; shows what it does to the margin ---- */
+/* ---- tap the value boxes: edit quote revisions, edit PO, margin breakdown ---- */
+function openQuotesEdit(jobId){
+  const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;formMode="quotes";editingId=jobId;
+  const qs=(j.quotes||[]).length?j.quotes:[{rev:0,date:j.quoteSentDate||todayISO(),value:"",ref:"",note:""}];
+  const row=(x,i)=>`<tr data-qi="${i}"><td class="cellmono">Rev ${i}</td><td><input type="date" data-q="date" value="${esc(x.date||"")}"></td><td><input type="number" step="any" data-q="value" value="${esc(x.value??"")}" placeholder="excl. VAT"></td><td><input data-q="ref" value="${esc(x.ref||"")}" placeholder="quote no."></td><td><input data-q="note" value="${esc(x.note||"")}" placeholder="e.g. 10% discount"></td><td>${qs.length>1?`<button type="button" class="icobtn del" title="Delete this revision" onclick="this.closest('tr').remove();qRenum()">✕</button>`:""}</td></tr>`;
+  openModal("Quote & revisions — "+jobLabel(j),`<div class="full impnote">Values excl. VAT. The last revision is the quoted value${reached(j,PH.PO)?"":" and pre-fills the PO"}. Fix a typo here, or add a revision.</div>
+    <div class="full tablewrap"><table class="qrevtab"><thead><tr><th>Rev</th><th>Date</th><th>Value</th><th>Quote no.</th><th>Note</th><th></th></tr></thead><tbody id="qrows">${qs.map(row).join("")}</tbody></table></div>
+    <div class="full"><button type="button" class="btn sm" onclick="closeForm();openRequote('${j.id}')" ${(j.quotes||[]).length?"":"disabled"}>+ Re-quote (with discount)</button></div>`,{wide:true,ok:"Save"});
+}
+function qRenum(){document.querySelectorAll("#qrows tr").forEach((tr,i)=>{tr.dataset.qi=i;tr.firstElementChild.textContent="Rev "+i;});}
+function saveQuotesEdit(){
+  const j=(DB.jobs||[]).find(x=>x.id===editingId);if(!j){closeForm();return;}
+  const qs=Array.from(document.querySelectorAll("#qrows tr")).map((tr,i)=>{const g=k=>(tr.querySelector(`[data-q="${k}"]`)||{}).value||"";return {rev:i,date:g("date")||todayISO(),value:g("value")===""?"":Math.round(+g("value")*100)/100,ref:g("ref").trim(),note:g("note").trim()};}).filter(x=>x.value!==""||x.ref||x.note);
+  if(qs.some(x=>!(+x.value>0))){toast("Every revision needs a value — or delete it");return;}
+  const before=quoteValue(j);j.quotes=qs.map((x,i)=>Object.assign(x,{rev:i}));
+  if(quoteValue(j)!==before)(j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"Quoted value corrected: "+(before==null?"—":money(before))+" → "+(quoteValue(j)==null?"—":money(quoteValue(j)))+" (excl. VAT)"});
+  save();closeForm();rerender();toast("Quote saved");
+}
+function openPoEdit(jobId){
+  const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;
+  if(!reached(j,PH.PO)){openPhaseAction(jobId,"po");return;}
+  formMode="poedit";editingId=jobId;
+  openModal("PO — "+jobLabel(j),`<div class="field"><label>PO number</label><input data-k="poNumber" value="${esc(j.poNumber||"")}"></div>
+    <div class="field"><label>PO value (excl. VAT)</label><input type="number" step="any" data-k="poValue" value="${esc(poValue(j)??"")}" placeholder="${esc(quoteValue(j)??"")}">${quoteValue(j)!=null?`<div class="lblnote">quote${quoteRev(j)?" Rev "+quoteRev(j):""}: ${mv(quoteValue(j))}</div>`:""}</div>
+    <div class="hint full">PO date and lead time are under <b>Edit project</b>, because they move the delivery due date.</div>`);
+}
+function savePoEdit(){
+  const j=(DB.jobs||[]).find(x=>x.id===editingId);if(!j){closeForm();return;}const d={};document.querySelectorAll("#mbody [data-k]").forEach(el=>{d[el.dataset.k]=el.value;});
+  const was=poValue(j);j.poNumber=(d.poNumber||"").trim();j.poValue=d.poValue===""?"":Math.round(+d.poValue*100)/100;
+  if(poValue(j)!==was)(j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"PO value "+(was==null?"set":"changed "+money(was)+" →")+" "+(poValue(j)==null?"—":money(poValue(j)))+" (excl. VAT)"});
+  save();closeForm();rerender();toast("PO saved");
+}
+function openMarginInfo(jobId){
+  const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;const C=jobCosting(j),v=jobValue(j);
+  if(!C.has){openCosting(jobId);return;}
+  formMode="view";
+  const rows=C.lines.filter(l=>l.cost||l.sell).map(l=>`<tr><td>${esc(l.label)}${l.labour&&nz(l.days)?` <span class="resp">${l.days} day${+l.days===1?"":"s"}</span>`:""}${l.auto?` <span class="resp">from material list</span>`:""}</td><td class="num">${mv(l.cost)}</td><td class="num">${pct(l.markup)}</td><td class="num">${mv(l.sell)}</td><td class="num">${mv(l.sell-l.cost)}</td></tr>`).join("");
+  const m=v!=null?v-C.cost:null,mp=v?m/v*100:null,low=mp!=null&&mp<minMargin();
+  openModal("Margin — "+jobLabel(j),`<div class="full tablewrap"><table class="mtab2"><thead><tr><th>Line</th><th class="num">Cost</th><th class="num">Markup</th><th class="num">Sell</th><th class="num">Mark-up $</th></tr></thead><tbody>${rows}</tbody>
+      <tfoot><tr><th>Costing total</th><th class="num">${mv(C.cost)}</th><th></th><th class="num">${mv(C.sell)}</th><th class="num">${mv(C.sell-C.cost)}</th></tr></tfoot></table></div>
+    <div class="full msum"><div class="m"><b>${v!=null?mv(v):"—"}</b>${reached(j,PH.PO)&&poValue(j)!=null?"PO value":"quoted value"+(quoteRev(j)?" (Rev "+quoteRev(j)+")":"")}</div><div class="m"><b>${mv(C.cost)}</b>cost</div><div class="m"><b class="${low?"late":"ontime"}">${m!=null?mv(m)+" · "+pct(mp):"—"}</b>margin${low?" — below your "+minMargin()+"% minimum":""}</div></div>
+    ${v!=null&&Math.abs(v-C.sell)>1?`<div class="full impnote">The ${reached(j,PH.PO)&&poValue(j)!=null?"PO":"quote"} is ${mv(Math.abs(v-C.sell))} ${v<C.sell?"below":"above"} the costing's sell total (${mv(C.sell)})${quoteRev(j)?" — after "+quoteRev(j)+" re-quote"+(quoteRev(j)>1?"s":""):""}.</div>`:""}
+    <div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="closeForm();openCosting('${j.id}')">Edit costing</button><button class="btn" onclick="closeForm();openQuotesEdit('${j.id}')">Quote &amp; revisions</button><button class="btn" onclick="closeForm()">Done</button></div>`,{wide:true,noFooter:true});
+}
 function openRequote(jobId){
   const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;const q=quoteValue(j);if(q==null){toast("Record the quote first");return;}
   formMode="requote";editingId=jobId;
@@ -4243,6 +4300,8 @@ function saveForm(){
   if(formMode==="wfopts")return saveWfOpts();
   if(formMode==="costing")return saveCosting();
   if(formMode==="requote")return saveRequote();
+  if(formMode==="quotes")return saveQuotesEdit();
+  if(formMode==="poedit")return savePoEdit();
   if(formMode==="eta"){const m=DB.materials.find(x=>x.id===purCtx.id);document.querySelectorAll("#mbody [data-k]").forEach(el=>{m[el.dataset.k]=el.value;});save();closeForm();rerender();toast("Saved");return;}
   if(formMode==="import"||formMode==="match"||formMode==="view"){closeForm();return;}
   const sch=SCHEMA[formTable],rec=editingId?DB[formTable].find(r=>r.id===editingId):{id:uid()};
