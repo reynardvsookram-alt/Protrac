@@ -1766,7 +1766,7 @@ function linkPrice(mid,itemId){const m=(DB.materials||[]).find(x=>x.id===mid);if
 function setManualPrice(mid){const m=(DB.materials||[]).find(x=>x.id===mid);const v=+(document.getElementById("manprice")||{}).value;if(!m||!(v>0)){toast("Enter a price");return;}m.unitCost=v;save();closeForm();rerender();toast("Manual price set");}
 
 function renderPrices(c){
-  const idx=pbIndex(),sups=idx.suppliers.slice(0,3),vat=priceVat?1+vatRate():1;
+  const idx=pbIndex(),sups=idx.suppliers.slice(0,3).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),vat=priceVat?1+vatRate():1;
   const cats=priceCats();
   const demo=DB.meta.demoPrices?`<div class="demobar">ℹ️ <b>Demo price book</b> — real steel quotes (TTD, excl. VAT) from two local stockists, supplier names hidden. Import your own workbook (📂 below or in Settings) to replace it.</div>`:"";
   const head=`<div class="tbar"><button class="btn" onclick="importPriceWorkbook()">📂 Import price workbook</button><button class="btn" onclick="openQuoteForm()">+ Log a supplier price</button><button class="btn" onclick="openPriceItemForm()">+ New item</button><span class="grow"></span><button class="pchip ${priceVat?'on':''}" onclick="priceVat=!priceVat;render()">${priceVat?"incl. VAT":"excl. VAT"}</button></div>
@@ -1783,7 +1783,7 @@ function sortBySize(res){const cats=priceCats(),ci=c=>{const i=cats.indexOf(c);r
   return res.map(x=>({x,c:ci(x.it.category),k:sizeKey(x.it)})).sort((a,b)=>{if(a.c!==b.c)return a.c-b.c;for(let i=0;i<Math.max(a.k.length,b.k.length);i++){const u=a.k[i]??-1,v=b.k[i]??-1;if(u!==v)return u-v;}return (a.x.it.description||"").localeCompare(b.x.it.description||"");}).map(o=>o.x);}
 function renderPriceRows(){
   const el=document.getElementById("prows");if(!el)return;
-  const idx=pbIndex(),sups=idx.suppliers.slice(0,3),vat=priceVat?1+vatRate():1;
+  const idx=pbIndex(),sups=idx.suppliers.slice(0,3).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),vat=priceVat?1+vatRate():1;
   const res=sortBySize(searchPrices(priceQ,{cat:priceCat,strict:true}));
   if(!res.length&&priceCat&&!priceQ){el.innerHTML=`<div class="empty">No items in <b>${esc(priceCat)}</b> yet. <button class="linkbtn" onclick="openPriceItemForm(null,priceCat)">+ Add the first item</button></div>`;return;}
   const rows=res.slice(0,150).map(({it})=>{

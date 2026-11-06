@@ -206,6 +206,8 @@ async def desktop(b):
 
     # ---- price book: remove a wrong price; warn on a price that looks off ----
     await E("go('prices')")
+    heads = await E("[...document.querySelectorAll('#prows thead th')].map(t=>t.textContent).slice(2,-1)")
+    ok(heads == sorted(heads) and heads.index("Supplier A") < heads.index("Supplier B"), f"price book supplier columns in A→Z order ({heads})")
     it9 = await E("DB.priceItems.find(i=>i.code==='RHS-09').id")
     await E(f"openQuoteForm('{it9}')"); await pg.fill("#mbody [data-k=supplier]", "Supplier B"); await pg.fill("#mbody [data-k=price]", "45")
     n0 = await E("DB.priceQuotes.length"); await E("saveForm()"); await pg.wait_for_timeout(50)
