@@ -114,6 +114,7 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 ### UI shell
 - **Navigation**: `buildNav`, `go`, `render` (PAGES map), `renderDetail` (job page; tabs Overview · Schedule · Materials · QC — old tab ids `updates`/`procurement` alias to `overview`/`materials`).
 - **Job form**: `jobFormHTML` / `wireJobForm` / `pickJobType` / `pickDeadline`; workflow options dialog `openWfOpts`. Job list columns come from `SCHEMA.jobs.gridCols` (`_step` = `currentStep`, `_pct` = `jobPct`).
+- **Calendar** (`renderCalendar`): Monday-first weeks, only as many weeks as the month needs, columns `repeat(7,minmax(0,1fr))` (**never plain `1fr`** — long names widened columns and pushed Fri–Sun off the card), today highlighted plus a "Today is …" pill, weekends and `meta.holidays` shaded, deadlines colour-coded (quote / delivery / follow-up / overdue). On phone the cells show dots and a dated list (`.calagenda`) sits under the grid.
 - **Board** (`renderKanban`): lanes fill the screen (`boardSize`), arrows step one lane (`boardStep`), wheel rules in `initBoard`, pointer-event drag that works with touch (press-and-hold) in `kDown/kMove/kUp`; dropping calls `changePhase`, so the phase dialog still opens.
 - **Scrollbars**: thin and transparent until hover / scroll (`.is-scrolling`), none on phone; sideways scrollers get `fade-l`/`fade-r` edge fades (observer at the end of the script).
 - **Layout**: collapsible sidebar (`toggleSide`). Settings is split into tabs (`setTab`).

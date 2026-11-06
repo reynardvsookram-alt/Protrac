@@ -262,6 +262,16 @@ async def desktop(b):
         ok(await E(f"!(DB.procurement.find(r=>r.id==='{rid}').suppliers[0].prices||{{}})['{mid}']"), "removing it clears that item on the RFQ reply too")
         await E("closeForm()")
 
+    # ---- calendar: 7 equal columns even with long names; weeks start Monday; today marked ----
+    await E("DB.jobs[0].jobName='A very long project name that used to stretch its calendar column across the page';save();go('jobs');setView('calendar')"); await pg.wait_for_timeout(100)
+    cols = await E("getComputedStyle(document.querySelector('.calgrid')).gridTemplateColumns.split(' ').map(parseFloat)")
+    ok(len(cols) == 7 and max(cols) - min(cols) < 1.5, f"calendar: 7 equal columns ({[round(x) for x in cols]})")
+    ok(await E("document.querySelector('.calgrid').getBoundingClientRect().right<=document.querySelector('.cal').getBoundingClientRect().right+1"), "calendar fits its card (Sunday column visible)")
+    ok(await E("(()=>{const c=[...document.querySelectorAll('.calcell')];const i=c.findIndex(x=>x.dataset.date===todayISO());return i>=0&&c[i].classList.contains('today')&&((new Date(todayISO()+'T00:00:00').getDay()+6)%7)===i%7})()"), "today sits under the right weekday and is highlighted")
+    ok(await E("(()=>{const c=[...document.querySelectorAll('.calcell')];return c.every((x,i)=>((new Date(x.dataset.date+'T00:00:00').getDay()+6)%7)===i%7)})()"), "every date sits under its weekday (Mon-first)")
+    ok("Today is" in await pg.inner_text(".todaypill"), "calendar states today's date")
+    await E("calNav(1)"); await E("calNav(-1)"); await E("calToday()")
+
     # ---- scrollbars ----
     await E("go('prices')")
     ok(await E("getComputedStyle(document.querySelector('.tablewrap')).scrollbarWidth") == "thin", "desktop scrollbars are thin")
@@ -282,6 +292,9 @@ async def phone(b):
                        ("board", "go('jobs');setView('kanban')"), ("settings", "go('settings');setTab='workflow';render()")]:
         await E(code); await pg.wait_for_timeout(200)
         ok(await E("document.documentElement.scrollWidth<=390"), f"phone {name}: no horizontal page scroll")
+    await E("go('jobs');setView('calendar')"); await pg.wait_for_timeout(150)
+    ok(await E("document.documentElement.scrollWidth<=390") and await E("(()=>{const c=getComputedStyle(document.querySelector('.calgrid')).gridTemplateColumns.split(' ').map(parseFloat);return c.length===7&&Math.max(...c)-Math.min(...c)<1.5})()"), "phone calendar: 7 equal columns, no sideways scroll")
+    ok(await E("getComputedStyle(document.querySelector('.calagenda')).display") != "none", "phone calendar: dated list under the grid")
     await E("openJob(DB.jobs.find(j=>j.jobId==='006').id)")
     ok(await E("(()=>{const t=document.querySelector('.jtabs');return t.scrollWidth<=t.clientWidth+1})()"), "phone: 4 job tabs fit without scrolling")
     ok(await E("getComputedStyle(document.documentElement).scrollbarWidth") == "none", "phone: no visible scrollbars")
