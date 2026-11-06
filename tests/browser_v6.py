@@ -190,6 +190,55 @@ async def desktop(b):
     ok(await E("!!detailJob"), "a plain click on a card opens the job")
     await pg.screenshot(path=os.path.join(OUT, "v6_desk_job.png"))
 
+    # ---- dashboard search results sit above the KPI cards (was hidden behind them) ----
+    for w, hgt in [(1366, 800), (1024, 700)]:
+        await pg.set_viewport_size({"width": w, "height": hgt})
+        await E("DB.meta.hideGuide=true;save();go('dashboard')"); await pg.wait_for_timeout(30)
+        await pg.fill("#gsq", "rhs"); await pg.wait_for_timeout(80)
+        for when in ("during the page animation", "after it"):
+            hidden = await E("""(()=>{const c=document.querySelector('.cards').getBoundingClientRect();return [...document.querySelectorAll('#gsres .gsitem')].filter(it=>{const q=it.getBoundingClientRect();if(q.bottom<c.top||q.top>c.bottom)return false;const e=document.elementFromPoint(q.left+q.width/2,q.top+q.height/2);return !(e&&e.closest('#gsres'));}).length})()""")
+            over = await E("(()=>{const c=document.querySelector('.cards').getBoundingClientRect();return [...document.querySelectorAll('#gsres .gsitem')].filter(it=>{const q=it.getBoundingClientRect();return q.bottom>c.top&&q.top<c.bottom}).length})()")
+            ok(over > 0 and hidden == 0, f"{w}px: search results drawn over the KPI cards {when} ({over} overlap, {hidden} hidden)")
+            await pg.wait_for_timeout(500)
+        await pg.keyboard.press("Escape")
+        ok(await E("document.getElementById('gsres').innerHTML") == "", f"{w}px: Escape closes the results")
+    await pg.set_viewport_size({"width": 1366, "height": 860})
+
+    # ---- price book: remove a wrong price; warn on a price that looks off ----
+    await E("go('prices')")
+    it9 = await E("DB.priceItems.find(i=>i.code==='RHS-09').id")
+    await E(f"openQuoteForm('{it9}')"); await pg.fill("#mbody [data-k=supplier]", "Supplier B"); await pg.fill("#mbody [data-k=price]", "45")
+    n0 = await E("DB.priceQuotes.length"); await E("saveForm()"); await pg.wait_for_timeout(50)
+    ok(await E("document.getElementById('askscrim').classList.contains('show')") and "98% lower" in await pg.inner_text("#askbody"), "typo price ($45 vs $2,000) → Check this price")
+    ok(await E("DB.priceQuotes.length") == n0, "nothing saved until you decide")
+    await pg.click("#askcancel")
+    ok(await E("document.getElementById('scrim').classList.contains('show')") and await E("DB.priceQuotes.length") == n0, "Fix → back to the form, nothing saved")
+    await pg.fill("#mbody [data-k=price]", "2100"); await E("saveForm()"); await pg.wait_for_timeout(50)
+    ok(await E("DB.priceQuotes.length") == n0 + 1 and not await E("document.getElementById('askscrim').classList.contains('show')"), "a sensible price saves without a warning")
+    await E(f"openQuoteForm('{it9}')"); await pg.fill("#mbody [data-k=supplier]", "Supplier B"); await pg.fill("#mbody [data-k=price]", "45"); await E("saveForm()"); await pg.wait_for_timeout(50)
+    await pg.click("#askok"); await pg.wait_for_timeout(50)
+    ok(await E("DB.priceQuotes.length") == n0 + 2 and await E(f"bestPrice(priceItem('{it9}')).price") == 45, "Keep → saved as typed")
+    await E(f"openPriceItem('{it9}')")
+    await pg.locator("#mbody tr", has_text="$45").locator("button[title='Remove this price']").click()
+    ok("$45" in await pg.inner_text("#askbody"), "✕ asks before removing")
+    await pg.click("#askok"); await pg.wait_for_timeout(50)
+    ok(await E("DB.priceQuotes.length") == n0 + 1 and await E(f"bestPrice(priceItem('{it9}')).price") == 2100 and "$45" not in await pg.inner_text("#mbody"), "wrong price removed; best price back to the real one ($2,100 logged above)")
+    await E("closeForm()")
+    # RFQ reply: an off price warns, and removing it also clears it from the reply
+    rid = await E("(()=>{const r=DB.procurement.find(r=>rfqMats(r).some(m=>m.priceItemRef)&&(r.suppliers||[]).length);return r&&r.id})()")
+    if rid:
+        lid = await E(f"DB.procurement.find(r=>r.id==='{rid}').suppliers[0].id")
+        mid = await E(f"rfqMats(DB.procurement.find(r=>r.id==='{rid}')).find(m=>m.priceItemRef&&lastPrice(m.priceItemRef)).id")
+        lastp = await E(f"+lastPrice(DB.materials.find(m=>m.id==='{mid}').priceItemRef).price")
+        await E(f"openQuote('{rid}','{lid}')"); await pg.fill(f"#mbody [data-mp='{mid}']", str(round(lastp / 40, 2))); await E("saveForm()"); await pg.wait_for_timeout(50)
+        ok(await E("document.getElementById('askscrim').classList.contains('show')"), "Enter quote on an RFQ: off price → Check this price")
+        await pg.click("#askok"); await pg.wait_for_timeout(50)
+        qid = await E(f"(DB.priceQuotes.find(q=>q.srcLine==='{lid}'&&q.itemRef===DB.materials.find(m=>m.id==='{mid}').priceItemRef)||{{}}).id")
+        ok(qid, "kept price logged from the RFQ reply")
+        await E(f"delPriceQuote('{qid}')"); await E("document.getElementById('askok').onclick()")
+        ok(await E(f"!(DB.procurement.find(r=>r.id==='{rid}').suppliers[0].prices||{{}})['{mid}']"), "removing it clears that item on the RFQ reply too")
+        await E("closeForm()")
+
     # ---- scrollbars ----
     await E("go('prices')")
     ok(await E("getComputedStyle(document.querySelector('.tablewrap')).scrollbarWidth") == "thin", "desktop scrollbars are thin")

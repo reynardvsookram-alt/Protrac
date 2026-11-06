@@ -103,6 +103,7 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 - **Lookups**: `latestBySupplier`, `bestPrice`, size-aware search (`normText`, `scoreItem`, index in `pbIndex`/WeakMap `pbT`), and `autoPriceMaterials`, which links only confident matches.
 - **Size matching ignores order and spacing**: `normText` splits "rhs4x6" → "rhs 4x6" and `canonDim` sorts the sides of every size (4x6 = 6x4; with 3+ parts the last one, the wall / thickness, stays last). `dimParts` lets "4x8x3/8" match a 3/8 plate on a 4x8 sheet; `tokHit` is the strict check.
 - **Price book order**: `sortBySize` — category, then size ascending (2x2 → 3x2 → 4x2 → 4x4…, thinner wall first).
+- **Price safety**: every price-history line has a ✕ (`delPriceQuote`; a price that came from an RFQ reply is cleared on that reply too). New prices that are under half or over double the item's last price (`priceOff`, `lastPrice`) trigger a "Check this price" dialog (`priceGuard`, Keep / Fix) in all three entry points: Log a price (`savePriceForms`), Enter quote on an RFQ (`saveQuote2`) and a supplier's "add an item" (`saveSupItem`). Spreadsheet import is not checked.
 - **Import**: `importPriceWorkbook` reads a workbook with "Price Book" + "Quote Log" sheets.
 - **Suppliers page**: `renderSuppliers` shows cards; `renderSupplier` is the profile, showing what they sell, stats (`supStats`) and RFQ history. Supplier `rating` is Preferred / Approved / Backup / Avoid.
 
@@ -116,7 +117,7 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 - **Scrollbars**: thin and transparent until hover / scroll (`.is-scrolling`), none on phone; sideways scrollers get `fade-l`/`fade-r` edge fades (observer at the end of the script).
 - **Layout**: collapsible sidebar (`toggleSide`). Settings is split into tabs (`setTab`).
 - **Search**: `listSearch()` sits below the filters on list pages.
-- **Motion**: `pageAnim()` page transition, with `prefers-reduced-motion` respected.
+- **Motion**: `pageAnim()` page transition, with `prefers-reduced-motion` respected. Its animation uses fill-mode `backwards`, **never `both`/`forwards`**: a kept transform turns every top-level block into its own layer painted in page order, which hid the dashboard search results behind the KPI cards. Any dropdown inside `#content` needs its own `position:relative; z-index` (as `.gsearch` has).
 
 ### Demo data
 - **Building**: `seed()` + `seedSchedules()` create 11 anonymised jobs on working-day offsets from today (`wdOff`).

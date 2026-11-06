@@ -421,7 +421,7 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .askmsg{white-space:pre-wrap}
 .askin{width:100%;margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font:inherit;background:var(--card);color:var(--ink)}
 .btn.dangerfill{background:linear-gradient(180deg,#e25555,#c43c3c);border-color:#b73535;color:#fff}
-.gsearch{position:relative;margin-bottom:16px}
+.gsearch{position:relative;z-index:60;margin-bottom:16px}
 .gsearch input{width:100%;font-size:15px;padding:13px 16px 13px 42px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);box-shadow:var(--raise)}
 .gsearch input:focus{outline:2px solid var(--weld-soft);border-color:var(--weld-dim)}
 .gsearch::before{content:"🔍";position:absolute;left:15px;top:13px;opacity:.55}
@@ -757,7 +757,7 @@ th{font-weight:600}
 /* motion */
 @keyframes pgin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @keyframes popin{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-#content.pgin>*{animation:pgin .26s cubic-bezier(.2,.7,.2,1) both}
+#content.pgin>*{animation:pgin .26s cubic-bezier(.2,.7,.2,1) backwards}  /* backwards, not both: nothing stays layered after the entry animation */
 #content.pgin>*:nth-child(2){animation-delay:.03s}#content.pgin>*:nth-child(3){animation-delay:.06s}#content.pgin>*:nth-child(4){animation-delay:.09s}#content.pgin>*:nth-child(n+5){animation-delay:.12s}
 .scrim.show .modal{animation:popin .22s cubic-bezier(.2,.7,.2,1) both}
 .statcard.clickable,.stagecard,.supcard,.wftype,.btn,.pchip,.tool{transition:transform .12s ease,box-shadow .15s ease,border-color .15s ease,background .15s ease}
@@ -1584,7 +1584,7 @@ function uiAsk(o){
   document.getElementById("asktitle").textContent=o.title||"Confirm";
   document.getElementById("askbody").innerHTML=`<div class="askmsg">${esc(o.msg||"")}</div>`+(o.input?`<input id="askin" class="askin" value="${esc(o.value||"")}" placeholder="${esc(o.placeholder||"")}">`:"");
   const ok=document.getElementById("askok"),cancel=document.getElementById("askcancel");
-  ok.textContent=o.ok||"OK";ok.className="btn "+(o.danger?"dangerfill":"primary");
+  ok.textContent=o.ok||"OK";ok.className="btn "+(o.danger?"dangerfill":"primary");cancel.textContent=o.cancel||"Cancel";
   const close=()=>sc.classList.remove("show");
   ok.onclick=()=>{const el=document.getElementById("askin");const v=o.input?((el&&el.value)||""):true;close();if(o.onOk)o.onOk(v);};
   cancel.onclick=()=>{close();if(o.onCancel)o.onCancel();};
@@ -1801,10 +1801,34 @@ function openPriceItem(id){
   openModal(it.description,`<div class="imp">
     <div class="impnote">${esc([it.code,it.category,it.stockLength&&"Stock: "+it.stockLength,it.grade&&"Grade: "+it.grade,it.uom&&"Per "+it.uom].filter(Boolean).join(" · "))}</div>
     ${it.notes?`<div class="nudge" style="margin:0">${esc(it.notes)}</div>`:""}
-    <div class="tablewrap"><table><thead><tr><th>Date</th><th>Supplier</th><th>Price excl. VAT</th><th>Response</th><th>Note</th></tr></thead><tbody>${qs.map(q=>`<tr><td class="cellmono">${esc(fmtShort(q.date))}</td><td>${esc(q.supplier)}</td><td class="pricecell">${hasPrice(q)?money(q.price):"—"}</td><td class="resp">${esc(q.response||"")}</td><td class="resp">${esc(q.note||"")}</td></tr>`).join("")||'<tr><td colspan="5" class="minimsg">No prices logged yet.</td></tr>'}</tbody></table></div>
+    <div class="tablewrap"><table><thead><tr><th>Date</th><th>Supplier</th><th>Price excl. VAT</th><th>Response</th><th>Note</th><th></th></tr></thead><tbody>${qs.map(q=>`<tr><td class="cellmono">${esc(fmtShort(q.date))}</td><td>${esc(q.supplier)}</td><td class="pricecell">${hasPrice(q)?money(q.price):"—"}</td><td class="resp">${esc(q.response||"")}</td><td class="resp">${esc(q.note||"")}</td><td><button class="icobtn del" title="Remove this price" onclick="delPriceQuote('${q.id}')">✕</button></td></tr>`).join("")||'<tr><td colspan="5" class="minimsg">No prices logged yet.</td></tr>'}</tbody></table></div>
     ${used.length?`<div class="impnote">Used on ${used.length} material line${used.length>1?"s":""}: ${used.slice(0,5).map(m=>esc(refName("jobs",m.jobRef)||"")).join(", ")}</div>`:""}
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="openQuoteForm('${id}')">+ Log a price for this item</button><button class="btn" onclick="openPriceItemForm('${id}')">Edit item</button></div>
   </div>`,{wide:true,noFooter:true});
+}
+/* ---- price book safety: remove a wrong price; warn when a new price looks off ---- */
+function delPriceQuote(qid){
+  const q=(DB.priceQuotes||[]).find(x=>x.id===qid);if(!q)return;const it=priceItem(q.itemRef);
+  let line=null,rfq=null;if(q.srcLine)(DB.procurement||[]).forEach(r=>(r.suppliers||[]).forEach(s=>{if(s.id===q.srcLine){line=s;rfq=r;}}));
+  const what=(hasPrice(q)?money(q.price):"“"+(q.response||"no price")+"”")+" · "+q.supplier+" · "+fmtShort(q.date);
+  uiConfirm(`Remove ${what} from the price book${it?" for "+it.description:""}?`+(line?` It came from ${rfq.rfqNumber||"an RFQ"} — that supplier's reply for this item is cleared too, so Compare & order won't use it.`:"")+" This can't be undone.",()=>{
+    DB.priceQuotes=DB.priceQuotes.filter(x=>x.id!==qid);
+    if(line&&line.prices)rfqMats(rfq).forEach(m=>{if(m.priceItemRef===q.itemRef&&line.prices[m.id])delete line.prices[m.id];});
+    pbInvalidate();save();if(it)openPriceItem(it.id);else closeForm();rerender();toast("Price removed");
+  },{ok:"Remove"});
+}
+/* the most recent price for an item (any supplier), ignoring entries from the reply being edited */
+function lastPrice(itemId,skipLine){return (pbIndex().byItem[itemId]||[]).filter(q=>hasPrice(q)&&(!skipLine||q.srcLine!==skipLine)).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.seq||0)-(a.seq||0))[0]||null;}
+/* off = less than half or more than double the last price */
+function priceOff(itemId,price,skipLine){if(price===""||price==null||!(+price>0))return null;const l=lastPrice(itemId,skipLine);if(!l||!(+l.price>0))return null;const r=+price/ +l.price;if(r>=0.5&&r<=2)return null;
+  const it=priceItem(itemId);return {it,price:+price,last:l,txt:`${it?it.description+": ":""}${money(+price)} is ${r<1?Math.round((1-r)*100)+"% lower":Math.round(r*10)/10+"× higher"} than the last price (${money(+l.price)} · ${l.supplier} · ${fmtShort(l.date)})`};}
+let _priceOK=false;
+/* show the warning once; "Keep" re-runs the save with the check skipped, "Fix" goes back to the form */
+function priceGuard(offs,again){
+  if(_priceOK){_priceOK=false;return false;}
+  offs=offs.filter(Boolean);if(!offs.length)return false;
+  uiAsk({title:"Check "+(offs.length>1?"these prices":"this price"),msg:offs.slice(0,6).map(o=>"• "+o.txt).join("\n")+(offs.length>6?"\n…":"")+"\n\nIs the unit right (per length, per foot, per sheet, each)?",ok:offs.length>1?"Keep them":"Keep "+money(offs[0].price),cancel:"Fix",onOk:()=>{_priceOK=true;again();}});
+  return true;
 }
 function openQuoteForm(itemId){
   formMode="quote";
@@ -1830,6 +1854,7 @@ function savePriceForms(){
   const d={};document.querySelectorAll("#mbody [data-k]").forEach(el=>{d[el.dataset.k]=el.value;});
   if(formMode==="quote"){
     if(!d.itemRef||!(d.supplier||"").trim()){toast("Pick an item and supplier");return;}
+    if(priceGuard([priceOff(d.itemRef,d.price)],savePriceForms))return;
     const seq=(DB.priceQuotes||[]).reduce((a,q)=>Math.max(a,q.seq||0),0)+1;
     DB.priceQuotes.push({id:uid(),itemRef:d.itemRef,supplier:d.supplier.trim(),date:d.date||todayISO(),price:d.price===""?"":+d.price,response:d.response||"",note:d.note||"",seq});
     pbInvalidate();save();const back=d.itemRef;closeForm();rerender();toast("Price logged");return;
@@ -1983,12 +2008,14 @@ function renderQC(c){
 
 /* ============ v2: GLOBAL SEARCH & GUIDE ============ */
 function searchBox(){return `<div class="gsearch"><input id="gsq" placeholder="Search projects, PO numbers, materials or steel prices…" oninput="globalSearch(this.value)" autocomplete="off"><div class="gsres" id="gsres"></div></div>`;}
+function gsClose(){const r=document.getElementById("gsres");if(r)r.innerHTML="";}
+if(typeof document!=="undefined"&&document.addEventListener){document.addEventListener("pointerdown",e=>{if(e.target&&e.target.closest&&!e.target.closest(".gsearch"))gsClose();});document.addEventListener("keydown",e=>{if(e.key==="Escape")gsClose();});}
 function globalSearch(q){
   const el=document.getElementById("gsres");if(!el)return;q=(q||"").trim().toLowerCase();if(q.length<2){el.innerHTML="";return;}
   const has=(...v)=>v.join(" ").toLowerCase().includes(q);
   const jobs=jobQ(DB.jobs||[],q,j=>[j.jobName,j.jobId,j.client,j.poNumber,j.notes].join(" ")).slice(0,6);
   const mats=(DB.materials||[]).filter(m=>has(m.description,m.size,m.grade,m.lineNo)).slice(0,5);
-  const prices=searchPrices(q,{strict:true}).slice(0,5);
+  const prices=sortBySize(searchPrices(q,{strict:true})).slice(0,5);
   const it=(on,a,b)=>`<div class="gsitem" onclick="${on}"><span>${a}</span><span class="s">${b}</span></div>`;
   el.innerHTML=(jobs.length?`<div class="gsgrp">Projects</div>`+jobs.map(j=>it(`openJob('${j.id}')`,esc(jobLabel(j)),esc(j.phase)+" · "+esc(jobDueMeta(j).txt))).join(""):"")
     +(mats.length?`<div class="gsgrp">Materials</div>`+mats.map(m=>it(`openJob('${m.jobRef}','materials')`,esc(m.description+" "+(m.size||"")),esc(refName("jobs",m.jobRef)))).join(""):"")
@@ -2414,8 +2441,9 @@ function saveQuote2(){
     mats.forEach(m=>{const pe=document.querySelector(`#mbody [data-mp="${m.id}"]`),re=document.querySelector(`#mbody [data-mr="${m.id}"]`),ne=document.querySelector(`#mbody [data-mn="${m.id}"]`);
       const pv=pe&&pe.value!==""?+pe.value:"";const resp=re?re.value:"Quoted";
       if(pv!==""||resp!=="Quoted"||(ne&&ne.value)){P[m.id]={price:pv,response:pv===""&&resp==="Quoted"?"No price given":resp,note:ne?ne.value:""};any=true;}});
-    s.prices=P;
     if(!any){toast("Enter at least one price, or tap “can't supply”");return;}
+    if(priceGuard(mats.map(m=>P[m.id]&&m.priceItemRef?priceOff(m.priceItemRef,P[m.id].price,s.id):null),saveQuote2))return;
+    s.prices=P;
     // log into the price book (replace this supplier-line's earlier entries)
     DB.priceQuotes=(DB.priceQuotes||[]).filter(q=>q.srcLine!==s.id);
     let seq=(DB.priceQuotes||[]).reduce((a,q)=>Math.max(a,q.seq||0),0),logged=0;
@@ -2937,6 +2965,7 @@ function saveSupItem(){
   let it=(DB.priceItems||[]).find(i=>i.description.toLowerCase()===desc.toLowerCase());
   if(!it){const cat=d.category&&d.category!=="__new__"?d.category:((s.supplies||[])[0]||"Other");it={id:uid(),code:"",category:cat,description:desc,tags:"",stockLength:"",grade:"",uom:d.uom||"",notes:"",synonyms:""};DB.priceItems.push(it);}
   else if(d.uom&&!it.uom)it.uom=d.uom;
+  if(priceGuard([priceOff(it.id,d.price)],saveSupItem))return;
   const seq=(DB.priceQuotes||[]).reduce((a,q)=>Math.max(a,q.seq||0),0)+1;
   DB.priceQuotes.push({id:uid(),itemRef:it.id,supplier:s.company,date:d.date||todayISO(),price:d.price===""?"":+d.price,response:d.price===""?"No price given":"Quoted",note:d.note||"",seq});
   if(it.category&&!(s.supplies||[]).includes(it.category)&&SCHEMA.suppliers.fields.find(f=>f.k==="supplies").opts.includes(it.category))s.supplies=(s.supplies||[]).concat([it.category]);
@@ -3843,7 +3872,7 @@ function saveForm(){
   if(autoProdToast(moved,"Saved"))return;
   toast((wasEditing?"Saved":"Added")+extra);
 }
-function closeForm(){document.getElementById("scrim").classList.remove("show");document.getElementById("mainmodal").className="modal";const ft=document.querySelector("#mainmodal footer");if(ft)ft.style.display="";impCtx=null;editingId=null;formMode="record";lineCtx=null;phaseCtx=null;}
+function closeForm(){_priceOK=false;document.getElementById("scrim").classList.remove("show");document.getElementById("mainmodal").className="modal";const ft=document.querySelector("#mainmodal footer");if(ft)ft.style.display="";impCtx=null;editingId=null;formMode="record";lineCtx=null;phaseCtx=null;}
 function del(id,table){
   const tbl=table||current,sch=SCHEMA[tbl],r=DB[tbl].find(x=>x.id===id);
   let extra="";
