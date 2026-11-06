@@ -14,10 +14,10 @@ async def main():
     # fonts
     ok(await E("document.fonts.check('14px \"IBM Plex Sans\"')") and "IBM Plex Sans" in await E("getComputedStyle(document.body).fontFamily"),"IBM Plex Sans embedded and in use")
     # C3 tab order
-    jid=await E("DB.jobs.find(j=>j.jobId==='J-26-028').id")
+    jid=await E("DB.jobs.find(j=>j.jobId==='004').id")
     await E(f"openJob('{jid}')")
     tabs=await E("Array.from(document.querySelectorAll('.jtabs button')).map(b=>b.textContent.replace(/[^A-Za-z]/g,''))")
-    ok([t.rstrip('0123456789') for t in tabs]==["Overview","Updates","Schedule","Procurement","Materials","QC"],f"tab order {tabs}")
+    ok([t.rstrip('0123456789') for t in tabs]==["Overview","Schedule","Materials","QC"],f"tab order {tabs}")
     # C2 parent task list only from this job
     await E(f"openJob('{jid}','schedule')")
     t=await E(f"DB.tasks.find(t=>t.jobRef==='{jid}'&&t.parentTask&&!t.stepKey.startsWith('sec'))")
@@ -31,7 +31,8 @@ async def main():
     # templates: new job via form builds schedule
     await E("openForm(null,'jobs')")
     await pg.fill('#mbody [data-k="jobName"]','Test — lifting beam')
-    await E("(()=>{const s=document.querySelector('#mbody [data-k=jobType]');s.value='Repair / blast & paint';s.onchange()})()")
+    await pg.click('#mbody .segbtn[data-jt="Repair / blast & paint"]')
+    ok(await E("document.querySelector('#mbody [data-k=jobType]').value")=="Repair / blast & paint","job type is a one-tap button")
     ok(await E("document.querySelector('#mbody [data-k=optSite]').checked && !document.querySelector('#mbody [data-k=optConcept]').checked"),"job type ticks its workflow options")
     await E("document.querySelector('#mbody [data-k=optFab]').checked=true")
     await E("saveForm()")
@@ -67,8 +68,8 @@ async def main():
     ok(await E("document.querySelectorAll('.tplrow').length")==await E("wfSteps().length"),"template editor lists every step")
     await E("wfAdd()");await pg.fill("#askin","Load test");await E("document.getElementById('askok').onclick()")
     ok(await E("wfSteps().some(s=>s.name==='Load test')"),"add template step")
-    await E("startSchedule(DB.jobs.find(j=>j.jobId==='Q-26-022').id,'Build to client drawing')")
-    ok(await E("DB.tasks.some(t=>t.taskName==='Load test'&&t.jobRef===DB.jobs.find(j=>j.jobId==='Q-26-022').id)"),"new step used by new schedules")
+    await E("startSchedule(DB.jobs.find(j=>j.jobId==='011').id,'Build to client drawing')")
+    ok(await E("DB.tasks.some(t=>t.taskName==='Load test'&&t.jobRef===DB.jobs.find(j=>j.jobId==='011').id)"),"new step used by new schedules")
     # settings tabs
     await E("go('settings')")
     for k in ["general","workflow","templates","lists","qc","data"]:
@@ -100,13 +101,13 @@ async def main():
     # motion
     await E("go('jobs')"); await pg.wait_for_timeout(30); ok(await E("document.getElementById('content').classList.contains('pgin')"),"page transition on navigation")
     # demo shift
-    r=await E("(()=>{const j=DB.jobs.find(j=>j.jobId==='J-26-031');const before=jobDueMeta(j).txt;DB.meta.demoAnchor=shiftWD(todayISO(),-5);DB.jobs.forEach(x=>{['rfqDate','poDate','quoteSentDate','rfqDueDate'].forEach(k=>{if(x[k])x[k]=shiftWD(x[k],-5)})});keepDemoCurrent();return [before,jobDueMeta(j).txt,DB.meta.demoAnchor===todayISO()]})()")
+    r=await E("(()=>{const j=DB.jobs.find(j=>j.jobId==='006');const before=jobDueMeta(j).txt;DB.meta.demoAnchor=shiftWD(todayISO(),-5);DB.jobs.forEach(x=>{['rfqDate','poDate','quoteSentDate','rfqDueDate'].forEach(k=>{if(x[k])x[k]=shiftWD(x[k],-5)})});keepDemoCurrent();return [before,jobDueMeta(j).txt,DB.meta.demoAnchor===todayISO()]})()")
     ok(r[2],f"demo dates re-anchored to today {r}")
     ok(not errs,"no errors: "+"; ".join(errs[:2]))
     # phone
     m=await b.new_context(viewport={"width":390,"height":844},device_scale_factor=2);mp=await m.new_page()
     await mp.goto(APP);await mp.wait_for_timeout(300)
-    for code,name in [("openJob(DB.jobs.find(j=>j.jobId==='Q-26-013').id,'schedule')","m5_sched"),("go('suppliers')","m5_sup"),("openSupplier(DB.suppliers[0].id)","m5_supp"),("go('settings');setTab='templates';render()","m5_tpl"),("go('dashboard')","m5_dash")]:
+    for code,name in [("openJob(DB.jobs.find(j=>j.jobId==='009').id,'schedule')","m5_sched"),("go('suppliers')","m5_sup"),("openSupplier(DB.suppliers[0].id)","m5_supp"),("go('settings');setTab='templates';render()","m5_tpl"),("go('dashboard')","m5_dash")]:
       await mp.evaluate(code);await mp.wait_for_timeout(350)
       sw=await mp.evaluate("document.documentElement.scrollWidth"); ok(sw<=392,f"{name}: fits phone ({sw})")
       await mp.screenshot(path=os.path.join(OUT,name+".png"))

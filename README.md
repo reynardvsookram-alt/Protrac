@@ -33,7 +33,11 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
 
 - **Dashboard built around actions**: quotes overdue, jobs overdue, due within 5 working days, RFQs to quote, awaiting PO, open QC fails. Every number opens the filtered list.
 - **Job templates & auto timeline**: pick the job type (design & build, build to client drawing, repair / blast & paint) and tick what it needs (site visit, concept, fabrication, coating, assembly). Protrac lays out the whole workflow with working-day dates. Steps the app already knows about (quote submitted, PO, materials ordered/received, QC, delivery) tick themselves with the real date, so the schedule becomes a timeline of what actually happened.
-- **Job page**: progress stepper, next-action button, turnaround stats (RFQ → quote, quote → PO, delivery vs. promise).
+- **Fast job entry**: a new job is five fields: name, client, job type (one tap), RFQ date (today) and the client's deadline (3 / 5 / 10 working-day chips). Job numbers run 001, 002, 003… and match the job's folder name ("006. Client A Tank hatch cover").
+- **Job page**: progress stepper, next-action button, **undo / redo** of phase changes, progress and current step taken from the schedule, turnaround stats (RFQ → quote, quote → PO, delivery vs. promise).
+- **Board**: jobs by phase in full-height lanes; drag a card (or press-and-hold on a phone) to move it on.
+- **Value & costing**: import or paste the costing sheet (cost per line × markup, labour as days × day rate, materials straight from the material list), quoted value and re-quotes (Rev 0, Rev 1 … with the margin impact shown before you agree a discount), PO value, margin per project, and a dashboard value row (quotes out, order book, delivered, average margin, win rate) with a one-tap *Hide values*.
+- **Automation**: the schedule re-plans itself when the PO and lead time come in; the job moves into production when the last material line is received; QC stages outside the job's scope are marked N/A.
 - **Material lists**: type them into a spreadsheet-style table (Enter moves down, paste cells straight from Excel), or import a multi-sheet .xlsx. Lines are priced from the price book as they come in.
 - **Purchasing pipeline**: one page with four clickable stages: **To order → Waiting on suppliers → Ordered → Received**.
   - Tick lines and send one RFQ to several suppliers. The RFQ copies as a real email table (keeps its columns in Gmail/Outlook) with blank price and lead-time columns for the supplier to fill in.
@@ -63,7 +67,7 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
 - **One self-contained file**: vanilla JavaScript, no frameworks, no external libraries, works offline. Data stays in the browser (`localStorage`) and is backed up to a JSON file.
 - **Excel import without a library**: reads `.xlsx` by unzipping it with the browser's built-in `DecompressionStream` and parsing the sheet XML (shared strings, date formats, multiple sheets).
 - **Working-day engine**: weekends plus T&T public holidays, including Easter-based holidays and Sunday → Monday observed rules. Eid and Divali are added per year in Settings.
-- **Tested**: an automated sweep that clicks all 1,600+ buttons, dialogs and save paths across every page (zero errors), plus 150 automated checks in Node (date maths, phase clocks, holds, data migrations from older versions) and 100+ end-to-end checks in headless Chrome (Excel import, price workbook import, purchasing flow, QC, phone layout).
+- **Tested**: an automated sweep that clicks every button, dialog and save path across every page, plus 180+ automated checks in Node (date maths, phase clocks, holds, undo/redo, data migrations from older versions) and 220+ end-to-end checks in headless Chrome (Excel import, price workbook import, purchasing flow, QC, board drag on desktop and touch, phone layout).
 
 ## About the demo data
 
