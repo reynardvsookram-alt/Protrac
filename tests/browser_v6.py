@@ -78,6 +78,25 @@ async def desktop(b):
     ok(await pg.locator(".phacts button", has_text="Redo").count() == 1, "redo survives closing the app")
     await pg.locator(".phacts button", has_text="Redo").click()
 
+    # ---- stepper: every step is clickable ----
+    sj = await E("DB.jobs.find(j=>j.jobId==='009').id")
+    await E(f"openJob('{sj}')")
+    ok(await E("document.querySelectorAll('.stepper button.step').length") == 6, "stepper steps are buttons")
+    await pg.click(".stepper .step[data-ph='PO Received']")
+    ok(await E("formMode") == "phase" and await E("phaseCtx.action") == "po" and await E("phaseCtx.target") == "PO Received", "tap a later step → its phase dialog")
+    await E("closeForm()")
+    await pg.click(".stepper .step[data-ph='In Production']")
+    ok(await E("phaseCtx.action") == "po" and await E("phaseCtx.target") == "In Production", "skipping ahead past PO asks for the PO first")
+    await E("closeForm()")
+    await pg.click(".stepper .step[data-ph='RFQ Received']")
+    ok("current phase" in (await pg.inner_text("#toast")).lower(), "tap the current step → just says so")
+    await E(f"openJob('{jid}')"); await pg.click(".stepper .step[data-ph='Quoted – Awaiting PO']")
+    ok(await E("document.getElementById('askscrim').classList.contains('show')"), "tap an earlier step → asks before moving back")
+    await E("document.getElementById('askok').onclick()")
+    ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').phase") == "Quoted – Awaiting PO" and await E(f"!!DB.jobs.find(j=>j.id==='{jid}').poNumber"), "moved back; PO number kept")
+    await pg.locator(".phacts button", has_text="Undo").click()
+    ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').phase") == "In Production", "Undo puts it forward again")
+
     # ---- edit form: phase sections only for phases reached ----
     await E(f"openForm('{jid}','jobs')")
     ks = await E("Array.from(document.querySelectorAll('#mbody [data-k]')).map(e=>e.dataset.k)")

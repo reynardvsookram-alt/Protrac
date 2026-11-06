@@ -385,7 +385,7 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 /* ===== Protrac: phase workflow ===== */
 .onhold{color:var(--hold);font-weight:700} .nodue{color:var(--ink-soft);font-style:italic} .ontime{color:var(--ok);font-weight:700}
 .stepper{display:flex;margin-top:16px;overflow-x:auto;padding-bottom:2px}
-.step{flex:1;min-width:88px;display:flex;flex-direction:column;align-items:center;position:relative;font-size:11.5px;color:var(--ink-soft);text-align:center}
+.step{flex:1;min-width:88px;display:flex;background:none;border:0;padding:4px 2px;font-family:inherit;cursor:pointer;border-radius:10px;flex-direction:column;align-items:center;position:relative;font-size:11.5px;color:var(--ink-soft);text-align:center}
 .step::before{content:"";position:absolute;top:12px;left:-50%;width:100%;height:3px;background:var(--line)}
 .step:first-child::before{display:none}
 .step.done::before,.step.cur::before{background:var(--weld)}
@@ -517,7 +517,9 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
   .dhead .dt{font-size:17px}
   .tll{width:100%}
   .jtabs{flex-wrap:nowrap;overflow-x:auto}
-  .jtabs button{white-space:nowrap;padding:8px 4px;flex:1 1 0;justify-content:center;gap:5px;font-size:12.5px;min-width:0}
+  .jtabs{gap:0}
+  .jtabs button{white-space:nowrap;padding:8px 3px;flex:1 1 auto;justify-content:center;gap:4px;font-size:12px;min-width:0}
+  .jtabs .tabcnt{padding:0 5px;font-size:10px}
   .jtabs .tic{display:none}
   .ovcounts{grid-template-columns:repeat(2,1fr)}
   .side-foot button span{display:inline}.side-foot button span.lbl{display:none}
@@ -867,6 +869,11 @@ body.kdragging,body.kdragging *{cursor:grabbing!important}
 .toast:not(.show){pointer-events:none}
 .toastbtn{margin-left:12px;padding:4px 12px;border-radius:7px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font:700 12.5px var(--sans);cursor:pointer}
 .olderups summary{cursor:pointer;font-size:12.5px;font-weight:700;color:var(--ink-soft);padding:8px 0}
+.step:hover .sdot{border-color:var(--weld);transform:scale(1.08)}
+.step:hover .slbl{color:var(--ink)}
+.step:focus-visible{outline:2px solid var(--weld-dim);outline-offset:2px}
+.step .sdot{transition:transform .15s,border-color .15s}
+.step.cur{cursor:default}
 </style>
 </head>
 <body>
@@ -1477,7 +1484,24 @@ function phaseActions(j){
 function phaseStepper(j){
   const steps=[[PH.RFQ,"RFQ",j.rfqDate],[PH.QUOTED,"Quoted",j.quoteSentDate],[PH.PO,"PO",j.poDate],[PH.PROC,"Procurement",j.procStartDate],[PH.PROD,"Production",j.prodStartDate],[PH.DONE,"Delivered",j.deliveredDate]];
   const idx=steps.findIndex(s=>s[0]===j.phase);
-  return `<div class="stepper ${j.phase===PH.LOST?"lost":""}">`+steps.map((s,i)=>`<div class="step ${idx>=0&&i<idx?"done":i===idx?"cur":""}"><span class="sdot">${idx>=0&&i<idx?"✓":i+1}</span><span class="slbl">${s[1]}</span><span class="sdate">${s[2]&&(idx<0||i<=idx)?esc(fmtShort(s[2])):""}</span></div>`).join("")+`</div>`;
+  const tip=(s,i)=>i===idx?"Current phase":j.phase===PH.LOST?"Reopen the job at "+s[0]:idx>=0&&i<idx?"Move back to "+s[0]:"Move to "+s[0];
+  return `<div class="stepper ${j.phase===PH.LOST?"lost":""}">`+steps.map((s,i)=>`<button type="button" class="step ${idx>=0&&i<idx?"done":i===idx?"cur":""}" title="${esc(tip(s,i))}" data-ph="${esc(s[0])}" onclick="stepClick('${j.id}',this.dataset.ph)"><span class="sdot">${idx>=0&&i<idx?"✓":i+1}</span><span class="slbl">${s[1]}</span><span class="sdate">${s[2]&&(idx<0||i<=idx)?esc(fmtShort(s[2])):""}</span></button>`).join("")+`</div>`;
+}
+/* tap a step on the stepper: forward opens that phase's dialog (dates / PO / lead time); back asks first (↩ Undo still works) */
+function stepClick(id,ph){
+  const j=(DB.jobs||[]).find(x=>x.id===id);if(!j||!ph)return;
+  if(ph===j.phase){toast("This is the current phase");return;}
+  if(j.phase===PH.LOST){openPhaseAction(id,"reopen");const s=document.querySelector('#mbody [data-k="phase"]');if(s&&ph!==PH.DONE)s.value=ph;return;}
+  const from=PH_ORDER.indexOf(j.phase),to=PH_ORDER.indexOf(ph);
+  if(to>from){
+    if(ph===PH.QUOTED)return openPhaseAction(id,"quoted");
+    if(ph===PH.DONE)return openPhaseAction(id,"done");
+    if(!reached(j,PH.PO)||ph===PH.PO)return openPhaseAction(id,"po",{target:ph});
+    return openPhaseAction(id,ph===PH.PROC?"proc":"prod");
+  }
+  uiConfirm(`Move ${jobLabel(j)} back to “${ph}”? Dates, PO number and lead time stay on the job, and ↩ Undo puts it forward again.`,()=>{
+    setPhase(j,ph,{note:"moved back from the stepper"});replan(j);save();rerender();toast("Phase → "+ph,{label:"Undo",fn:()=>undoPhase(j.id)});
+  },{ok:"Move back",danger:false});
 }
 function leadFields(j,lbl){
   return `<div class="field"><label>${lbl} — min (target)</label><input type="number" min="0" step="any" data-k="leadMin" value="${j.leadMin??""}"></div>
