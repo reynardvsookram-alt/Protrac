@@ -930,6 +930,34 @@ body.kdragging,body.kdragging *{cursor:grabbing!important}
 .rem-add input:focus,.rcol-add input:focus,.tpladd input:focus,select.colsel:focus{outline:none;border-color:var(--weld-dim);background:var(--card);box-shadow:0 0 0 3px var(--weld-soft)}
 .rem-add .btn,.rcol-add .btn,.tpladd .btn{border-radius:10px}
 @media (pointer:fine){.boardscroll{scroll-snap-type:none}}   /* snapping fights mouse thumb-wheels; arrows already land on lane edges */
+/* ---- v7: value & costing ---- */
+.vgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.vcell{background:var(--card-alt);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.vcell label{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft)}
+.vcell b{font:700 17px var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.revlist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.costin{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.costpaste{display:flex;flex-direction:column;align-items:flex-start;gap:8px}.costpaste[hidden]{display:none}.costpaste textarea{width:100%}
+.costpaste textarea{min-height:110px;border:1px solid var(--line);border-radius:10px;padding:9px 11px;background:var(--card-alt);color:var(--ink);font:12.5px var(--mono)}
+.costtab{width:100%;min-width:560px;table-layout:fixed}
+.costtab th:nth-child(1){width:36%}.costtab th:nth-child(2){width:28%}.costtab th:nth-child(3){width:14%}.costtab th:nth-child(4){width:22%}
+.costtab td{vertical-align:middle}
+.costtab input{width:100%;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--card);color:var(--ink);font:13px var(--mono)}
+.costtab .cm{white-space:nowrap}.costtab .cm input{width:64px;display:inline-block;margin-right:4px}
+.costtab .cdays{display:flex;align-items:center;gap:6px;margin-bottom:5px}.costtab .cdays input{width:72px}
+.costtab .xlabel{font-family:var(--sans);margin-bottom:5px}
+.costtab .cs{font:700 13px var(--mono);text-align:right}
+.valhead{display:flex;align-items:center;justify-content:space-between;margin:18px 0 8px}
+.valhead h3{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft)}
+.vcards .statcard .n{font-size:22px;font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vstat .vs{font-size:11.5px;color:var(--ink-soft);margin-top:3px}
+.valcell{display:flex;flex-direction:column;font-family:var(--mono);font-weight:600;white-space:nowrap}
+.rqcur{font:700 20px var(--mono)}
+@media(max-width:760px){.vgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.vcell b{font-size:15px}
+  .costtab{min-width:0;table-layout:auto}.costtab thead{display:none}
+  .costtab tr{display:grid;grid-template-columns:minmax(0,1fr) 84px 96px;gap:6px 8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .costtab td{display:block;padding:0!important;border:0!important;min-width:0}.costtab td.cl{grid-column:1/-1;font-weight:700}
+  .costtab .cm input{width:52px}.costtab .cdays input{width:58px}}
 </style>
 </head>
 <body>
@@ -999,7 +1027,7 @@ const STATUS_COLOR={
 };
 const SCHEMA={
   jobs:{ label:"Projects", icon:"📋", primary:"jobName", views:["grid","kanban","calendar"], kanbanField:"phase",
-    gridCols:["jobName","client","phase","_step","priority","_due","_pct"],
+    gridCols:["jobName","client","phase","_step","priority","_due","_val","_pct"],
     fields:[
       {k:"jobName",l:"Project name",t:"text",req:1,full:1},
       {k:"jobId",l:"Project no.",t:"text",mono:1},
@@ -1100,7 +1128,7 @@ let supView=null, supCat="", supRating="", supItemQ="", _supWas="", listQ="", gr
 
 function load(){
   try{const r=localStorage.getItem(STORE);if(r){DB=JSON.parse(r);migrate();keepDemoCurrent();save();return;}}catch(e){}
-  DB=seed();migrate();autoPriceMaterials(DB.materials);seedSchedules();save();
+  DB=seed();migrate();autoPriceMaterials(DB.materials);demoValues();seedSchedules();save();
 }
 function mapOldStatus(s){ return LINE_STATUS.includes(s)?s:(s==="Awaiting Quote"?"RFQ Sent":"RFQ Sent"); }
 function migrate(){
@@ -1147,11 +1175,19 @@ function migrate(){
   migrateV2();
   migrateV5();
   migrateV6();
+  migrateV7();
   migrateDemo();
 }
 /* v6 (phase-1 workflow clean-up). Idempotent. Nothing is removed from project records:
    the old Stage and manual % fields stay on each project but are no longer shown (progress now comes
    from the schedule, the current step from the next open schedule step). */
+/* v7: project value & costing. Idempotent. */
+function migrateV7(){
+  const m=DB.meta;
+  if(!m.dayRates||typeof m.dayRates!=="object")m.dayRates={fab:1250,paint:1500};
+  if(typeof m.minMargin!=="number")m.minMargin=10;
+  (DB.jobs||[]).forEach(j=>{if(!Array.isArray(j.quotes))j.quotes=[];});
+}
 function migrateV6(){
   const m=DB.meta;
   if("statuses" in m)delete m.statuses;   // old project Status list — no longer used anywhere
@@ -1192,7 +1228,7 @@ function save(){ pbInvalidate(); try{syncAllSchedules();}catch(e){} try{localSto
 /* ============ SEED ============ */
 const DEMO_PRICES={"items":[["RHS-01","RHS / SHS","SHS 2\" x 2\" x 5mm (≈3/16\")","2x2x5mm 2x2x3/16 2x2x1/4","6 m","MS","Length","Supplier A: Supplier A stocks 5mm wall only. RFQ-030 asked for 1/4\" wall and got this price — expect 5mm to be supplied.  |  Supplier B: quoted 2x2x1/4 @ $450 — wall thickness not confirmed in writing; check it's truly 1/4\" vs Supplier A 5mm. 1 Jun (RFQ-006) Supplier B wrote $215 for 2x2x1/4, then $450 on 6 Aug & 14 Sep — ⚠ confirm current price and wall.","square hollow tube box"],["RHS-02","RHS / SHS","RHS 4\" x 2\" x 5mm (≈3/16\")","4x2x5mm 2x4x5mm 4x2x1/4 2x4x1/4","6 m","MS","Length","Supplier A: 5mm wall. Offered against 4x2x1/4 and 3x2x1/4 requests. RFQ-008 first showed $980 — corrected by their rep to $1,400 on 8 Jul.","rectangular hollow tube box"],["RHS-03","RHS / SHS","RHS 8\" x 4\" x 1/4\"","8x4x1/4 4x8x1/4","Not stated","MS","Length","Supplier A: First quoted $1,795 in error (that is the 1/4\" plate price); corrected to $3,600. Confirm stock length.","rectangular hollow tube forklift pocket"],["RHS-04","RHS / SHS","SHS 4\" x 4\" x 1/4\"","4x4x1/4","Not stated (assume 20')","MS","Length","Supplier A: Confirm stock length.  |  Supplier B: 4x4x1/4 offered GALVANISED (zinc) only @ $1,600 — not a like-for-like with Supplier A black steel. Black 1/4 not stocked (offered 4x4x1/8 instead).","square hollow tube"],["RHS-05","RHS / SHS","SHS 3\" x 3\" x 1/4\"","3x3x1/4","Not stated","MS","Length","Supplier A: ⚠ VERIFY: priced higher than 4x4x1/4 ($1,950). Likely typo.","square hollow tube"],["RHS-06","RHS / SHS","SHS 6\" x 6\" x 1/4\"","6x6x1/4","20'","ASTM A36 (as requested)","Length","⚠ Supplier B: handwritten $1,800 vs Supplier A $3,800 — confirm with Supplier B (possible misread / wrong wall).","square hollow tube"],["RHS-07","RHS / SHS","SHS 6\" x 6\" x 3/8\"","6x6x3/8","-","-","Length","Supplier A: Not stocked. Import + lead time requested 7 Aug — no reply on file.","square hollow tube"],["RHS-08","RHS / SHS","RHS 6\" x 4\" x 3/8\"","6x4x3/8","Not stated","MS","Length","","rectangular hollow tube"],["RHS-09","RHS / SHS","RHS 6\" x 4\" x 1/4\"","6x4x1/4","-","-","Length","Supplier A: Left unpriced on RFQ-030 reply.  |  Supplier B: offered as alternative to 4x2x1/4 / 8x4x1/4.","rectangular hollow tube"],["RHS-10","RHS / SHS","RHS 12\" x 4\" x 3/8\"","12x4x3/8","-","-","Length","Supplier A: Not stocked. Import + lead time requested 7 Aug — no reply on file.","rectangular hollow tube"],["RHS-11","RHS / SHS","RHS 3\" x 2\" x 1/4\"","3x2x1/4","-","-","Length","Supplier A: Not stocked — Supplier A offered 4x2x5mm RHS (RHS-02) instead.","rectangular hollow tube"],["RHS-12","RHS / SHS","SHS 8\" x 8\" x 1/4\"","8x8x1/4","Not stated","Not stated","Length","Supplier B: offered as alternative when 8x4x1/4 was not stocked.","square hollow tube"],["RHS-13","RHS / SHS","SHS 4\" x 4\" x 1/8\"","4x4x1/8","Not stated","Not stated","Length","","square hollow tube"],["RHS-14","RHS / SHS","SHS 4\" x 4\" x 3/8\"","4x4x3/8 hss","Not stated","Not stated","Length","Supplier B: also offered @ $2,500 as the 3/8\" alternative for a 4x4x1/4 forklift pocket (26 May).","square hollow tube hss"],["RHS-16","RHS / SHS","RHS 8\" x 4\" x 3/8\" HSS","8x4x3/8 hss","-","A500 Gr C (requested)","Length","","rectangular hollow tube hss skid"],["RHS-17","RHS / SHS","SHS 8\" x 8\" x 1/2\"","8x8x1/2 hss","Not stated","Not stated","Length","Supplier B: offered when 8x4x3/8 and 10x6x3/8 HSS were not stocked. Heavier/larger — check it suits the design.","square hollow tube hss"],["RHS-18","RHS / SHS","RHS 10\" x 6\" x 3/8\" HSS","10x6x3/8 hss","-","A500 Gr C (requested)","Length","","rectangular hollow tube hss skid"],["RHS-19","RHS / SHS","RHS 6\" x 3\"","6x3 rhs","-","-","Length","","rectangular hollow tube"],["FB-01","Flat Bar","Flat 1\" x 1/4\"","1x1/4","Not stated (assume 20')","MS","Length","Supplier B: $60 (1 Jun).","flats flat bar"],["FB-02","Flat Bar","Flat 2\" x 1/4\"","2x1/4","20'","MS","Length","","flats flat bar"],["FB-03","Flat Bar","Flat 3\" x 1/4\"","3x1/4","20'","MS","Length","","flats flat bar"],["FB-04","Flat Bar","Flat 3\" x 3/8\"","3x3/8","Not stated (assume 20')","MS / A36","Length","","flats flat bar"],["FB-05","Flat Bar","Flat 3\" x 1/2\"","3x1/2","Not stated (assume 20')","MS / A36","Length","","flats flat bar"],["FB-06","Flat Bar","Flat 4\" x 1/4\"","4x1/4","20'","MS","Length","Supplier A: ⚠ 6 Aug: $365 on RFQ-013 but $545 on RFQ-030. PO SESL26-260 placed at $365.","flats flat bar"],["FB-07","Flat Bar","Flat 4\" x 1\"","4x1","20'","MS","Length","","flats flat bar"],["FB-08","Flat Bar","Flat 4\" x 1/8\" or 3/16\"","4x1/8 4x3/16","-","-","Length","Supplier A: Not stocked — 4\" x 1/4\" (FB-06) offered @ $365.","flats flat bar"],["FB-09","Flat Bar","Flat 2\" x 3/8\"","2x3/8","Not stated","A36","Length","","flats flat bar"],["PL-01","Plate","Plate 1/4\" thk","1/4 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-02","Plate","Plate 3/8\" thk","3/8 plate","4' x 8'","A36","Sheet","Supplier B: RFQ-007 asked A572 Gr50 — Supplier B wrote 'A36' against it.","plate sheet 4x8"],["PL-03","Plate","Plate 1/2\" thk","1/2 plate","4' x 8'","A36","Sheet","Supplier B: RFQ SHC-002 asked A572 Gr50 1/2\" — Supplier B wrote '4x8 @ $2,600' (same as A36 price); confirm grade.","plate sheet 4x8"],["PL-04","Plate","Plate 5/8\" thk","5/8 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-05","Plate","Plate 3/4\" thk","3/4 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-06","Plate","Plate 1\" thk","1 plate 1in","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-07","Plate","Plate 1/4\" thk — large sheet","1/4 plate 8x20","8' x 20'","A36 — Supplier A note: \"BQ only\"","Sheet","Supplier A: their rep wrote \"BQ only\" — confirm grade/quality before using on structural or certified work.  |  Supplier B: also wrote 'BQ' @ $12,400.","plate sheet 8x20 bq"],["PL-08","Plate","Plate 1\" thk — Gr 50","1 plate gr50","Not stated","Gr 50","Sheet","Supplier A: Sheet size not stated — confirm before ordering.  |  Supplier B: wrote '4x8' @ $7,500 (same as their 1\" A36) — confirm Gr 50 on MTR.","plate sheet grade 50 a572"],["PL-09","Plate","Plate 3/16\" thk","3/16 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["SH-01","Sheet","Sheet 1/8\" thk","1/8 sheet","4' x 8'","A36","Sheet","","sheet plate 4x8 checker"],["SH-02","Sheet","Galvanised sheet 14 ga","14ga galv","4' x 8'","A653 G90","Sheet","Supplier A: Not stocked.","sheet galvanized galvanised"],["SH-03","Sheet","Expanded metal 25mm diamond 3/16\"","expanded metal 3/16","-","A36","Sheet","","expanded metal mesh"],["SH-04","Sheet","Diamond (checker) plate 3/16\"","3/16 diamond checker","4' x 8'","Not stated","Sheet","Supplier B: 4x8 @ $1,125.","sheet plate diamond checker floor deck"],["SH-05","Sheet","Corrugated sheet 18 ga","18ga corrugated","-","-","Sheet","","sheet corrugated roofing"],["AN-01","Angle","Angle 1\" x 1\" x 1/8\"","1x1x1/8","Not stated (assume 20')","MS","Length","","angle iron"],["AN-02","Angle","Angle 1-1/2\" x 1-1/2\" x 3/16\"","1.5x1.5x3/16 1-1/2x1-1/2x3/16","20'","MS","Length","","angle iron"],["AN-03","Angle","Angle 2\" x 2\" x 3/16\"","2x2x3/16","Not stated (assume 20')","MS / A36","Length","","angle iron"],["AN-04","Angle","Angle 2\" x 2\" x 1/4\"","2x2x1/4","Not stated (assume 20')","MS","Length","","angle iron"],["AN-05","Angle","Angle 3\" x 3\" x 1/4\"","3x3x1/4","20'","A36","Length","","angle iron"],["CH-01","Channel","Channel 4\" x 2\" x 7.25 lb/ft (C4x7.25)","4x2 2x4 c4x7.25 4x2x3/16","20'","MS / A36","Length","Supplier A: Quoted as \"2x4x7.25# x 20'\" against a 2x4x3/16 request.  |  Supplier B: 2x4x3/16 channel @ $600 — section/weight not confirmed.","channel c-channel"],["CH-02","Channel","Channel 3\" x 2\" x 1/4\" (as requested)","3x2x1/4 c3","Not stated","MS","Length","Supplier A: Section weight not confirmed by Supplier A — verify.","channel c-channel"],["CH-03","Channel","Channel 6\" x 2\" x 12 lb/ft","6x2x12 6x3x1/4 upn160 c6","20'","MS","Length","Supplier A: Offered for UPN160 request (13 Aug) and for 6x3x1/4 request (17 Sep) at same price. Confirm actual flange width.","channel c-channel upn"],["CH-04","Channel","Channel 6\" x 10 lb/ft (written \"6x3 x 10#\") x 20'","6x3 c6x10 3x6","20'","Not stated","Length","⚠ Supplier B: handwriting unclear ('6x3 +10# x 20' 1000.00', with an over-written figure) — confirm section and price.","channel c-channel"],["CH-05","Channel","Channel 2\" x 6\" (as requested)","2x6 channel","-","-","Length","","channel c-channel"],["CH-06","Channel","Channel 10\" x 2-3/4\" x 21 lb/ft (≈C10x20)","10x2-3/4x21 c10","20'","Not stated","Length","Supplier B: offered for 4\"x10\" forklift-pocket channel request. Confirm exact section.","channel c-channel forklift"],["CH-07","Channel","Channel 8\" x 17 lb/ft (written \"8x3 x 17#\")","8x3x17 c8","20'","Not stated","Length","⚠ Supplier B: handwriting reads '8x3+17# x 20'' — confirm section (C8x18.75 is the nearest standard).","channel c-channel forklift"],["BM-01","Beam","Wide flange W6 x 20","w6x20 6x20","20'","A36","Length","Supplier B: RFQ-007 asked A572 Gr50 at $1,940 — grade not confirmed.","beam wide flange w-beam i-beam"],["BM-02","Beam","Beam 4\" x 4\" x 13 lb/ft","4x4x13 w4x13","-","-","Length","Supplier A: Not stocked.","beam wide flange w-beam"],["BM-03","Beam","Beam 8\" x 6\" x 24 lb/ft (likely W8x24)","8x6x24 w8x24","20'","Not stated","Length","Supplier A: Offered as substitute for 6x6x24lb beam. Confirm exact section before design use.","beam wide flange w-beam"],["BM-04","Beam","Beam 6\" x 6\" x 24/25 lb/ft","6x6x24 w6x25","-","-","Length","Supplier A: Not stocked in 24/25 lb. Offered 8x6x24# (BM-03) on 4 Aug and 6x6x20# x 30' (BM-05) on 16 Sep.  |  ⚠ Supplier B: 6x6x24lb @ $1,940 — identical to their W6x20 price; likely W6x20 supplied. Confirm section.","beam wide flange w-beam"],["BM-05","Beam","Beam 6\" x 6\" x 20 lb/ft (W6x20) — 30' length","6x6x20 w6x20 30ft 30'","30'","A36 (as requested)","Length","Supplier A: ⚠ Offered against a 6x6x25lb request — 20 lb/ft is LIGHTER. Check section properties against design before accepting. Same section as BM-01 (20' @ $2,000 = $100/ft); this 30' length works out to $95/ft.","beam wide flange w-beam i-beam"],["BM-06","Beam","Beam 6\" x 6\" x 25 lb/ft (W6x25) — 30' length","6x6x25 w6x25 30ft","30'","A36 (as requested)","Length","Supplier B: 30' length = $118.75/ft.","beam wide flange w-beam i-beam"],["PP-01","Pipe","Pipe 1-1/2\" Sch 40 ERW","1-1/2 sch40 1.5 sch 40","20'","Not stated (ERW)","Length","Supplier A: $440 once (RFQ-013, 6 Aug); $470 on every other quote and PO.  |  Supplier B: $280 for '1-1/2\" steel pipe 20'' — schedule not stated; confirm Sch 40. RFQ-005 states 6 m stock length.","pipe tube erw"],["PP-02","Pipe","Pipe 2\" Sch 40 ERW","2 sch40","Not stated","Not stated (ERW)","Length","Supplier A: $510 on 6 Aug, $570 on 13 Aug.","pipe tube erw"],["PP-03","Pipe","Pipe 4\" Sch 40 ERW","4 sch40","19'","ASTM A53 Gr B","Length","","pipe tube erw a53"],["PP-04","Pipe","Pipe 6\" Sch 40 ERW","6 sch40","20'","ASTM A53 Gr B","Length","","pipe tube erw a53"],["PP-05","Pipe","Pipe 1\" Sch 80","1 sch80","-","-","Length","Supplier A: Not stocked.","pipe heavy wall"],["PP-06","Pipe","Pipe 4\" Sch 80","4 sch80","-","-","Length","Supplier A: Not stocked.","pipe heavy wall"],["PP-07","Pipe","Pipe 8\" Sch 80","8 sch80","-","-","Length","Supplier A: Not stocked.","pipe heavy wall"],["PP-08","Pipe","Pipe 3\" Sch 40","3 sch40","-","CS","Length","","pipe"],["PP-09","Pipe","Pipe 20\" NPS STD wall (0.375\")","20 std pipe","-","ASTM A53 Gr B","Each","","pipe large bore"],["PP-10","Pipe","Pipe 3/4\" Sch 40","3/4 sch40","Not stated","Not stated","Length","⚠ Supplier B: $375 is more than their 2\" Sch 40 ($330) — confirm.","pipe"],["FT-01","Pipe Fittings","Elbow 4\" 90° Sch 40","4 elbow 90","-","CS","Each","Supplier A: Material confirmed as CS 6 Aug; formal quote requested 10 Aug — no price on file.","fitting elbow"],["FT-02","Pipe Fittings","Elbow 3\" 90° Sch 40","3 elbow 90","-","CS","Each","Supplier A: As FT-01 — no price on file.","fitting elbow"],["FT-03","Pipe Fittings","Slip-on flange 4\" Class 150","4 flange so 150","-","-","Each","Supplier A: Not stocked.","flange slip on"],["FT-04","Pipe Fittings","Elbow 1-1/2\" 90° Short Radius","1-1/2 elbow sr","-","-","Each","Supplier A: Not stocked.","fitting elbow"],["FT-05","Pipe Fittings","Elbow 1-1/2\" 90° Long Radius","1-1/2 elbow lr","-","-","Each","Supplier A: Not stocked.","fitting elbow"],["FT-06","Pipe Fittings","Nipple 1\" Sch 80 x 6\" long","1 nipple sch80","-","-","Each","Supplier A: Not stocked.","fitting nipple"],["FT-07","Pipe Fittings","Elbow 3\" 45° Sch 40","3 elbow 45","-","CS","Each","","fitting elbow"],["FT-08","Pipe Fittings","Flange 5\" Class 150 RF (B16.5)","5 flange rf 150","-","CS","Each","","flange raised face"],["FT-09","Pipe Fittings","Pneumatic valve 3\" PTFE/Viton (HCl service)","pneumatic valve","-","-","Each","","valve"],["FT-10","Pipe Fittings","Elbow 2\" 90° Short Radius","2 elbow sr","-","-","Each","","fitting elbow"],["FT-11","Pipe Fittings","Elbow 2\" 90° Long Radius","2 elbow lr","-","-","Each","","fitting elbow"],["RB-01","Round Bar","Round bar 1/4\" MS","1/4 rod","Not stated","MS","Length","","rod smooth bar round"],["RB-02","Round Bar","Round bar 3/8\" MS","3/8 rod","Not stated","MS","Length","","rod smooth bar round"],["RB-03","Round Bar","Round bar 3/8\" HT","3/8 rod ht","Not stated","HT (high tensile)","Length","","rod round bar rebar ht"],["RB-04","Round Bar","Round bar 5/8\" MS","5/8 rod","Not stated","MS","Length","","rod smooth bar round"],["RB-05","Round Bar","Round bar 3/4\" MS","3/4 rod","Not stated","MS","Length","Supplier A: ⚠ 13 Aug: MS $114 / HT $96. Later quotes + PO show \"3/4 MS\" at $96 — confirm MS vs HT on delivery/MTR.","rod smooth bar round"],["RB-06","Round Bar","Round bar 3/4\" HT","3/4 rod ht","Not stated","HT (high tensile)","Length","","rod round bar ht"],["RB-07","Round Bar","Round bar 1\" MS","1 rod 1in","Not stated","MS (quoted)","Length","Supplier A: A572 Gr.50 was requested; Supplier A quoted \"MS rods\". Check grade on MTR.","rod round bar"],["RB-08","Round Bar","Round bar 1-1/8\" MS","1-1/8 rod","Not stated","MS","Length","Supplier A: ⚠ VERIFY: looks high vs 1\" ($210) and 1-1/2\" ($1,295).","rod round bar"],["RB-09","Round Bar","Round bar 1-1/2\"","1-1/2 rod 1.5","Not stated","MS / A36","Length","","rod round bar"],["RB-10","Round Bar","Round bar 2\" A36","2 rod","-","A36","Length","","rod round bar"],["RB-11","Round Bar","Round bar 3/4\" SS316","3/4 ss316 rod","-","SS316","Length","","rod round bar stainless"],["GR-01","Grating","Galvanised grating 1\" thk, 3' x 6'","1 grating 3x6","3' x 6'","Galvanised","Sheet","","grating galvanized"],["GR-02","Grating","Grating 1\" thk, 3' x 6 m (as requested)","1 grating 3ft x 6m","3' x 6 m (as requested)","Not stated","Length","Supplier A: Possibly same panel as GR-01 (6' vs 6 m typo?) — verify size.","grating"],["FS-01","Fasteners","A325 bolt 5/8\" x 2-1/2\" c/w nut & washer","5/8 x 2-1/2 a325 bolt nut washer","-","ASTM A325","Set","Supplier A: their rep wrote \"5/8x2-1/2 A325 B/N/W\" — $10.50 appears to be per bolt/nut/washer set. Confirm.","bolt nut washer"],["FS-02","Fasteners","A325 bolt / all-thread 5/8\" x 2\"","5/8 x 2 a325","-","ASTM A325","Each","Supplier A: Requested 7 Aug (RFQ-013 Sect. 4) — no reply on file.","bolt all thread"],["FS-03","Fasteners","U-bolt 1/2\" x 6\" c/w nut & washer","u-bolt 6 1/2","-","-","Each","Supplier A: Not stocked.","u bolt"],["FS-04","Fasteners","U-bolt 1/2\" x 4\" c/w nut & washer","u-bolt 4 1/2","-","-","Each","Supplier A: Not stocked.","u bolt"],["FS-05","Fasteners","Nyloc nut M8 SS316","m8 nyloc","-","SS316","Each","Supplier A: Not stocked.","nut stainless"],["FS-06","Fasteners","Plain washer M8 SS316","m8 washer","-","SS316","Each","Supplier A: Not stocked.","washer stainless"],["FS-07","Fasteners","Hex head bolt M8 x 35 SS316","m8x35 bolt","-","SS316","Each","Supplier A: No price given.","bolt stainless"],["FS-08","Fasteners","Plain washer M10 SS316","m10 washer","-","SS316","Each","Supplier A: Not stocked.","washer stainless"],["FS-09","Fasteners","Shoulder screw Ø10 (M8) x 50 SS316","m8 shoulder screw","-","SS316","Each","Supplier A: Not stocked.","screw stainless"],["FS-10","Fasteners","Hex bolt 7/8\" x 3-1/2\" (SS316 / HDG)","7/8 bolt","-","SS316 or HDG","Each","","bolt"],["FS-11","Fasteners","Hex bolt 3/4\"-10 UNC x 3\" (SS316 / HDG)","3/4 bolt","-","SS316 or HDG","Each","","bolt"],["FS-12","Fasteners","Heavy hex nut 7/8\" & 3/4\"","heavy hex nut","-","SS316 or HDG","Each","","nut"],["FS-13","Fasteners","Flat washer 7/8\" & 3/4\"","washer","-","SS316 or HDG","Each","","washer"],["FS-14","Fasteners","Countersunk screw M6 SS316","m6 csk screw","-","SS316","Each","","screw stainless"],["FS-15","Fasteners","R-clip + lanyard SS316","r-clip lanyard","-","SS316","Each","","clip"],["OT-01","Plastics / Other","UHMW-PE sheet 1/2\" UV stabilised","uhmw 1/2","-","UHMW-PE","Each","","plastic uhmw wear pad"],["OT-02","Plastics / Other","UHMW-PE sheet 1/4\" UV stabilised","uhmw 1/4","-","UHMW-PE","Each","","plastic uhmw wear pad"]],"quotes":[["RHS-16",1,"2026-05-26",null,"No stock",""],["RHS-18",1,"2026-05-26",null,"Substitute offered",""],["RHS-17",1,"2026-05-26",9500.0,"Substitute offered",""],["RHS-04",1,"2026-05-26",null,"Substitute offered",""],["RHS-14",1,"2026-05-26",2500.0,"Substitute offered","A500 Gr C requested — grade not confirmed."],["CH-04",1,"2026-06-01",1000.0,"Substitute offered","⚠ Handwriting unclear."],["AN-04",1,"2026-06-01",215.0,"Quoted",""],["CH-05",1,"2026-06-01",null,"No price given",""],["PL-01",1,"2026-06-01",1450.0,"Quoted",""],["PL-06",1,"2026-06-01",7500.0,"Quoted",""],["SH-04",1,"2026-06-01",1125.0,"Quoted",""],["SH-05",1,"2026-06-01",null,"No stock",""],["PP-01",1,"2026-06-01",280.0,"Quoted","6 m stock length."],["RHS-19",1,"2026-06-01",null,"No price given",""],["PL-03",1,"2026-06-01",2600.0,"Quoted",""],["PL-09",1,"2026-06-01",985.0,"Quoted",""],["SH-01",1,"2026-06-01",700.0,"Quoted",""],["RHS-01",1,"2026-06-01",215.0,"Quoted","⚠ Later quoted $450."],["FB-01",1,"2026-06-01",60.0,"Quoted",""],["CH-06",1,"2026-06-01",2350.0,"Substitute offered",""],["CH-07",1,"2026-06-01",1900.0,"Substitute offered",""],["RHS-14",1,"2026-06-02",2500.0,"Quoted",""],["PL-02",1,"2026-06-02",1950.0,"Quoted",""],["PP-08",1,"2026-06-02",null,"No stock",""],["FT-07",1,"2026-06-02",null,"No stock",""],["FT-02",1,"2026-06-02",null,"No stock",""],["FT-09",1,"2026-06-02",null,"No stock",""],["FT-08",1,"2026-06-02",null,"No stock",""],["RHS-05",1,"2026-06-02",800.0,"Quoted",""],["PL-03",1,"2026-06-10",2600.0,"Substitute offered","Full 4x8 sheet offered; grade not confirmed."],["PL-09",1,"2026-06-10",985.0,"Quoted",""],["RHS-05",1,"2026-06-10",800.0,"Quoted",""],["SH-03",1,"2026-06-10",null,"No stock",""],["PL-05",1,"2026-06-15",4000.0,"Quoted",""],["PL-09",1,"2026-06-15",985.0,"Quoted",""],["PP-09",1,"2026-06-15",null,"No stock",""],["FB-09",1,"2026-06-15",205.0,"Quoted",""],["RB-10",1,"2026-06-15",null,"No stock",""],["RB-11",1,"2026-06-15",null,"No stock",""],["OT-01",1,"2026-06-15",null,"No stock",""],["OT-02",1,"2026-06-15",null,"No stock",""],["FS-10",1,"2026-06-15",null,"No stock",""],["FS-11",1,"2026-06-15",null,"No stock",""],["FS-12",1,"2026-06-15",null,"No stock",""],["FS-13",1,"2026-06-15",null,"No stock",""],["FS-14",1,"2026-06-15",null,"No stock",""],["FS-15",1,"2026-06-15",null,"No stock",""],["BM-01",1,"2026-06-22",1940.0,"Quoted","Gr 50 requested — grade not confirmed."],["PL-02",1,"2026-06-22",1950.0,"Substitute offered","A36 offered instead of Gr 50."],["PL-05",1,"2026-06-22",4000.0,"Quoted","Grade not confirmed."],["RHS-02",1,"2026-07-03",null,"No stock",""],["RHS-03",1,"2026-07-03",null,"No stock",""],["RHS-11",1,"2026-07-03",null,"No stock",""],["RHS-12",1,"2026-07-03",5000.0,"Substitute offered",""],["RHS-09",1,"2026-07-03",2000.0,"Substitute offered",""],["PL-01",1,"2026-07-08",1450.0,"Quoted",""],["PL-03",1,"2026-07-08",2600.0,"Quoted",""],["PL-06",1,"2026-07-08",7500.0,"Quoted",""],["RHS-02",0,"2026-07-08",1400.0,"Substitute offered","Initial $980 superseded by clarification."],["RHS-11",0,"2026-07-08",null,"Substitute offered","Substitute = RHS-02."],["RHS-03",0,"2026-07-08",3600.0,"Quoted",""],["PL-01",0,"2026-07-08",1795.0,"Quoted",""],["PL-03",0,"2026-07-08",3195.0,"Quoted",""],["PL-06",0,"2026-07-08",6400.0,"Quoted",""],["RHS-03",0,"2026-07-15",3600.0,"Purchased","PO total $8,100.00 incl. VAT."],["BM-01",1,"2026-07-16",1940.0,"Quoted",""],["PL-03",1,"2026-07-16",2600.0,"Quoted",""],["AN-05",1,"2026-07-16",360.0,"Quoted",""],["FB-03",1,"2026-07-16",215.0,"Quoted",""],["FB-07",1,"2026-07-16",null,"No stock",""],["FB-03",0,"2026-07-16",295.0,"Quoted",""],["FB-07",0,"2026-07-16",2050.0,"Quoted",""],["BM-01",0,"2026-07-16",2000.0,"Quoted",""],["PL-03",0,"2026-07-16",3195.0,"Quoted",""],["AN-05",0,"2026-07-16",490.0,"Quoted",""],["PP-03",1,"2026-07-21",900.0,"Quoted","Length not stated."],["PP-04",1,"2026-07-21",2100.0,"Quoted","Length not stated."],["RB-07",1,"2026-07-21",null,"No stock",""],["PP-03",0,"2026-07-23",1895.0,"Quoted",""],["PP-04",0,"2026-07-23",3200.0,"Quoted",""],["RB-07",0,"2026-07-23",null,"No reply",""],["RHS-06",1,"2026-07-27",1800.0,"Quoted","⚠ Verify — less than half Supplier A price."],["PL-03",1,"2026-07-27",2600.0,"Quoted","Priced in Cat. 2 and Cat. 3."],["AN-05",1,"2026-07-27",360.0,"Quoted",""],["PL-05",1,"2026-07-27",4000.0,"Quoted",""],["PP-01",1,"2026-07-27",280.0,"Quoted","Schedule not stated."],["SH-01",1,"2026-07-27",700.0,"Quoted",""],["PL-01",1,"2026-07-27",1450.0,"Quoted",""],["BM-02",1,"2026-07-27",null,"No stock",""],["RHS-06",0,"2026-07-27",3800.0,"Quoted",""],["PL-03",0,"2026-07-27",3195.0,"Quoted",""],["AN-05",0,"2026-07-27",490.0,"Quoted",""],["PL-05",0,"2026-07-27",4700.0,"Quoted",""],["PP-01",0,"2026-07-27",470.0,"Quoted",""],["AN-01",1,"2026-07-28",null,"No stock",""],["AN-02",1,"2026-07-28",125.0,"Quoted",""],["SH-01",1,"2026-07-28",700.0,"Quoted",""],["SH-02",1,"2026-07-28",null,"No stock",""],["PL-01",1,"2026-07-28",1450.0,"Quoted",""],["SH-01",0,"2026-07-28",895.0,"Quoted",""],["PL-03",0,"2026-07-28",3195.0,"Quoted",""],["PL-01",0,"2026-07-28",1795.0,"Quoted",""],["BM-02",0,"2026-07-28",null,"No stock",""],["AN-01",0,"2026-07-28",100.0,"Quoted",""],["AN-02",0,"2026-07-28",200.0,"Quoted",""],["SH-01",0,"2026-07-28",895.0,"Quoted",""],["SH-02",0,"2026-07-28",null,"No stock",""],["PL-01",0,"2026-07-28",1795.0,"Quoted",""],["RHS-07",1,"2026-08-03",3500.0,"Quoted",""],["RHS-04",1,"2026-08-03",null,"Substitute offered","See RHS-13 (1/8 wall)."],["RHS-13",1,"2026-08-03",500.0,"Substitute offered",""],["RHS-08",1,"2026-08-03",null,"No stock",""],["PL-07",1,"2026-08-03",12400.0,"Quoted",""],["PL-08",1,"2026-08-03",7500.0,"Quoted",""],["RHS-10",1,"2026-08-03",null,"No stock",""],["BM-04",1,"2026-08-03",1940.0,"Quoted","⚠ Same price as their W6x20 — confirm section."],["AN-05",1,"2026-08-03",360.0,"Quoted",""],["RHS-07",0,"2026-08-04",null,"No stock",""],["RHS-04",0,"2026-08-04",1950.0,"Quoted",""],["RHS-08",0,"2026-08-04",4900.0,"Quoted",""],["PL-07",0,"2026-08-04",10500.0,"Quoted",""],["PL-08",0,"2026-08-04",9100.0,"Quoted",""],["RHS-10",0,"2026-08-04",null,"No stock",""],["BM-04",0,"2026-08-04",null,"Substitute offered",""],["BM-03",0,"2026-08-04",2328.0,"Substitute offered",""],["AN-05",0,"2026-08-04",490.0,"Quoted",""],["FB-06",1,"2026-08-06",308.0,"Quoted",""],["RHS-04",1,"2026-08-06",1600.0,"Substitute offered","Galvanised only."],["RHS-05",1,"2026-08-06",800.0,"Quoted",""],["RHS-01",1,"2026-08-06",450.0,"Quoted",""],["RHS-09",1,"2026-08-06",2000.0,"Quoted",""],["RHS-02",1,"2026-08-06",null,"No stock",""],["FT-01",1,"2026-08-06",null,"No stock",""],["FT-03",1,"2026-08-06",null,"No stock",""],["PP-03",1,"2026-08-06",900.0,"Quoted",""],["FT-02",1,"2026-08-06",null,"No stock",""],["RHS-06",0,"2026-08-06",3800.0,"Quoted",""],["PP-02",0,"2026-08-06",510.0,"Quoted",""],["PL-02",0,"2026-08-06",2390.0,"Quoted","Quoted in Sect. 1 and Sect. 3."],["GR-02",0,"2026-08-06",1095.0,"Quoted",""],["PP-01",0,"2026-08-06",440.0,"Quoted",""],["FB-06",0,"2026-08-06",365.0,"Quoted",""],["SH-01",0,"2026-08-06",895.0,"Quoted",""],["FS-01",0,"2026-08-06",10.5,"Quoted",""],["FB-06",0,"2026-08-06",545.0,"Quoted","Conflicts with $365 same day."],["RHS-04",0,"2026-08-06",1950.0,"Quoted",""],["RHS-05",0,"2026-08-06",2800.0,"Quoted",""],["RHS-01",0,"2026-08-06",980.0,"Quoted","Likely 5mm wall supplied."],["RHS-09",0,"2026-08-06",null,"No price given",""],["RHS-02",0,"2026-08-06",1400.0,"Quoted","Likely 5mm wall supplied."],["FT-01",0,"2026-08-06",null,"No price given",""],["FT-03",0,"2026-08-06",null,"No stock",""],["PP-03",0,"2026-08-06",null,"No price given",""],["FT-02",0,"2026-08-06",null,"No price given",""],["FS-02",0,"2026-08-07",null,"No reply",""],["PL-01",1,"2026-08-12",1450.0,"Quoted",""],["PL-02",1,"2026-08-12",1950.0,"Quoted",""],["PL-03",1,"2026-08-12",2600.0,"Quoted",""],["PL-04",1,"2026-08-12",3100.0,"Quoted",""],["PL-05",1,"2026-08-12",4000.0,"Quoted",""],["PL-06",1,"2026-08-12",7500.0,"Quoted",""],["PP-05",1,"2026-08-12",null,"No stock",""],["PP-02",1,"2026-08-12",330.0,"Quoted",""],["PP-06",1,"2026-08-12",null,"No stock",""],["PP-04",1,"2026-08-12",2100.0,"Quoted",""],["PP-07",1,"2026-08-12",null,"No stock",""],["CH-03",1,"2026-08-12",null,"No stock",""],["RB-01",1,"2026-08-12",null,"No stock",""],["RB-02",1,"2026-08-12",null,"No stock",""],["RB-05",1,"2026-08-12",null,"No stock",""],["RB-08",1,"2026-08-12",null,"No stock",""],["PL-01",0,"2026-08-13",1795.0,"Quoted","Grade A36 confirmed."],["PL-02",0,"2026-08-13",2390.0,"Quoted",""],["PL-03",0,"2026-08-13",3195.0,"Quoted",""],["PL-04",0,"2026-08-13",3600.0,"Quoted",""],["PL-05",0,"2026-08-13",4700.0,"Quoted",""],["PL-06",0,"2026-08-13",6400.0,"Quoted",""],["PP-05",0,"2026-08-13",null,"No stock",""],["PP-02",0,"2026-08-13",570.0,"Quoted",""],["PP-06",0,"2026-08-13",null,"No stock",""],["PP-04",0,"2026-08-13",3200.0,"Quoted",""],["PP-07",0,"2026-08-13",null,"No stock",""],["CH-03",0,"2026-08-13",1680.0,"Substitute offered",""],["RB-01",0,"2026-08-13",12.25,"Substitute offered",""],["RB-02",0,"2026-08-13",27.5,"Substitute offered",""],["RB-03",0,"2026-08-13",25.5,"Substitute offered",""],["RB-05",0,"2026-08-13",114.0,"Substitute offered",""],["RB-06",0,"2026-08-13",96.0,"Substitute offered",""],["RB-08",0,"2026-08-13",995.0,"Substitute offered",""],["PP-01",0,"2026-08-17",470.0,"Quoted",""],["FB-02",0,"2026-08-17",188.0,"Quoted",""],["PP-02",1,"2026-08-24",330.0,"Quoted",""],["FT-10",1,"2026-08-24",null,"No stock",""],["FT-11",1,"2026-08-24",null,"No stock",""],["FB-08",1,"2026-08-24",null,"Substitute offered",""],["FB-06",1,"2026-08-24",308.0,"Substitute offered",""],["PL-02",1,"2026-08-24",1950.0,"Quoted",""],["RB-02",1,"2026-08-24",null,"No stock",""],["PP-10",1,"2026-08-24",375.0,"Quoted","⚠ Verify vs 2\" @ $330."],["RB-05",1,"2026-08-24",110.0,"Quoted",""],["RHS-01",0,"2026-08-24",980.0,"Quoted",""],["PP-01",0,"2026-08-24",470.0,"Quoted",""],["FT-04",0,"2026-08-24",null,"No stock",""],["FT-05",0,"2026-08-24",null,"No stock",""],["FB-08",0,"2026-08-24",null,"Substitute offered",""],["FB-06",0,"2026-08-24",365.0,"Substitute offered",""],["PL-02",0,"2026-08-24",2390.0,"Quoted",""],["RB-02",0,"2026-08-24",27.5,"Quoted",""],["FT-06",0,"2026-08-24",null,"No stock",""],["RB-05",0,"2026-08-24",96.0,"Quoted","Price matches 3/4 HT from 13 Aug."],["FS-05",0,"2026-08-24",null,"No stock",""],["FS-06",0,"2026-08-24",null,"No stock",""],["FS-07",0,"2026-08-24",null,"No price given",""],["FS-08",0,"2026-08-24",null,"No stock",""],["FS-09",0,"2026-08-24",null,"No stock",""],["RHS-01",0,"2026-08-27",980.0,"Purchased","PO total $4,914.56 incl. VAT."],["PP-01",0,"2026-08-27",470.0,"Purchased",""],["FB-06",0,"2026-08-27",365.0,"Purchased",""],["RB-05",0,"2026-08-27",96.0,"Purchased",""],["RB-02",0,"2026-08-27",27.5,"Purchased",""],["AN-05",1,"2026-09-01",360.0,"Quoted",""],["RB-07",0,"2026-09-08",210.0,"Purchased","Collected 10 Sep, cut in 4 for transport."],["SH-01",1,"2026-09-11",700.0,"Quoted",""],["CH-01",1,"2026-09-11",600.0,"Quoted",""],["RB-09",1,"2026-09-11",null,"No stock",""],["RB-04",1,"2026-09-11",73.0,"Quoted",""],["AN-03",1,"2026-09-11",170.0,"Quoted",""],["FB-04",1,"2026-09-11",318.0,"Quoted",""],["FB-05",1,"2026-09-11",null,"No stock",""],["SH-01",0,"2026-09-11",895.0,"Quoted",""],["CH-01",0,"2026-09-11",700.0,"Substitute offered",""],["RB-09",0,"2026-09-11",1295.0,"Quoted",""],["RB-04",0,"2026-09-11",76.0,"Quoted",""],["AN-03",0,"2026-09-11",235.0,"Quoted",""],["FB-04",0,"2026-09-11",495.0,"Quoted",""],["FB-05",0,"2026-09-11",660.0,"Quoted",""],["RHS-03",1,"2026-09-14",null,"No stock",""],["RHS-01",1,"2026-09-14",450.0,"Quoted",""],["PL-01",1,"2026-09-14",1450.0,"Quoted",""],["RHS-09",1,"2026-09-14",2000.0,"Substitute offered",""],["RHS-12",1,"2026-09-14",5000.0,"Substitute offered",""],["RHS-03",0,"2026-09-14",3600.0,"Quoted",""],["RHS-01",0,"2026-09-14",980.0,"Substitute offered","1/4\" requested — 5mm offered again."],["PL-01",0,"2026-09-14",1795.0,"Quoted",""],["AN-05",1,"2026-09-16",360.0,"Quoted",""],["BM-06",1,"2026-09-16",3562.5,"Quoted",""],["AN-05",0,"2026-09-16",490.0,"Quoted",""],["BM-04",0,"2026-09-16",null,"Substitute offered",""],["BM-05",0,"2026-09-16",2850.0,"Substitute offered",""],["FS-03",0,"2026-09-17",null,"No stock",""],["FS-04",0,"2026-09-17",null,"No stock",""],["AN-04",0,"2026-09-17",285.0,"Quoted","Quoted in Cat. 1 and Cat. 2."],["CH-02",0,"2026-09-17",515.0,"Quoted",""],["CH-03",0,"2026-09-17",1680.0,"Quoted","Same price as 6x2x12# channel."],["GR-01",0,"2026-09-17",1195.0,"Quoted",""],["FB-02",0,"2026-09-17",188.0,"Quoted",""],["FB-01",0,"2026-09-17",110.0,"Quoted",""],["AN-05",0,"2026-09-17",490.0,"Quoted","Blank in Cat. 1, priced in Cat. 2."],["SH-01",0,"2026-09-17",895.0,"Quoted",""]]};
 /* ---- demo price-book revisions (his preview comments). DEMO_REV bumps re-apply them to saved DEMO data only ---- */
-const DEMO_REV=7;
+const DEMO_REV=8;
 const EST_NOTE="Drafted estimate for the demo — not a supplier quote";
 // TTD excl. VAT, [code, Supplier B, Supplier A, note]. Pipe per 20' length, scaled by weight from the real Sch 40 quotes; fittings at typical local stockist rates.
 const DEMO_EST=[["PP-05",300,480],["PP-06",1260,2650],["PP-07",4800,7300],["PP-08",620,1250],["PP-09",8700,13000],
@@ -1234,7 +1270,27 @@ function migrateDemo(){
   (DB.suppliers||[]).forEach(s=>{if(Array.isArray(s.supplies))s.supplies=Array.from(new Set(s.supplies.filter(x=>x!=="Abrasives"&&x!=="Hoses").map(x=>x==="Consumables"?"Miscellaneous":x)));
     if(/abrasive|blast hose|masking/i.test(s.notes||""))s.notes="Degreaser, reflective tape, lifting & rigging. Delivery Tue/Thu only.";if(/Clemco/.test(s.brands||""))s.brands=(s.brands||"").replace(/,?\s*Clemco/,"");});
   (DB.jobs||[]).forEach(j=>(j.updates||[]).forEach(u=>{u.text=(u.text||"").replace("Abrasive & masking RFQ out.","Degreaser & reflective tape RFQ out.").replace("Coatings Distributor quoted abrasive.","Coatings Distributor quoted the degreaser.");}));
+  demoValues();
   m.demoRev=DEMO_REV;
+}
+/* invented demo costings and quotes (never real figures). Fills only projects that have none yet. */
+const DEMO_VALUES={
+  "005":{c:{paintTop:3200,paintPrimer:1600,labFab:{days:12},labPaint:{days:3},equip:2500,consum:2200,machine:3500,transport:1800,mpi:2400},requote:0.9},
+  "006":{c:{paintTop:1050,paintPrimer:500,labPaint:{days:2},equip:200,consum:400,transport:500},po:1},
+  "007":{c:{paintTop:700,paintPrimer:350,labPaint:{days:1},consum:300,transport:400},po:1},
+  "001":{c:{paintTop:2800,paintPrimer:1400,labFab:{days:6},labPaint:{days:2},equip:800,consum:1200,transport:1500},po:1},
+  "004":{c:{paintTop:1200,paintPrimer:600,labFab:{days:3},labPaint:{days:2},consum:600,mpi:1200,transport:600},po:0.97},
+  "002":{c:{paintTop:1800,paintPrimer:900,labFab:{days:4},labPaint:{days:3},consum:900,transport:1200},po:1},
+  "003":{c:{paintTop:2400,paintPrimer:1200,labFab:{days:8},consum:1500,transport:2000}}
+};
+function demoValues(){
+  (DB.jobs||[]).forEach(j=>{const s=DEMO_VALUES[j.jobId];if(!s||(j.quotes||[]).length||j.costing)return;
+    const lines={};Object.keys(s.c).forEach(k=>{const v=s.c[k];lines[k]=typeof v==="object"?{days:v.days}:{cost:v};});
+    j.costing={lines,extra:[]};const sell=jobCosting(j).sell,q0=Math.round(sell/10)*10,d0=j.quoteSentDate||j.rfqDate||todayISO();
+    j.quotes=[{rev:0,date:d0,value:q0,ref:"Q-"+j.jobId,note:""}];
+    if(s.requote){j.quotes.push({rev:1,date:addWorkingDays(d0,3),value:Math.round(q0*s.requote/10)*10,ref:"Q-"+j.jobId+" R1",note:"client asked for 10% off"});}
+    if(s.po&&reached(j,PH.PO)&&j.phase!==PH.LOST)j.poValue=Math.round(quoteValue(j)*s.po/10)*10;
+  });
 }
 function wdOff(base,n){if(!n)return nextWD(base);if(n>0)return addWorkingDays(nextWD(base),n);let d=base,k=-n;while(k>0){d=isoAdd(d,-1);if(isWorkDay(d))k--;}return d;}
 function seed(){
@@ -1619,10 +1675,14 @@ function openPhaseAction(jobId,action,opts){
   const dl={quoted:"Submitted on",po:"PO received on",proc:"Procurement started on",prod:"Production started on",done:"Delivered on",lost:"Date",reopen:"Date"}[action];
   const had={quoted:j.quoteSentDate,po:j.poDate,proc:j.procStartDate,prod:j.prodStartDate}[action]||"";
   let body=`<div class="field"><label>${dl}</label><input type="date" data-k="date" value="${esc(had||todayISO())}"></div>`;
+  if(action==="quoted"){const sug=quoteValue(j)??(nz(j.costSell)?+j.costSell:(jobCosting(j).has?Math.round(jobCosting(j).sell*100)/100:""));
+    body+=`<div class="field"><label>Quoted value (excl. VAT)</label><input type="number" step="any" data-k="qvalue" value="${esc(sug)}" placeholder="total on the quotation">${jobCosting(j).has?`<div class="lblnote">from the costing — change it if the quote differs</div>`:""}</div>
+      <div class="field"><label>Quotation no. (optional)</label><input data-k="qref" value="${esc(((j.quotes||[])[0]||{}).ref||"")}"></div>`;}
   if(action==="quoted")body+=`<div class="field"><label>Follow up client on</label><input type="date" data-k="followUpDate" value="${esc(j.followUpDate||"")}"></div><div class="hint">Leave blank to follow up ${followUpDays()} working days after submission. While awaiting the PO the project is never "overdue" — it flags "chase client" instead.</div>
       <div class="fhead full">Lead time you're quoting <span style="font-weight:500;text-transform:none;letter-spacing:0">(optional — fills in the PO step for you)</span></div>${leadFields(j,"Lead time")}`;
   if(action==="po"){
     body+=`<div class="field"><label>PO number</label><input type="text" data-k="poNumber" value="${esc(j.poNumber||"")}"></div>
+      <div class="field"><label>PO value (excl. VAT)</label><input type="number" step="any" data-k="poValue" value="${esc(poValue(j)??quoteValue(j)??"")}">${quoteValue(j)!=null?`<div class="lblnote">from the quote${quoteRev(j)?" (Rev "+quoteRev(j)+")":""} — change it if the PO differs</div>`:""}</div>
       <div class="field"><label>Quoted lead time — min (target)</label><input type="number" min="0" step="any" data-k="leadMin" value="${j.leadMin??""}"></div>
       <div class="field"><label>Quoted lead time — max (due)</label><input type="number" min="0" step="any" data-k="leadMax" value="${j.leadMax??""}"></div>
       <div class="field"><label>Unit</label><select data-k="leadUnit">${["working days","weeks"].map(o=>`<option ${(j.leadUnit||"working days")===o?"selected":""}>${o}</option>`).join("")}</select></div>
@@ -1644,9 +1704,10 @@ function savePhase(){
   if(a==="po"){
     if(!d.leadMax&&!d.leadMin&&!d.dueOverride){toast("Enter the quoted lead time or a fixed delivery date");return;}
     const num=v=>(v===""||v==null)?"":Number(v);
-    j.poNumber=d.poNumber||"";j.leadMin=num(d.leadMin);j.leadMax=num(d.leadMax);j.leadUnit=d.leadUnit||"working days";j.dueOverride=d.dueOverride||"";j.poDate=date;
+    j.poNumber=d.poNumber||"";if(d.poValue!==""&&d.poValue!=null)j.poValue=Math.round(+d.poValue*100)/100;j.leadMin=num(d.leadMin);j.leadMax=num(d.leadMax);j.leadUnit=d.leadUnit||"working days";j.dueOverride=d.dueOverride||"";j.poDate=date;
   }
   if(a==="quoted"){j.quoteSentDate=date;j.followUpDate=d.followUpDate||"";
+    if(nz(d.qvalue)&&+d.qvalue>0){const v=Math.round(+d.qvalue*100)/100;j.quotes=j.quotes||[];if(!j.quotes.length)j.quotes.push({rev:0,date,value:v,ref:(d.qref||"").trim(),note:""});else{const l=j.quotes[j.quotes.length-1];l.value=v;if(d.qref)l.ref=d.qref.trim();}}
     const num=v=>(v===""||v==null)?"":Number(v);if(d.leadMin!==""||d.leadMax!==""){j.leadMin=num(d.leadMin);j.leadMax=num(d.leadMax);j.leadUnit=d.leadUnit||"working days";}}
   if(a==="proc")j.procStartDate=date;
   if(a==="prod")j.prodStartDate=date;
@@ -3123,7 +3184,7 @@ function go(id){ setTimeout(pageAnim,0); listQ=""; gridFilters={}; supView=null;
 function dashFilter(kind){ setTimeout(pageAnim,0); detailJob=null; current="jobs"; currentView="grid"; sortKey="jobName"; sortDir=-1; jobFilter=kind; listQ=""; gridFilters={}; render(); buildNav(); }
 function dashGo(page){ if(page==="procurement")purStage="waiting"; go(page); }
 function clearJobFilter(){ jobFilter=null; render(); }
-const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Projects overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active projects (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded"};
+const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Projects overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active projects (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded",delivered:"Delivered this year"};
 function rerender(){ if(detailJob)renderDetail(); else render(); buildNav(); }
 
 /* ============ ROUTER ============ */
@@ -3160,14 +3221,14 @@ function filteredRows(){
   if(current==="jobs"&&jobFilter){
     const F={quoteover:j=>{const s=jobState(j);return s.kind==="quote"&&s.overdue;},jobover:j=>{const s=jobState(j);return s.kind==="delivery"&&s.overdue;},
       soon:j=>jobState(j).soon,rfq:j=>j.phase===PH.RFQ,awaitingpo:j=>j.phase===PH.QUOTED,chase:j=>jobState(j).chase,active:j=>EXEC.includes(j.phase),
-      onhold:j=>!isClosed(j)&&isOnHold(j),nodue:j=>{const s=jobState(j);return(s.kind==="quote"||s.kind==="delivery")&&!s.due;},nochecklist:jobNeedsChecklist}[jobFilter];
+      onhold:j=>!isClosed(j)&&isOnHold(j),nodue:j=>{const s=jobState(j);return(s.kind==="quote"||s.kind==="delivery")&&!s.due;},nochecklist:jobNeedsChecklist,delivered:j=>j.phase===PH.DONE&&(j.deliveredDate||"").slice(0,4)===todayISO().slice(0,4)}[jobFilter];
     if(F)rows=rows.filter(F);
   }
   if(sortKey==="_due"){
     const key=j=>{const s=jobState(j);return isClosed(j)?"9999-12-31":(s.due||s.followUp||"9999-12-30");};
     rows.sort((a,b)=>{const x=key(a),y=key(b);return x<y?-sortDir:x>y?sortDir:0;});
-  }else if(sortKey==="_pct"||sortKey==="_step"){
-    const key=sortKey==="_pct"?jobPct:j=>currentStep(j).toLowerCase();
+  }else if(sortKey==="_pct"||sortKey==="_step"||sortKey==="_val"){
+    const key=sortKey==="_pct"?jobPct:sortKey==="_val"?j=>jobValue(j)??-1:j=>currentStep(j).toLowerCase();
     rows.sort((a,b)=>{const x=key(a),y=key(b);return x<y?-sortDir:x>y?sortDir:0;});
   }else if(sortKey==="jobName"&&current==="jobs"){
     const key=j=>{const m=/^\s*(\d+)\s*$/.exec(j.jobId||"");return m?"1"+String(+m[1]).padStart(8,"0"):"0"+(j.jobName||"").toLowerCase();};   // numbered projects by number; others sort to the end of the newest-first list
@@ -3182,7 +3243,7 @@ function filteredRows(){
 /* ============ GRID ============ */
 function renderGrid(c){
   const sch=SCHEMA[current];
-  const cols=sch.gridCols?sch.gridCols.map(k=>({_due:{k:"_due",l:"Due / next action"},_price:{k:"_price",l:"Best price"},_mstatus:{k:"_mstatus",l:"Status"},_step:{k:"_step",l:"Current step"},_pct:{k:"_pct",l:"Progress"}})[k]||sch.fields.find(f=>f.k===k)):sch.fields.filter(f=>f.t!=="textarea"&&f.t!=="heading").slice(0,9);
+  const cols=sch.gridCols?sch.gridCols.map(k=>({_due:{k:"_due",l:"Due / next action"},_price:{k:"_price",l:"Best price"},_mstatus:{k:"_mstatus",l:"Status"},_step:{k:"_step",l:"Current step"},_pct:{k:"_pct",l:"Progress"},_val:{k:"_val",l:"Value"}})[k]||sch.fields.find(f=>f.k===k)):sch.fields.filter(f=>f.t!=="textarea"&&f.t!=="heading").slice(0,9);
   const selFields=sch.fields.filter(f=>f.t==="select"&&!f.noFilter);
   const fbar=selFields.length?`<div class="filters"><span class="lbl">Filter</span>`+selFields.map(f=>{const ops=optsFor(f);const cur=gridFilters[f.k]||"";return `<select data-filter="${f.k}" onchange="gridFilters['${f.k}']=this.value;render()" class="${cur?"on":""}"><option value="">${f.l}: All</option>${ops.map(o=>`<option ${cur===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;}).join("")+`</div>`:"";
   const rows=filteredRows();
@@ -3215,6 +3276,7 @@ function cellHTML(f,r){
   if(f.k==="_due"){const m=jobDueMeta(r);return `<span class="${m.cls}">${esc(m.txt)}</span>`;}
   if(f.k==="_price")return priceCell(r);
   if(f.k==="_mstatus")return matChip(r);
+  if(f.k==="_val"){const v=jobValue(r),m=jobMargin(r);return v==null?"<span style='color:var(--ink-soft)'>—</span>":`<span class="valcell">${mv(v)}${m?`<span class="resp ${m.pct<minMargin()?"late":""}">${pct(m.pct)} margin</span>`:""}</span>`;}
   if(f.k==="_step"){const s=currentStep(r);return s?`<span class="stepcell">${esc(s)}</span>`:"<span style='color:var(--ink-soft)'>—</span>";}
   if(f.k==="_pct"){if(r.phase===PH.LOST)return "<span style='color:var(--ink-soft)'>—</span>";const p=jobPct(r);return `<div class="pbar" title="${p}% of schedule steps done"><span class="ptrack"><span class="pf ${p>=100?'full':''}" style="width:${p}%"></span></span><em>${p}%</em></div>`;}
   let v=r[f.k];
@@ -3536,7 +3598,7 @@ function renderDashboard(c){
   const duePanel=`<div class="panel"><h3>Next deadlines</h3><div class="upnext">${uphtml}</div></div>`;
   const qf=qcOpenFails();
   const qcNudge=qf?`<div class="kpi-sub warn" onclick="qcFilter='fail';go('qc')" style="border-left-color:var(--bad)"><span>✗</span> <b>${qf}</b> open QC fail${qf>1?"s":""} <span class="kpi-go">→</span></div>`:"";
-  c.innerHTML=`${searchBox()}${guideCard()}<div class="cards">${cards}</div><div class="sublines">${subline}${qcNudge}${chkNudge}</div>
+  c.innerHTML=`${searchBox()}${guideCard()}<div class="cards">${cards}</div><div class="sublines">${subline}${qcNudge}${chkNudge}</div>${valueRow()}
     <div class="dashrow">${reminders}${statusPanel}</div>
     <div class="dashrow" style="margin-top:14px">${recentPanel}${duePanel}</div>`;
 }
@@ -3646,6 +3708,11 @@ function renderSettingsRaw(c){
       <div class="setrow"><span>VAT rate (%)</span><span class="spacer"></span><input type="number" style="width:80px" value="${Math.round(vatRate()*1000)/10}" onchange="DB.meta.vatRate=Math.max(0,+this.value||0)/100;save();toast('Saved')"></div>
       <div class="setrow"><span>Supplier price workbook (.xlsx)</span><span class="spacer"></span><button class="btn" onclick="importPriceWorkbook()">📂 Import</button></div>
       <div class="setrow" style="align-items:flex-start"><span>RFQ email sign-off<br><small style="color:var(--ink-soft)">added under “Thank you,”</small></span><span class="spacer"></span><textarea style="max-width:220px;min-height:62px;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--card);color:var(--ink);font:inherit;font-size:13px" placeholder="Name&#10;Title&#10;Phone" onchange="DB.meta.emailSignoff=this.value;save();toast('Saved')">${esc(DB.meta.emailSignoff||"")}</textarea></div></div>
+    <div class="panel"><h3>💰 Costing defaults</h3><div class="setnote">Used by each project's costing (all figures excl. VAT). Labour = days × the day rate. Markups are the defaults for new costings — you can still change a markup on any project.</div>
+      <div class="setrow"><span>Labour day rate — fabrication</span><span class="spacer"></span><input type="number" min="0" style="width:110px" value="${dayRate("fab")}" onchange="DB.meta.dayRates=Object.assign({},DB.meta.dayRates,{fab:Math.max(0,+this.value||0)});save();toast('Saved')"></div>
+      <div class="setrow"><span>Labour day rate — blast &amp; paint</span><span class="spacer"></span><input type="number" min="0" style="width:110px" value="${dayRate("paint")}" onchange="DB.meta.dayRates=Object.assign({},DB.meta.dayRates,{paint:Math.max(0,+this.value||0)});save();toast('Saved')"></div>
+      <div class="setrow"><span>Warn when margin is below (%)</span><span class="spacer"></span><input type="number" min="0" style="width:80px" value="${minMargin()}" onchange="DB.meta.minMargin=Math.max(0,+this.value||0);save();toast('Saved')"></div>
+      <div class="setlist">${costLines().map((l,i)=>`<div class="setrow"><span>${esc(l.label)}${l.auto?' <span class="resp">(from the material list)</span>':l.labour?' <span class="resp">(days × rate)</span>':""}</span><span class="spacer"></span><input type="number" min="0" style="width:70px" value="${l.markup}" onchange="setCostMarkup(${i},this.value)"><span class="resp">% markup</span></div>`).join("")}</div></div>
     <div class="panel"><h3>💲 Price-book categories</h3><div class="setnote">Add a category here or with “+ Category” on the Price Book page. 🗑 removes a category; if it has items, it asks first and deletes them and their prices too.</div>
       <div class="setlist">${priceCats().map(cc=>{const n=(DB.priceItems||[]).filter(i=>i.category===cc).length;return `<div class="setrow"><span>${esc(cc)}</span><span class="resp">${n} item${n===1?"":"s"}</span><span class="spacer"></span><button class="icobtn" title="Rename" data-c="${esc(cc)}" onclick="renamePriceCat(this.dataset.c)">✏️</button><button class="icobtn del" title="Remove" data-c="${esc(cc)}" onclick="removePriceCat(this.dataset.c)">🗑</button></div>`;}).join("")||'<div class="minimsg">No categories yet.</div>'}</div>
       <div class="setadd"><button class="btn" onclick="addPriceCat(()=>render())">+ Add category</button></div></div>
@@ -3731,6 +3798,181 @@ function saveLine(){
 }
 
 /* ============ JOB DETAIL ============ */
+/* ============ v7: PROJECT VALUE & COSTING (all figures excl. VAT) ============
+   j.quotes  = [{rev,date,value,ref,note}]  — Rev 0 at "Quote submitted", Rev 1… from Re-quote; the latest is the quoted value
+   j.poValue = value on the PO (pre-filled from the latest quote)
+   j.costing = {lines:{key:{cost,markup,days}}, extra:[{id,label,cost,markup}]} — the costing sheet, cost column + markup %
+   Materials come from the project's material list; labour = days × the day rate in Settings. */
+const COST_LINES_DEFAULT=[
+  {key:"paintTop",label:"Paint — top coat",markup:10},{key:"paintPrimer",label:"Paint — primer",markup:10},
+  {key:"labFab",label:"Labour — fabrication",markup:35,labour:"fab"},{key:"labPaint",label:"Labour — blast & paint",markup:35,labour:"paint"},
+  {key:"equip",label:"Equipment",markup:10},{key:"consum",label:"Consumables",markup:10},{key:"mat",label:"Materials",markup:20,auto:"materials"},
+  {key:"machine",label:"Machine shop",markup:10},{key:"transport",label:"Transport",markup:0},{key:"mpi",label:"MPI / NDT",markup:0}];
+function setCostMarkup(i,v){const a=JSON.parse(JSON.stringify(costLines()));if(!a[i])return;a[i].markup=Math.max(0,+v||0);DB.meta.costLines=a;save();toast("Default markup saved");}
+function costLines(){const c=DB.meta&&DB.meta.costLines;return Array.isArray(c)&&c.length?c:COST_LINES_DEFAULT;}
+function dayRate(k){const r=(DB.meta&&DB.meta.dayRates)||{};return +r[k]||0;}
+function minMargin(){const v=DB.meta&&DB.meta.minMargin;return typeof v==="number"?v:10;}
+function nz(v){return v!==""&&v!=null&&!isNaN(+v);}
+function matCostExcl(j){return matTotals(jobMats(j.id)).cost;}
+function jobCosting(j){
+  const C=j.costing||{},S=C.lines||{};let cost=0,sell=0,any=false;
+  const lines=costLines().map(t=>{const s=S[t.key]||{},markup=nz(s.markup)?+s.markup:t.markup;let c=0,auto=false,days=s.days,rate=0;
+    if(t.auto==="materials"){if(nz(s.cost))c=+s.cost;else{c=matCostExcl(j);auto=true;}}
+    else if(t.labour){rate=dayRate(t.labour);c=nz(s.cost)?+s.cost:(nz(days)?+days*rate:0);}
+    else c=nz(s.cost)?+s.cost:0;
+    if((nz(s.cost)&&+s.cost>0)||(nz(days)&&+days>0))any=true;
+    const sl=c*(1+markup/100);cost+=c;sell+=sl;return {key:t.key,label:t.label,cost:c,markup,sell:sl,auto,days,rate,labour:t.labour};});
+  (C.extra||[]).forEach(x=>{const c=+x.cost||0,mk=+x.markup||0,sl=c*(1+mk/100);if(c>0)any=true;cost+=c;sell+=sl;lines.push({key:x.id,label:x.label,cost:c,markup:mk,sell:sl,extra:true});});
+  return {lines,cost,sell,has:any};
+}
+function quoteValue(j){const q=(j.quotes||[]).filter(x=>nz(x.value));return q.length?+q[q.length-1].value:null;}
+function quoteRev(j){return Math.max(0,(j.quotes||[]).length-1);}
+function poValue(j){return nz(j.poValue)?+j.poValue:null;}
+/* the project's value: the PO once it's in, else the latest quote */
+function jobValue(j){return reached(j,PH.PO)&&j.phase!==PH.LOST&&poValue(j)!=null?poValue(j):quoteValue(j);}
+function jobMargin(j){const v=jobValue(j),c=jobCosting(j);if(v==null||!c.has)return null;return {amt:v-c.cost,pct:v>0?(v-c.cost)/v*100:0,cost:c.cost,value:v};}
+function hideVals(){try{return localStorage.getItem("protrac_hidevals")==="1";}catch(e){return false;}}
+function toggleHideVals(){try{localStorage.setItem("protrac_hidevals",hideVals()?"0":"1");}catch(e){}rerender();toast(hideVals()?"Values hidden on this device":"Values shown");}
+function mv(n){return hideVals()?"$ •••":money(n==null?n:Math.round(+n*100)/100);}
+function pct(n){return hideVals()?"••%":(Math.round(n*10)/10)+"%";}
+/* Overview card */
+function valueCard(j){
+  const q=quoteValue(j),po=poValue(j),c=jobCosting(j),m=jobMargin(j),low=m&&m.pct<minMargin();
+  const cell=(l,v,s)=>`<div class="vcell"><label>${l}</label><b>${v}</b>${s?`<span class="resp">${s}</span>`:""}</div>`;
+  return `<div class="dsection valcard"><h3><span class="ic">💲</span> Value &amp; costing <span class="resp" style="font-weight:500;text-transform:none;letter-spacing:0">excl. VAT</span>
+      <span class="hbtns">${j.phase===PH.QUOTED&&q!=null?`<button class="btn sm" onclick="openRequote('${j.id}')">Re-quote</button>`:""}<button class="btn sm primary" onclick="openCosting('${j.id}')">${c.has?"Costing":"+ Costing"}</button></span></h3>
+    <div class="vgrid">${cell("Quoted"+(q!=null&&quoteRev(j)?" · Rev "+quoteRev(j):""),q!=null?mv(q):"—",(j.quotes||[]).length>1?"was "+mv(+(j.quotes[0].value)):"")}
+      ${cell("PO value",po!=null?mv(po):"—",po!=null&&q!=null&&Math.abs(po-q)>0.5?(po<q?"below":"above")+" quote":"")}
+      ${cell("Cost",c.has?mv(c.cost):"—",c.has?"materials "+mv(c.lines.find(l=>l.key==="mat").cost):"add a costing")}
+      ${cell("Margin",m?`<span class="${low?"late":"ontime"}">${mv(m.amt)}</span>`:"—",m?pct(m.pct)+(low?" — below "+minMargin()+"%":""):"")}</div>
+    ${(j.quotes||[]).length>1?`<div class="revlist">${j.quotes.map(x=>`<span class="chip">Rev ${x.rev} · ${esc(fmtShort(x.date))} · ${mv(x.value)}${x.note?" · "+esc(x.note):""}</span>`).join("")}</div>`:""}
+  </div>`;
+}
+/* ---- costing editor ---- */
+function openCosting(jobId){
+  const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;formMode="costing";editingId=jobId;
+  const C=jobCosting(j),S=(j.costing||{}).lines||{};
+  const row=l=>{const s=S[l.key]||{};
+    const costIn=l.labour?`<div class="cdays"><input type="number" min="0" step="any" data-cd="${l.key}" value="${esc(s.days??"")}" placeholder="days" oninput="costCalc()"><span class="resp">× ${mv(l.rate)}/day</span></div><input type="number" step="any" data-cc="${l.key}" value="${nz(s.cost)?esc(s.cost):""}" placeholder="or $ amount" oninput="costCalc()">`
+      :l.key==="mat"?`<input type="number" step="any" data-cc="mat" value="${nz(s.cost)?esc(s.cost):""}" placeholder="${esc(money(Math.round(matCostExcl(j)*100)/100))} from material list" oninput="costCalc()">`
+      :l.extra?`<input data-xl="${l.key}" value="${esc(l.label)}" class="xlabel"><input type="number" step="any" data-xc="${l.key}" value="${esc(l.cost||"")}" oninput="costCalc()">`
+      :`<input type="number" step="any" data-cc="${l.key}" value="${nz(s.cost)?esc(s.cost):""}" placeholder="0" oninput="costCalc()">`;
+    return `<tr><td class="cl">${l.extra?"":esc(l.label)}${l.key==="mat"?`<div class="resp">auto from the material list unless you type a figure</div>`:""}</td><td class="cc">${costIn}</td><td class="cm"><input type="number" step="any" data-${l.extra?"xm":"cm"}="${l.key}" value="${esc(l.markup)}" oninput="costCalc()"><span>%</span></td><td class="cs" data-cs="${l.key}"></td></tr>`;};
+  openModal("Costing — "+jobLabel(j),`<div class="full impnote">All figures <b>excl. VAT</b>. Type the cost column (or paste the rows from your costing sheet) — sell, totals and margin work themselves out. Markups default from Settings.</div>
+    <div class="full costin"><button type="button" class="btn primary" onclick="costImport()">📂 Import costing sheet (.xlsx)</button><button type="button" class="btn" onclick="costPasteOpen()">📋 Paste cells from Excel</button><span class="resp">…or type the cost column below</span></div>
+    <div class="full costpaste" id="costpaste" hidden><textarea id="costpastein" placeholder="In Excel, select the costing rows (line name to Extended Markup — the heading row too if you like), copy, and paste here"></textarea><button type="button" class="btn sm primary" onclick="costPaste()">Fill in</button></div>
+    <div class="full" id="costsheet"></div>
+    <div class="full tablewrap"><table class="costtab"><thead><tr><th>Line</th><th>Cost</th><th>Markup</th><th>Sell</th></tr></thead><tbody id="costrows">${C.lines.map(row).join("")}</tbody></table></div>
+    <div class="full"><button type="button" class="btn sm" onclick="costAddLine()">+ Line</button></div>
+    <div class="full" id="costtot"></div>
+    ${j.phase===PH.RFQ||!(j.quotes||[]).length?`<label class="full optchk" style="width:max-content"><input type="checkbox" id="costuseq" checked><span>Use the sell total as the quoted value</span></label>`:""}`,{wide:true,ok:"Save costing"});
+  costCalc();
+}
+function costRead(){
+  const lines={},extra=[];
+  costLines().forEach(t=>{const c=document.querySelector(`#mbody [data-cc="${t.key}"]`),m=document.querySelector(`#mbody [data-cm="${t.key}"]`),d=document.querySelector(`#mbody [data-cd="${t.key}"]`);
+    const o={};if(c&&c.value!=="")o.cost=+c.value;if(m&&m.value!==""&&+m.value!==t.markup)o.markup=+m.value;if(d&&d.value!=="")o.days=+d.value;if(Object.keys(o).length)lines[t.key]=o;});
+  document.querySelectorAll("#mbody [data-xc]").forEach(el=>{const id=el.dataset.xc,lab=document.querySelector(`#mbody [data-xl="${id}"]`),mk=document.querySelector(`#mbody [data-xm="${id}"]`);
+    if((lab&&lab.value.trim())||el.value!=="")extra.push({id,label:(lab&&lab.value.trim())||"Other",cost:el.value===""?"":+el.value,markup:mk&&mk.value!==""?+mk.value:0});});
+  return {lines,extra};
+}
+function costCalc(){
+  const j=(DB.jobs||[]).find(x=>x.id===editingId);if(!j)return;const C=jobCosting(Object.assign({},j,{costing:costRead()}));
+  C.lines.forEach(l=>{const el=document.querySelector(`#mbody [data-cs="${l.key}"]`);if(el)el.innerHTML=`${mv(l.sell)}<div class="resp">${l.cost?"cost "+mv(l.cost):""}</div>`;});
+  const v=jobValue(j),cmp=v!=null&&C.has?`<div class="m"><b class="${(v-C.cost)/v*100<minMargin()?"late":"ontime"}">${mv(v-C.cost)} · ${pct((v-C.cost)/v*100)}</b>margin on the ${reached(j,PH.PO)&&poValue(j)!=null?"PO":"quoted"} value ${mv(v)}</div>`:"";
+  const el=document.getElementById("costtot");if(el)el.innerHTML=`<div class="msum"><div class="m"><b>${mv(C.cost)}</b>total cost</div><div class="m"><b>${mv(C.sell)}</b>sell total (quote)</div><div class="m"><b>${mv(C.sell-C.cost)} · ${pct(C.sell?(C.sell-C.cost)/C.sell*100:0)}</b>margin at these markups</div>${cmp}</div>`;
+}
+function costAddLine(){const tb=document.getElementById("costrows");if(!tb)return;const id="x"+uid();tb.insertAdjacentHTML("beforeend",`<tr><td class="cl"></td><td class="cc"><input data-xl="${id}" class="xlabel" placeholder="Line name"><input type="number" step="any" data-xc="${id}" placeholder="0" oninput="costCalc()"></td><td class="cm"><input type="number" step="any" data-xm="${id}" value="10" oninput="costCalc()"><span>%</span></td><td class="cs" data-cs="${id}"></td></tr>`);}
+function costPasteOpen(){const p=document.getElementById("costpaste");if(p){p.hidden=!p.hidden;if(!p.hidden)document.getElementById("costpastein").focus();}}
+/* paste rows from a costing sheet: name … qty, unit price / extended … markup % — matched to the standard lines by name */
+const COST_MATCH=[["paintTop",/top\s*coat|topcoat|finish coat/i],["paintPrimer",/primer/i],["labFab",/labou?r.*fab|fab.*labou?r/i],["labPaint",/labou?r.*(blast|paint|coat)|(blast|paint).*labou?r/i],["equip",/equip/i],["consum",/consum/i],["mat",/material/i],["machine",/machin/i],["transport",/transport|deliver|truck/i],["mpi",/\bmpi\b|\bndt\b|inspection/i]];
+function costPaste(){const t=(document.getElementById("costpastein")||{}).value||"";costFromRows(parseDelim(t,t.includes("\t")?"\t":","),"pasted");}
+function costImport(){pickXl(async f=>{try{const sh=await fileToSheets(f);
+  const score=s=>(s.rows||[]).slice(0,40).some(r=>(r||[]).some(c=>/mark\s*-?up/i.test(c||"")))?2:(s.rows||[]).some(r=>(r||[]).some(c=>COST_MATCH.some(([,re])=>re.test(c||""))))?1:0;
+  const best=sh.slice().sort((a,b)=>score(b)-score(a))[0];if(!best||!score(best)){toast("No costing table found in that file — copy the cells and paste them instead");return;}
+  const p=document.getElementById("costpaste");if(p)p.hidden=true;costFromRows(best.rows,"imported from “"+f.name+"”"+(sh.length>1?" (sheet "+best.name+")":""));}catch(e){toast(e.message||"Couldn't read that file");}});}
+/* rows from the costing sheet → the form. With a header row (… Qty | Unit price | Extended | Markup | Extended markup) columns are read by name;
+   without one, a row is: name … numbers, where 3+ numbers = qty, unit, extended and a "%" cell is the markup. The "total" row gives the sheet's own quote total. */
+function costFromRows(rows,how){
+  rows=(rows||[]).map(r=>(r||[]).map(c=>(c==null?"":String(c)).trim()));
+  const num=c=>{const v=parseFloat((c||"").replace(/[$,%\s]/g,""));return isNaN(v)?null:v;};
+  const hi=rows.findIndex(r=>r.some(c=>/^mark\s*-?up$/i.test(c)));let col=null;
+  if(hi>=0){const H=rows[hi].map(c=>c.toLowerCase());col={mk:H.findIndex(c=>/^mark\s*-?up$/.test(c)),ext:H.findIndex(c=>/^extended$|^ext\.?$|^cost$|^amount$/.test(c)),qty:H.findIndex(c=>/^qty|quantity/.test(c)),unit:H.findIndex(c=>/unit/.test(c)),sell:H.findIndex(c=>/extended\s*mark|sell|price to client/.test(c))};}
+  let n=0,sheetTotal=null;
+  rows.slice(hi+1).forEach(r=>{
+    const label=r.find(c=>/[a-z]/i.test(c)&&num(c)==null);if(!label)return;
+    if(/\btotal\b/i.test(label)){const v=col&&col.sell>=0?num(r[col.sell]):null;const nums=r.map(num).filter(v=>v!=null);sheetTotal=v!=null?v:nums.length?nums[nums.length-1]:null;return;}
+    let cost=null,mk=null;
+    if(col){const e=col.ext>=0?num(r[col.ext]):null,q=col.qty>=0?num(r[col.qty]):null,u=col.unit>=0?num(r[col.unit]):null;cost=e!=null?e:(q!=null&&u!=null?q*u:u);
+      if(col.mk>=0){const raw=r[col.mk]||"",v=num(raw);if(v!=null)mk=/%/.test(raw)||v>1?v:v*100;}}
+    else{const cells=r.filter(c=>c!==label&&c!==""&&c!=="$");const pc=cells.find(c=>/%$/.test(c));if(pc)mk=num(pc);const vals=cells.filter(c=>!/%$/.test(c)).map(num).filter(v=>v!=null);
+      if(!vals.length)return;cost=vals.length>=3?vals[2]:vals.length===2?vals[0]*vals[1]:vals[0];}
+    if(cost==null)return;cost=Math.round(cost*100)/100;
+    const hit=COST_MATCH.find(([,re])=>re.test(label));
+    if(hit){const k=hit[0],c=document.querySelector(`#mbody [data-cc="${k}"]`),m=document.querySelector(`#mbody [data-cm="${k}"]`),d=document.querySelector(`#mbody [data-cd="${k}"]`);
+      if(c)c.value=cost;if(d)d.value="";if(m&&mk!=null)m.value=Math.round(mk*100)/100;n++;}
+    else{costAddLine();const xs=document.querySelectorAll("#mbody [data-xl]"),last=xs[xs.length-1],id=last.dataset.xl;last.value=label.replace(/\s+/g," ");document.querySelector(`#mbody [data-xc="${id}"]`).value=cost;if(mk!=null)document.querySelector(`#mbody [data-xm="${id}"]`).value=Math.round(mk*100)/100;n++;}
+  });
+  costCalc();
+  const j=(DB.jobs||[]).find(x=>x.id===editingId),C=j?jobCosting(Object.assign({},j,{costing:costRead()})):null;
+  const chk=document.getElementById("costsheet");if(chk)chk.innerHTML=sheetTotal!=null&&C?(Math.abs(sheetTotal-C.sell)<1?`<div class="nudge" style="margin:0">✅ Matches the sheet's total of ${mv(sheetTotal)}.</div>`:`<div class="nudge" style="margin:0">⚠ The sheet's total is ${mv(sheetTotal)}, these lines add up to ${mv(C.sell)} — check a line or markup.</div>`):"";
+  if(sheetTotal!=null&&j)j._sheetTotal=sheetTotal;
+  toast(n?n+" line"+(n>1?"s":"")+" "+how+" — check and save":"Couldn't read any lines — include the line names, cost and markup %");
+}
+function saveCosting(){
+  const j=(DB.jobs||[]).find(x=>x.id===editingId);if(!j){closeForm();return;}
+  j.costing=costRead();const C=jobCosting(j);const useq=document.getElementById("costuseq");
+  if(useq&&useq.checked&&C.has){j.costSell=Math.round(C.sell*100)/100;}
+  (j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"Costing updated — cost "+money(Math.round(C.cost*100)/100)+", sell "+money(Math.round(C.sell*100)/100)+" (excl. VAT)"});
+  save();closeForm();rerender();toast("Costing saved");
+}
+/* ---- re-quote: tap a discount or type the new total; shows what it does to the margin ---- */
+function openRequote(jobId){
+  const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;const q=quoteValue(j);if(q==null){toast("Record the quote first");return;}
+  formMode="requote";editingId=jobId;
+  openModal("Re-quote — "+jobLabel(j),`<div class="field"><label>Current quote (Rev ${quoteRev(j)})</label><div class="rqcur">${mv(q)}</div></div>
+    <div class="field"><label>New total excl. VAT</label><input type="number" step="any" data-k="value" id="rqval" value="${Math.round(q*0.9*100)/100}" oninput="rqCalc()"><div class="qchips">${[5,10,15].map(p=>`<button type="button" class="qchip ${p===10?"on":""}" onclick="rqPick(${p})">−${p}%</button>`).join("")}</div></div>
+    <div class="field"><label>Submitted on</label><input type="date" data-k="date" value="${todayISO()}"></div>
+    <div class="field"><label>Note (optional)</label><input data-k="note" placeholder="e.g. client asked for 10% off"></div>
+    <div class="full" id="rqmargin"></div>`,{ok:"Save re-quote"});
+  rqCalc();
+}
+function rqPick(p){const j=(DB.jobs||[]).find(x=>x.id===editingId);const el=document.getElementById("rqval");if(!j||!el)return;el.value=Math.round(quoteValue(j)*(1-p/100)*100)/100;document.querySelectorAll("#mbody .qchip").forEach(b=>b.classList.toggle("on",b.textContent==="−"+p+"%"));rqCalc();}
+function rqCalc(){
+  const j=(DB.jobs||[]).find(x=>x.id===editingId),el=document.getElementById("rqmargin");if(!j||!el)return;
+  const v=+(document.getElementById("rqval")||{}).value||0,q=quoteValue(j),C=jobCosting(j);
+  const off=q?Math.round((1-v/q)*1000)/10:0;
+  if(!C.has){el.innerHTML=`<div class="impnote">${off>0?off+"% below":"Same as"} the current quote. Add a costing to see what this does to your margin.</div>`;return;}
+  const was=(q-C.cost)/q*100,now=v?(v-C.cost)/v*100:0,low=now<minMargin();
+  el.innerHTML=`<div class="msum"><div class="m"><b>${mv(q-C.cost)} · ${pct(was)}</b>margin now</div><div class="m"><b class="${low?"late":"ontime"}">${mv(v-C.cost)} · ${pct(now)}</b>margin after the re-quote</div></div>${low?`<div class="nudge" style="margin:6px 0 0">⚠ Below your ${minMargin()}% minimum margin${v<C.cost?" — this is under cost":""}.</div>`:""}`;
+}
+function saveRequote(){
+  const j=(DB.jobs||[]).find(x=>x.id===editingId);if(!j){closeForm();return;}const d={};document.querySelectorAll("#mbody [data-k]").forEach(el=>{d[el.dataset.k]=el.value;});
+  if(!nz(d.value)||+d.value<=0){toast("Enter the new total");return;}
+  const q=quoteValue(j),v=Math.round(+d.value*100)/100,rev=(j.quotes||[]).length;
+  (j.quotes=j.quotes||[]).push({rev,date:d.date||todayISO(),value:v,ref:"",note:(d.note||"").trim()});
+  (j.updates=j.updates||[]).push({id:uid(),date:d.date||todayISO(),ts:Date.now(),text:`Re-quote Rev ${rev}: ${money(v)} excl. VAT (was ${money(q)}${q?", "+Math.round((1-v/q)*1000)/10+"% off":""})${d.note?" — "+d.note.trim():""}`});
+  save();closeForm();rerender();toast("Rev "+rev+" saved — "+money(v));
+}
+/* ---- dashboard value row ---- */
+function valueRow(){
+  const jobs=DB.jobs||[],Y=todayISO().slice(0,4);
+  const sum=f=>jobs.filter(f).reduce((a,j)=>a+(jobValue(j)||0),0);
+  const out=sum(j=>j.phase===PH.QUOTED),book=sum(j=>EXEC.includes(j.phase)),done=sum(j=>j.phase===PH.DONE&&(j.deliveredDate||"").slice(0,4)===Y);
+  const ms=jobs.filter(j=>(EXEC.includes(j.phase)||j.phase===PH.DONE)).map(jobMargin).filter(Boolean);
+  const avg=ms.length?ms.reduce((a,m)=>a+m.amt,0)/ms.reduce((a,m)=>a+m.value,0)*100:null;
+  const won=jobs.filter(j=>reached(j,PH.PO)&&j.phase!==PH.LOST||(j.phase===PH.LOST&&(j.phaseLog||[]).some(e=>e.phase===PH.PO))),lost=jobs.filter(j=>j.phase===PH.LOST&&!(j.phaseLog||[]).some(e=>e.phase===PH.PO));
+  const wr=won.length+lost.length?won.length/(won.length+lost.length)*100:null;
+  const wv=won.reduce((a,j)=>a+(quoteValue(j)||0),0),lv=lost.reduce((a,j)=>a+(quoteValue(j)||0),0),wrv=wv+lv?wv/(wv+lv)*100:null;
+  const tile=(l,v,s,fn)=>`<div class="statcard vstat ${fn?"clickable":""}" ${fn?`onclick="${fn}"`:""}><div class="n">${v}</div><div class="l">${l}</div>${s?`<div class="vs">${s}</div>`:""}</div>`;
+  return `<div class="valhead"><h3>Value <span class="resp">excl. VAT</span></h3><button class="btn sm ghost" onclick="toggleHideVals()" title="Hide money on this device, e.g. when sharing your screen">${hideVals()?"👁 Show values":"🙈 Hide values"}</button></div>
+    <div class="cards vcards">${tile("Quotes out",mv(out),jobs.filter(j=>j.phase===PH.QUOTED).length+" awaiting PO","dashFilter('awaitingpo')")}
+      ${tile("Order book",mv(book),(n=>n+" project"+(n===1?"":"s")+" in hand")(jobs.filter(j=>EXEC.includes(j.phase)).length),"dashFilter('active')")}
+      ${tile("Delivered "+Y,mv(done),(n=>n+" project"+(n===1?"":"s"))(jobs.filter(j=>j.phase===PH.DONE&&(j.deliveredDate||"").slice(0,4)===Y).length),"dashFilter('delivered')")}
+      ${tile("Average margin",avg==null?"—":pct(avg),ms.length?"on "+ms.length+" costed projects":"add costings to see it","")}
+      ${tile("Win rate",wr==null?"—":Math.round(wr)+"%",wr==null?"":won.length+" won · "+lost.length+" lost"+(wrv!=null?" · "+(hideVals()?"••":Math.round(wrv)+"%")+" by value":""),"")}</div>`;
+}
+
 function openJob(id,tab){ setTimeout(pageAnim,0); matSel=new Set(); detailJob=id; detailTab=tab||"overview"; renderDetail(); buildNav(); }
 function setDetailTab(t){ detailTab=t; renderDetail(); }
 const TAB_ALIAS={updates:"overview",procurement:"materials"};
@@ -3775,6 +4017,7 @@ function renderDetail(){
     ${ups.length>5?`<details class="olderups"><summary>Show ${ups.length-5} older update${ups.length-5>1?"s":""}</summary>${ups.slice(5).map(upRow).join("")}</details>`:""}</div></div>`;
   const overview=`${jobNeedsChecklist(j)?`<div class="nudge click" onclick="setDetailTab('checklist')">⚠️ This project is in production but no QC is recorded yet — tap to record it.</div>`:""}
     ${procReadyNudge(j)}
+    ${valueCard(j)}
     ${updates}
     ${jobTimeline(j)}
     ${j.notes?`<div class="dsection"><h3><span class="ic">🗒️</span> Notes</h3><div class="dnotes">${esc(j.notes).replace(/\n/g,"<br>")}</div></div>`:""}`;
@@ -3961,6 +4204,8 @@ function saveForm(){
   if(formMode==="compare")return saveCompare();
   if(formMode==="supitem")return saveSupItem();
   if(formMode==="wfopts")return saveWfOpts();
+  if(formMode==="costing")return saveCosting();
+  if(formMode==="requote")return saveRequote();
   if(formMode==="eta"){const m=DB.materials.find(x=>x.id===purCtx.id);document.querySelectorAll("#mbody [data-k]").forEach(el=>{m[el.dataset.k]=el.value;});save();closeForm();rerender();toast("Saved");return;}
   if(formMode==="import"||formMode==="match"||formMode==="view"){closeForm();return;}
   const sch=SCHEMA[formTable],rec=editingId?DB[formTable].find(r=>r.id===editingId):{id:uid()};
@@ -4090,7 +4335,7 @@ function exportCSV(){
   const cols=sch.fields.filter(f=>f.t!=="heading");
   const head=cols.map(f=>f.l);
   const rows=data.map(r=>cols.map(f=>{let v=r[f.k];if(f.t==="link")v=refName(f.to,v);else if(Array.isArray(v))v=v.join("; ");else if(f.t==="checkbox")v=v?"Yes":"No";return v;}));
-  if(current==="jobs"){head.push("Due date","Due / next action","Current step","Progress %");rows.forEach((row,i)=>{const s=jobState(data[i]);row.push(s.due||s.followUp||"",jobDueMeta(data[i]).txt,currentStep(data[i]),jobPct(data[i]));});}
+  if(current==="jobs"){head.push("Due date","Due / next action","Current step","Progress %","Quoted value (excl. VAT)","Quote rev","PO value (excl. VAT)","Cost (excl. VAT)","Margin","Margin %");rows.forEach((row,i)=>{const s=jobState(data[i]),j=data[i],c=jobCosting(j),m=jobMargin(j);row.push(s.due||s.followUp||"",jobDueMeta(j).txt,currentStep(j),jobPct(j),quoteValue(j)??"",(j.quotes||[]).length?quoteRev(j):"",poValue(j)??"",c.has?Math.round(c.cost*100)/100:"",m?Math.round(m.amt*100)/100:"",m?Math.round(m.pct*10)/10:"");});}
   csvDownload(head,rows,current);
 }
 function csvDownload(head,rows,name){
@@ -4099,7 +4344,7 @@ function csvDownload(head,rows,name){
   const blob=new Blob([csv],{type:"text/csv"});
   saveFile("Protrac_"+name+"_"+todayISO()+".csv",blob,"CSV saved");
 }
-function clearAll(){ uiConfirm("Erase ALL data and reload the demo data? Back up first if you want to keep anything.",()=>{DB=seed();migrate();autoPriceMaterials(DB.materials);pbInvalidate();seedSchedules();save();detailJob=null;go("dashboard");toast("Demo data loaded — dates set around today");}); }
+function clearAll(){ uiConfirm("Erase ALL data and reload the demo data? Back up first if you want to keep anything.",()=>{DB=seed();migrate();autoPriceMaterials(DB.materials);pbInvalidate();demoValues();seedSchedules();save();detailJob=null;go("dashboard");toast("Demo data loaded — dates set around today");}); }
 function startEmpty(){ uiConfirm("Erase ALL data and start with an empty tracker? Back up first if you want to keep anything.",()=>{const keep=DB.meta;DB={jobs:[],tasks:[],procurement:[],materials:[],suppliers:[],checklists:[],priceItems:[],priceQuotes:[],meta:{clients:["Other"]}};migrate();DB.meta.isDemo=false;DB.meta.hideGuide=keep.hideGuide;save();detailJob=null;go("dashboard");toast("Empty tracker ready");}); }
 
 /* ============ INIT ============ */

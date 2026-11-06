@@ -312,5 +312,30 @@ ok(!g('R.qc.weld.s'), 'turning the option back on clears an automatic N/A');
   d(`DB.meta.isDemo=false;DB.meta.demoRev=0;DB.priceItems.push({id:"real1",code:"AB-01",category:"Abrasives",description:"my garnet",tags:"",stockLength:"",grade:"",uom:"Bag",notes:"",synonyms:""});migrate();`);
   ok(d('DB.priceItems.some(i=>i.id==="real1")'), 'real (non-demo) data is never changed by demo revisions');
 }
+
+// ---- 13. v7 project value & costing ----
+{ const V = makeCtx({}); vm.runInContext(appCode, V.ctx); const v = s => run(V.ctx, s);
+  ok(v('DB.jobs.filter(j=>["005","006","001"].includes(j.jobId)).every(j=>j.quotes.length&&j.costing)'), 'demo projects carry invented costings and quotes');
+  ok(v('DB.jobs.find(j=>j.jobId==="005").quotes.length') === 2, 'demo shows a re-quote (Rev 1)');
+  v(`delete DB.meta.dayRates;delete DB.meta.minMargin;DB.jobs.forEach(j=>delete j.quotes);migrate();`);
+  ok(v('DB.meta.dayRates.fab') === 1250 && v('DB.meta.minMargin') === 10 && v('DB.jobs.every(j=>Array.isArray(j.quotes))'), 'v7: defaults added, every project has a quotes list');
+  { const a = JSON.stringify(v('DB')); v('migrate()'); ok(JSON.stringify(v('DB')) === a, 'v7 migrate() idempotent'); }
+  v(`globalThis.K={id:"k1",jobId:"099",jobName:"Cost test",phase:PH.QUOTED,quoteSentDate:todayISO(),holds:[],phaseLog:[],updates:[],quotes:[{rev:0,date:todayISO(),value:17399.90}],
+     costing:{lines:{paintTop:{cost:1050},paintPrimer:{cost:500},labFab:{days:2},labPaint:{days:1},equip:{cost:200},consum:{cost:500},mat:{cost:4574},machine:{cost:1500},transport:{cost:500},mpi:{cost:1200}},extra:[]}};DB.jobs.push(K);`);
+  const kc = v('jobCosting(K)');
+  ok(Math.abs(kc.cost - 14024) < 0.01, 'cost total: days × rate for labour, typed lines, materials excl. VAT (' + kc.cost + ')');
+  ok(Math.abs(kc.sell - 16713.80) < 0.01, 'sell total with default markups (' + kc.sell.toFixed(2) + ')');
+  ok(Math.abs(v('jobMargin(K).amt') - (17399.90 - 14024)) < 0.01, 'margin = quoted value − cost');
+  v('K.quotes.push({rev:1,date:todayISO(),value:15659.91})');
+  ok(v('quoteValue(K)') === 15659.91 && v('quoteRev(K)') === 1, 'latest revision is the quoted value');
+  ok(Math.abs(v('jobMargin(K).pct') - 10.446) < 0.01, 'after a 10% discount the margin is ' + v('jobMargin(K).pct').toFixed(1) + '%');
+  v('setPhase(K,PH.PO);K.poValue=15500');
+  ok(v('jobValue(K)') === 15500, 'after the PO the value is the PO value');
+  ok(v('(()=>{const o=K.costing;delete K.costing;const r=jobMargin(K);K.costing=o;return r===null})()'), 'no costing → no margin shown (never a made-up one)');
+  // a saved demo from before v7 gets the demo values on load; a real project is never given made-up values
+  v(`DB.meta.demoRev=7;DB.jobs.forEach(j=>{if(j.id!=="k1"){j.quotes=[];delete j.costing;delete j.poValue;}});DB.jobs.push({id:"real",jobId:"001x",jobName:"real",phase:PH.QUOTED,holds:[],phaseLog:[],updates:[],quotes:[]});migrate();`);
+  ok(v('DB.jobs.find(j=>j.jobId==="006").quotes.length===1&&!!DB.jobs.find(j=>j.jobId==="006").costing'), 'saved demo (rev 7) picks up the demo values');
+  ok(v('!DB.jobs.find(j=>j.id==="real").costing&&!DB.jobs.find(j=>j.id==="real").quotes.length'), 'projects outside the demo list are left alone');
+}
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

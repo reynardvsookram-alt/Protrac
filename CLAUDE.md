@@ -47,6 +47,7 @@ python3 tests/browser_purchasing.py   # purchasing flow end to end (desktop + ph
 python3 tests/browser_v4.py           # search placement, categories, RFQ email table, material table editor
 python3 tests/browser_v5.py           # templates/auto timeline, suppliers, settings tabs, sidebar, fonts, demo shift
 python3 tests/browser_v6.py           # phase 1: new-job form, job page, undo/redo, automation, board (mouse + touch drag), scrollbars, phone
+python3 tests/browser_v7.py           # value & costing: xlsx import + paste, quote → re-quote → PO values, margin warning, dashboard, hide values, phone
 node tests/shots_phase1.js after      # before/after screenshots into docs/phase1/ (desktop + phone)
 python3 tests/sweep.py                # clicks every control on every page/tab (~2,400) — slow (~15 min); PHONE=1 for the phone-only layout pass
 grep -nE 'fetch\(|XMLHttpRequest|cdnjs|googleapis|jsdelivr|unpkg|<link |<script src' index.html   # must print nothing
@@ -108,6 +109,14 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 - **Import**: `importPriceWorkbook` reads a workbook with "Price Book" + "Quote Log" sheets.
 - **Suppliers page**: `renderSuppliers` shows cards; `renderSupplier` is the profile, showing what they sell, stats (`supStats`) and RFQ history. Supplier `rating` is Preferred / Approved / Backup / Avoid.
 
+### Project value & costing (v7, all figures **excl. VAT** — his decision)
+- `j.quotes=[{rev,date,value,ref,note}]`: Rev 0 is saved in the **Quote submitted** dialog (value pre-filled from the costing's sell total); **Re-quote** (Overview → Value & costing, while Quoted) adds Rev 1, 2… with −5 / −10 / −15 % chips and shows the margin before/after, warning below `meta.minMargin` (default 10 %). `quoteValue` = latest revision.
+- `j.poValue`: asked in the PO dialog, pre-filled from the latest revision. `jobValue` = PO value once the PO is in, else the latest quote.
+- `j.costing={lines:{key:{cost,markup,days}},extra:[…]}` mirrors his colleague's costing sheet (`COST_LINES_DEFAULT`: paint top coat / primer, labour fab / blast & paint (days × `meta.dayRates`), equipment, consumables, materials (auto from the material list unless typed), machine shop, transport, MPI; default markups 10/10/35/35/10/10/20/10/0/0, editable in Settings → General → Costing defaults). `jobCosting`, `jobMargin`.
+- **Getting the costing in = import or paste, typing is the fallback**: `costImport` reads the .xlsx (finds the sheet with a "Markup" heading), `costPaste` takes copied cells; both go through `costFromRows` (columns by heading name, % cells stored as 0.1 handled, unknown lines added as extra lines, the sheet's "total" row is checked against the computed sell total). Line names matched by `COST_MATCH` (note "labor" and "labour").
+- Dashboard `valueRow`: quotes out, order book, delivered this year, average margin (costed projects only), win rate (count and value). **Hide values** (`toggleHideVals`, per device in localStorage `protrac_hidevals`) masks every money figure (`mv`). Project list has a Value column (`_val`), CSV export has value / cost / margin columns.
+- Demo: invented costings and quotes (`DEMO_VALUES`, `demoValues()`), never his real figures; 005 shows a re-quote that drops below the minimum margin.
+
 ### QC
 `job.qc[weld|blast|paint|final] = {s,date,by,note}`, one tap Pass/Fail/N/A. Optional item checks live in `DB.checklists` (with `stage`). There is also a QC register page. `qcAutoNA` (run from `save()`) sets stages the workflow leaves out to N/A once (`auto:true`, tracked in `job.qcAuto`); clearing it by hand sticks, and switching the option back on clears it.
 
@@ -132,7 +141,7 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 ## Roadmap / ideas (confirm priority with the owner first)
 - **Job ↔ folder linking (future).** He keeps one server folder per job, named "006. Client Job name", with fixed subfolders (email request, quotation, RFQs sent/received, drawings, material list & costing, weld maps, MTRs, additional info). The foundation is in place: running job number, `folderName()` format and `meta.projectsPath`. Next step could be creating the folder + subfolders from the job (File System Access API, desktop Chrome/Edge only; may be blocked on a company server drive) — he chose to skip it for now.
 - Stock-length nesting (cut list → lengths/sheets) so material totals use real stock quantities.
-- Quotation builder (labour by trade, materials from the price book, coatings, margin) feeding the "Prepare quotation" step.
+- Quotation builder: the costing + value tracking is in (v7); still open — generating the quotation document itself (scope / procedures, terms, validity) from the project.
 - Win-rate and turnaround stats across jobs (data already in `phaseLog` and dates).
 - Downloads in the claude.ai-hosted copy (needs that platform's downloads capability); they already work on GitHub Pages.
 - Parked: engineering calculator / unit converter (he has a separate fab-shop tool).

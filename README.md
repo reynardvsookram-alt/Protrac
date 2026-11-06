@@ -36,6 +36,7 @@ RFQ received ──► Quote submitted ──► PO received ──► Procureme
 - **Fast job entry**: a new job is five fields: name, client, job type (one tap), RFQ date (today) and the client's deadline (3 / 5 / 10 working-day chips). Job numbers run 001, 002, 003… and match the job's folder name ("006. Client A Tank hatch cover").
 - **Job page**: progress stepper, next-action button, **undo / redo** of phase changes, progress and current step taken from the schedule, turnaround stats (RFQ → quote, quote → PO, delivery vs. promise).
 - **Board**: jobs by phase in full-height lanes; drag a card (or press-and-hold on a phone) to move it on.
+- **Value & costing**: import or paste the costing sheet (cost per line × markup, labour as days × day rate, materials straight from the material list), quoted value and re-quotes (Rev 0, Rev 1 … with the margin impact shown before you agree a discount), PO value, margin per project, and a dashboard value row (quotes out, order book, delivered, average margin, win rate) with a one-tap *Hide values*.
 - **Automation**: the schedule re-plans itself when the PO and lead time come in; the job moves into production when the last material line is received; QC stages outside the job's scope are marked N/A.
 - **Material lists**: type them into a spreadsheet-style table (Enter moves down, paste cells straight from Excel), or import a multi-sheet .xlsx. Lines are priced from the price book as they come in.
 - **Purchasing pipeline**: one page with four clickable stages: **To order → Waiting on suppliers → Ordered → Received**.
