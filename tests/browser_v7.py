@@ -64,6 +64,13 @@ async def desktop(b):
     await E("saveForm()")
     c = await E(f"jobCosting(DB.jobs.find(j=>j.id==='{jid}'))")
     ok(abs(c["cost"] - 11350) < 0.01 and abs(c["sell"] - 13535) < 0.01, f"costing saved: cost {c['cost']} sell {c['sell']}")
+    # "Use the sell total as the quoted value" shows straight away on the Quoted box (his comment), as a draft until the quote is submitted
+    await E(f"openJob('{jid}')")
+    qbox = await E("document.querySelector('.vcell').innerText")
+    ok("13,535" in qbox and "draft" in qbox.lower(), f"Quoted box shows the costing's sell total as a draft ({qbox!r})")
+    await E(f"openPhaseAction('{jid}','quoted')")
+    ok(await E("document.querySelector('#mbody [data-k=qvalue]').value") == "13535", "…and it pre-fills the Quote submitted dialog")
+    await E("closeForm()")
 
     # paste instead of import (replaces the figures)
     await E(f"openCosting('{jid}')"); await pg.locator("#mbody button", has_text="Paste cells").click()

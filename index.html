@@ -4123,7 +4123,9 @@ function valueCard(j){
   const cell=(l,v,s,fn,tip)=>`<button type="button" class="vcell" onclick="${fn}" title="${esc(tip)}"><label>${l}</label><b>${v}</b>${s?`<span class="resp">${s}</span>`:""}<span class="vgo">${esc(tip)} ›</span></button>`;
   return `<div class="dsection valcard"><h3><span class="ic">💲</span> Value &amp; costing <span class="resp" style="font-weight:500;text-transform:none;letter-spacing:0">excl. VAT</span>
       <span class="hbtns">${j.phase===PH.QUOTED&&q!=null?`<button class="btn sm" onclick="openRequote('${j.id}')">Re-quote</button>`:""}<button class="btn sm primary" onclick="openCosting('${j.id}')">${c.has?"Costing":"+ Costing"}</button></span></h3>
-    <div class="vgrid">${cell("Quoted"+(q!=null&&quoteRev(j)?" · Rev "+quoteRev(j):""),q!=null?mv(q):"—",(j.quotes||[]).length>1?"was "+mv(+(j.quotes[0].value)):"",`openQuotesEdit('${j.id}')`,q!=null?"Revisions":"Add the quote")}
+    <div class="vgrid">${q==null&&nz(j.costSell)&&+j.costSell>0&&!reached(j,PH.QUOTED)
+        ?cell("Quoted · draft",mv(+j.costSell),"from the costing — recorded when you submit the quote",`openPhaseAction('${j.id}','quoted')`,"Submit quote")
+        :cell("Quoted"+(q!=null&&quoteRev(j)?" · Rev "+quoteRev(j):""),q!=null?mv(q):"—",(j.quotes||[]).length>1?"was "+mv(+(j.quotes[0].value)):"",`openQuotesEdit('${j.id}')`,q!=null?"Revisions":"Add the quote")}
       ${cell("PO value",po!=null?mv(po):"—",po!=null&&q!=null&&Math.abs(po-q)>0.5?(po<q?"below":"above")+" quote":"",`openPoEdit('${j.id}')`,reached(j,PH.PO)?"Edit PO":"Record PO")}
       ${(()=>{const mc=(c.lines.find(l=>l.key==="mat")||{}).cost||0;   // priced material list counts even before the rest of the costing is in
         return c.has?cell("Cost",mv(c.cost),"materials "+mv(mc),`openCosting('${j.id}')`,"Costing")
@@ -4150,7 +4152,7 @@ function openCosting(jobId){
     <div class="full tablewrap"><table class="costtab"><thead><tr><th>Line</th><th>Cost</th><th>Markup</th><th>Sell</th></tr></thead><tbody id="costrows">${C.lines.map(row).join("")}</tbody></table></div>
     <div class="full"><button type="button" class="btn sm" onclick="costAddLine()">+ Line</button></div>
     <div class="full" id="costtot"></div>
-    ${j.phase===PH.RFQ||!(j.quotes||[]).length?`<label class="full optchk" style="width:max-content"><input type="checkbox" id="costuseq" checked><span>Use the sell total as the quoted value</span></label>`:""}`,{wide:true,ok:"Save costing"});
+    ${j.phase===PH.RFQ||!(j.quotes||[]).length?`<label class="full optchk" style="width:max-content"><input type="checkbox" id="costuseq" checked><span>Use the sell total as the quoted value${(j.quotes||[]).length?"":" (a draft until you press “Quote submitted”)"}</span></label>`:""}`,{wide:true,ok:"Save costing"});
   costCalc();
 }
 function costRead(){
@@ -4207,7 +4209,9 @@ function costFromRows(rows,how){
 function saveCosting(){
   const j=(DB.jobs||[]).find(x=>x.id===editingId);if(!j){closeForm();return;}
   j.costing=costRead();const C=jobCosting(j);const useq=document.getElementById("costuseq");
-  if(useq&&useq.checked&&C.has){j.costSell=Math.round(C.sell*100)/100;}
+  if(useq&&useq.checked&&C.has){j.costSell=Math.round(C.sell*100)/100;
+    // quote not sent yet: the latest revision follows the costing too (a sent quote is only changed by a re-quote)
+    if(j.phase===PH.RFQ&&(j.quotes||[]).length)j.quotes[j.quotes.length-1].value=j.costSell;}
   (j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"Costing updated — cost "+money(Math.round(C.cost*100)/100)+", sell "+money(Math.round(C.sell*100)/100)+" (excl. VAT)"});
   save();closeForm();rerender();toast("Costing saved");
 }
