@@ -160,7 +160,7 @@ run(c, 'sortKey=null');
 const smoke = (label, code) => { try { run(c, code); ok(true, label); } catch (e) { ok(false, label + ' threw: ' + e.stack.split('\n').slice(0, 3).join(' | ')); } };
 smoke('dashboard', 'go("dashboard")');
 const dash = N.els.content.innerHTML;
-ok(dash.includes('Quotes overdue') && dash.includes('Projects overdue') && dash.includes('Pipeline by phase'), 'dashboard content');
+ok(['Attention required', 'Financial overview', 'Project pipeline', 'Upcoming deadlines', 'At-risk projects', 'My actions', 'This month', 'Recent projects'].every(s => dash.includes(s)) && !dash.includes('Quick stats'), 'dashboard content (v3 cards, "This month" replaces Quick stats)');
 smoke('reminders', 'go("reminders")');
 /* settings uses real DOM — covered in browser suites */
 smoke('jobs grid', 'go("jobs")');
@@ -187,6 +187,44 @@ ok(fs_.some(s => s.kind === 'quote' && s.overdue) && fs_.some(s => s.chase), 'se
 run(F.ctx, 'go("dashboard")');
 ok(run(F.ctx, 'DB.jobs.every(j=>!j.client||/^(Client [A-Z] — .+|Other)$/.test(j.client))'), 'seed clients are anonymised');
 ok(run(F.ctx, 'DB.jobs.map(j=>j.jobId).sort().join(",")') === '001,002,003,004,005,006,007,008,009,010,011', 'demo jobs numbered 001–011');
+
+// ---- 8b. Dashboard v3 fixes (demo data) ----
+{
+  const D = code => run(F.ctx, code), html = () => F.els.content.innerHTML;
+  D('go("dashboard")');
+  const sec = (from, to) => { const h = html(); return h.slice(h.indexOf(from), h.indexOf(to, h.indexOf(from))); };
+  const overIds = D('DB.jobs.filter(j=>jobState(j).overdue).map(j=>j.id)');
+  ok(overIds.length > 0, 'demo has an overdue project');
+  const risk = sec('At-risk projects', 'My actions'), dl = sec('Upcoming deadlines', 'At-risk projects'), att = sec('Attention required', 'Financial overview');
+  ok(overIds.every(id => !risk.includes(`openJob('${id}')`)), 'fix 1: overdue projects are not listed under At-risk');
+  ok(overIds.every(id => dl.includes(`openJob('${id}')`)) && att.includes("dashFilter('quoteover')"), 'fix 1: overdue projects stay in Attention + Upcoming deadlines');
+  ok(/openJob\('/.test(risk) && D('DB.jobs.filter(j=>!isClosed(j)&&!jobState(j).overdue&&(qcSummary(j).fail>0||jobState(j).soon||jobState(j).chase||isOnHold(j))).length') === (risk.match(/class="rrow/g) || []).length, 'fix 1: At-risk = due soon / chase / on hold / QC fail');
+  // fix 2: This month
+  const mon = sec('This month', 'Recent projects');
+  ok(['Quote', 'PO', 'Delivered', 'Value won'].every(s => mon.includes(s)) && ['mquoted', 'mwon', 'mdelivered'].every(f => mon.includes(`dashFilter('${f}')`)), 'fix 2: This month tiles open filtered lists');
+  D(`globalThis.__M=todayISO().slice(0,7);globalThis.__L=isoAdd(__M+"-01",-3);DB.jobs.push({id:"mth1",jobId:"901",jobName:"Month test",phase:PH.PO,holds:[],updates:[],qc:{},quotes:[{rev:0,date:todayISO(),value:1000}],poValue:1234,
+     phaseLog:[{phase:PH.RFQ,date:__L},{phase:PH.QUOTED,date:__L},{phase:PH.PO,date:todayISO()}],rfqDate:__L,quoteSentDate:__L,poDate:todayISO()})`);
+  ok(D('inThisMonth(DB.jobs.find(j=>j.id==="mth1"),"won")') && !D('inThisMonth(DB.jobs.find(j=>j.id==="mth1"),"quoted")'), 'fix 2: phase-log dates decide what happened this month');
+  D('current="jobs";jobFilter="mwon";listQ="";gridFilters={}');
+  ok(D('filteredRows().some(j=>j.id==="mth1")&&filteredRows().every(j=>inThisMonth(j,"won"))'), 'fix 2: "POs won" filter lists this month\'s POs');
+  D('jobFilter="mquoted"'); ok(D('!filteredRows().some(j=>j.id==="mth1")'), 'fix 2: last month\'s quote is not counted this month');
+  D('go("dashboard")'); ok(sec('This month', 'Recent projects').includes('PO'), 'dashboard renders with the month test project');
+  D('DB.jobs=DB.jobs.filter(j=>j.id!=="mth1")');
+  // fix 3: attention filter = exactly the projects behind the cards
+  D('current="jobs";jobFilter="attention";listQ="";gridFilters={}');
+  const attIds = D('[...attentionJobIds()].sort().join()'), rowIds = D('filteredRows().map(j=>j.id).sort().join()');
+  ok(attIds && attIds === rowIds && D('filteredRows().length') < D('DB.jobs.length'), 'fix 3: "View all" lists only the attention projects (' + D('filteredRows().length') + ' of ' + D('DB.jobs.length') + ')');
+  ok(D('JOBFILTER_LABEL.attention') && D('JOBFILTER_LABEL.mwon'), 'new filters have banner labels');
+  // fix 4: zero stages left out of the financial overview
+  D('go("dashboard")');
+  const rfqVal = D('DB.jobs.filter(j=>j.phase===PH.RFQ).reduce((a,j)=>a+(jobValue(j)??(jobCosting(j).has?jobCosting(j).sell:0)),0)');
+  const fin = sec('Financial overview', 'Project pipeline');
+  ok(rfqVal === 0 ? !fin.includes('RFQ (costed)') : fin.includes('RFQ (costed)'), 'fix 4: RFQ line shown only when it has a value (' + rfqVal + ')');
+  ok(!/TTD 0(?![\d,])/.test(fin) && !/>0%</.test(fin), 'fix 4: no "TTD 0" or 0% lines in the financial overview');
+  D('globalThis.__bak=[DB.jobs,DB.procurement];DB.jobs=[];DB.procurement=[]'); D('go("dashboard")');
+  ok(html().includes('No project values yet') && html().includes('All clear') && html().includes('No projects yet'), 'empty data: dashboard explains instead of showing zeros');
+  D('DB.jobs=__bak[0];DB.procurement=__bak[1]');
+}
 
 
 // ---- 9. v2 migrations on legacy data (context N came from the OLD app's data) ----

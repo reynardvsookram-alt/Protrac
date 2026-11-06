@@ -8,6 +8,7 @@ const OUT=path.join(__dirname,'..','docs','phase1'),tag=process.argv[2]||'after'
   await p.goto('file://'+path.join(__dirname,'..','index.html'));await p.waitForTimeout(500);
   await p.evaluate(()=>{DB.meta.hideGuide=true;save();});
   const shot=async n=>{await p.waitForTimeout(350);await p.screenshot({path:`${OUT}/${tag}-${dev}-${n}.png`});};
+  await p.evaluate(()=>go('dashboard'));await shot('dashboard');
   await p.evaluate(()=>go('jobs'));await shot('jobs');
   await p.evaluate(()=>openForm(null,'jobs'));await shot('newjob');
   await p.evaluate(()=>closeForm());

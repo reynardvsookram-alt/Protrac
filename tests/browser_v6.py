@@ -208,15 +208,15 @@ async def desktop(b):
     ok(await E("!!detailJob"), "a plain click on a card opens the job")
     await pg.screenshot(path=os.path.join(OUT, "v6_desk_job.png"))
 
-    # ---- dashboard search results sit above the KPI cards (was hidden behind them) ----
+    # ---- dashboard search results sit above the Attention cards (was hidden behind them) ----
     for w, hgt in [(1366, 800), (1024, 700)]:
         await pg.set_viewport_size({"width": w, "height": hgt})
         await E("DB.meta.hideGuide=true;save();go('dashboard')"); await pg.wait_for_timeout(30)
         await pg.fill("#gsq", "rhs"); await pg.wait_for_timeout(80)
         for when in ("during the page animation", "after it"):
-            hidden = await E("""(()=>{const c=document.querySelector('.cards').getBoundingClientRect();return [...document.querySelectorAll('#gsres .gsitem')].filter(it=>{const q=it.getBoundingClientRect();if(q.bottom<c.top||q.top>c.bottom)return false;const e=document.elementFromPoint(q.left+q.width/2,q.top+q.height/2);return !(e&&e.closest('#gsres'));}).length})()""")
-            over = await E("(()=>{const c=document.querySelector('.cards').getBoundingClientRect();return [...document.querySelectorAll('#gsres .gsitem')].filter(it=>{const q=it.getBoundingClientRect();return q.bottom>c.top&&q.top<c.bottom}).length})()")
-            ok(over > 0 and hidden == 0, f"{w}px: search results drawn over the KPI cards {when} ({over} overlap, {hidden} hidden)")
+            hidden = await E("""(()=>{const c=document.querySelector('.attgrid').getBoundingClientRect();return [...document.querySelectorAll('#gsres .gsitem')].filter(it=>{const q=it.getBoundingClientRect();if(q.bottom<c.top||q.top>c.bottom)return false;const e=document.elementFromPoint(q.left+q.width/2,q.top+q.height/2);return !(e&&e.closest('#gsres'));}).length})()""")
+            over = await E("(()=>{const c=document.querySelector('.attgrid').getBoundingClientRect();return [...document.querySelectorAll('#gsres .gsitem')].filter(it=>{const q=it.getBoundingClientRect();return q.bottom>c.top&&q.top<c.bottom}).length})()")
+            ok(over > 0 and hidden == 0, f"{w}px: search results drawn over the Attention cards {when} ({over} overlap, {hidden} hidden)")
             await pg.wait_for_timeout(500)
         await pg.keyboard.press("Escape")
         ok(await E("document.getElementById('gsres').innerHTML") == "", f"{w}px: Escape closes the results")
