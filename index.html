@@ -266,7 +266,7 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .linesel{border:1px solid var(--line);border-radius:6px;padding:4px 7px;font-size:12px;background:var(--card);color:var(--ink);font-weight:600;box-shadow:inset 0 1px 0 var(--emboss-hi)}
 .awcb{width:17px;height:17px;accent-color:var(--weld)}
 
-/* job detail */
+/* project detail */
 .backbtn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:linear-gradient(180deg,var(--card),var(--card-alt));border-radius:9px;padding:7px 13px;font-size:13px;font-weight:600;margin-bottom:14px;box-shadow:inset 0 1px 0 var(--emboss-hi),var(--raise)}
 .backbtn:active{box-shadow:inset 0 2px 3px var(--emboss-lo)}
 .dhead{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px;box-shadow:var(--raise)}
@@ -846,7 +846,7 @@ body.kdragging,body.kdragging *{cursor:grabbing!important}
 .board.can-l::before,.board.can-r::after{opacity:1}
 @media (pointer:coarse),(max-width:760px){.barrow{display:none}.lane{flex-basis:calc(100vw - 120px);max-width:320px}.board::before,.board::after{width:28px}}
 
-/* ---- v6: job form ---- */
+/* ---- v6: project form ---- */
 .segbtns{display:flex;flex-wrap:wrap;gap:6px}
 .segbtn{flex:1 1 150px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:600 13px var(--sans);cursor:pointer;text-align:center;transition:border-color .15s,background .15s,transform .1s}
 .segbtn:hover{border-color:var(--weld-dim)}
@@ -880,7 +880,7 @@ body.kdragging,body.kdragging *{cursor:grabbing!important}
 <div class="app">
   <aside class="side">
     <div class="brand"><div class="mark"><div class="weldbar"></div>
-      <div class="bname"><h1>Protrac</h1><div class="sub">Fabrication job tracker</div></div></div>
+      <div class="bname"><h1>Protrac</h1><div class="sub">FabShop Project tracker</div></div></div>
       <button class="sidetog" id="sidetog" title="Collapse menu" onclick="toggleSide()">‹</button></div>
     <nav class="nav" id="nav"></nav>
     <div class="side-foot"><span class="who" id="sidewho"></span>
@@ -926,7 +926,7 @@ const STORE="protrac_v1", THEMEKEY="protrac_theme";
 const uid=()=>"r"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const todayISO=()=>ymd(new Date());
 const LINE_STATUS=["RFQ Sent","Quote Received","Will Not Supply","Ordered","Received"];
-/* ---- Job lifecycle (Protrac) ---- */
+/* ---- Project lifecycle (Protrac) ---- */
 const PH={RFQ:"RFQ Received",QUOTED:"Quoted – Awaiting PO",PO:"PO Received",PROC:"Procurement",PROD:"In Production",DONE:"Delivered",LOST:"Lost / Declined"};
 const PHASES=[PH.RFQ,PH.QUOTED,PH.PO,PH.PROC,PH.PROD,PH.DONE,PH.LOST];
 const PHASE_TOK={[PH.RFQ]:"warn",[PH.QUOTED]:"hold",[PH.PO]:"info",[PH.PROC]:"prog",[PH.PROD]:"prog",[PH.DONE]:"ok",[PH.LOST]:"idle"};
@@ -942,15 +942,15 @@ const STATUS_COLOR={
   "Active":"ok","Will Not Supply SS":"bad","Awaiting Response":"warn"
 };
 const SCHEMA={
-  jobs:{ label:"Jobs", icon:"📋", primary:"jobName", views:["grid","kanban","calendar"], kanbanField:"phase",
+  jobs:{ label:"Projects", icon:"📋", primary:"jobName", views:["grid","kanban","calendar"], kanbanField:"phase",
     gridCols:["jobName","client","phase","_step","priority","_due","_pct"],
     fields:[
-      {k:"jobName",l:"Job name",t:"text",req:1,full:1},
-      {k:"jobId",l:"Job no.",t:"text",mono:1},
+      {k:"jobName",l:"Project name",t:"text",req:1,full:1},
+      {k:"jobId",l:"Project no.",t:"text",mono:1},
       {k:"client",l:"Client",t:"select",opts:["Other"],dyn:"clients"},
       {k:"phase",l:"Phase",t:"select",opts:PHASES,badge:1,phase:1},
       {k:"priority",l:"Priority",t:"select",opts:["Low","Medium","High","Urgent"],pri:1,quick:1,dyn:"priorities"},
-      {k:"jobType",l:"Job type",t:"select",opts:["Design & build","Build to client drawing","Repair / blast & paint"],noFilter:1,full:1},
+      {k:"jobType",l:"Project type",t:"select",opts:["Design & build","Build to client drawing","Repair / blast & paint"],noFilter:1,full:1},
       {k:"optSite",l:"Site visit",t:"checkbox"},
       {k:"optConcept",l:"Concept design",t:"checkbox"},
       {k:"optFab",l:"Fabrication / welding",t:"checkbox"},
@@ -974,7 +974,7 @@ const SCHEMA={
   tasks:{ label:"Schedule", icon:"🗓️", primary:"taskName", views:["schedule","grid"], hidden:true,
     fields:[
       {k:"taskName",l:"Task Name",t:"text",req:1},
-      {k:"jobRef",l:"Job",t:"link",to:"jobs"},
+      {k:"jobRef",l:"Project",t:"link",to:"jobs"},
       {k:"parentTask",l:"Parent Task",t:"link",to:"tasks"},
       {k:"assignee",l:"Assignee",t:"text"},
       {k:"startDate",l:"Start Date",t:"date"},
@@ -989,7 +989,7 @@ const SCHEMA={
     fields:[
       {k:"rfqNumber",l:"RFQ Number",t:"text",mono:1},
       {k:"date",l:"Date Raised",t:"date"},
-      {k:"jobRef",l:"Job",t:"link",to:"jobs"},
+      {k:"jobRef",l:"Project",t:"link",to:"jobs"},
       {k:"item",l:"Items Requested",t:"textarea",full:1},
       {k:"qtyRequested",l:"Qty Requested",t:"number"},
       {k:"notes",l:"Notes",t:"textarea",full:1}
@@ -997,7 +997,7 @@ const SCHEMA={
   materials:{ label:"Materials", icon:"🔩", primary:"description", views:["grid"],
     gridCols:["jobRef","lineNo","description","size","qtyReq","unit","_price","_mstatus"],
     fields:[
-      {k:"jobRef",l:"Job",t:"link",to:"jobs",req:1,full:1},
+      {k:"jobRef",l:"Project",t:"link",to:"jobs",req:1,full:1},
       {k:"lineNo",l:"Item / mark",t:"text",mono:1},
       {k:"description",l:"Description",t:"text",req:1,full:1},
       {k:"size",l:"Size / dimensions",t:"text"},
@@ -1027,7 +1027,7 @@ const SCHEMA={
   checklists:{ label:"Checklists", icon:"✓", primary:"item", views:["grid"], hidden:true,
     fields:[
       {k:"item",l:"Item",t:"text",req:1},
-      {k:"jobRef",l:"Job",t:"link",to:"jobs"},
+      {k:"jobRef",l:"Project",t:"link",to:"jobs"},
       {k:"type",l:"Checklist Type",t:"select",opts:["Welding","Fabrication","Sandblasting","Painting","Inspection"],dyn:"checklistTypes"},
       {k:"status",l:"Status",t:"select",opts:["Pending","Pass","Fail","N/A"],badge:1,quick:1},
       {k:"inspector",l:"Inspector",t:"text"},
@@ -1092,12 +1092,12 @@ function migrate(){
   migrateV5();
   migrateV6();
 }
-/* v6 (phase-1 workflow clean-up). Idempotent. Nothing is removed from job records:
-   the old Stage and manual % fields stay on each job but are no longer shown (progress now comes
+/* v6 (phase-1 workflow clean-up). Idempotent. Nothing is removed from project records:
+   the old Stage and manual % fields stay on each project but are no longer shown (progress now comes
    from the schedule, the current step from the next open schedule step). */
 function migrateV6(){
   const m=DB.meta;
-  if("statuses" in m)delete m.statuses;   // old job Status list — no longer used anywhere
+  if("statuses" in m)delete m.statuses;   // old project Status list — no longer used anywhere
   if("stages" in m)delete m.stages;       // old Stage list — replaced by the schedule's current step
   if(typeof m.projectsPath!=="string")m.projectsPath="";
   if(typeof m.quoteDays!=="number"||!(m.quoteDays>0))m.quoteDays=5;
@@ -1106,7 +1106,7 @@ function migrateV6(){
     if(!j.qcAuto||typeof j.qcAuto!=="object"||Array.isArray(j.qcAuto))j.qcAuto={};
   });
 }
-/* Old status/start/due → phase model. Idempotent: only touches jobs without a valid phase. */
+/* Old status/start/due → phase model. Idempotent: only touches projects without a valid phase. */
 function migrateProtrac(){
   const m=DB.meta;
   if(typeof m.managerLabel!=="string"||!m.managerLabel.trim())m.managerLabel="Manager";
@@ -1166,7 +1166,7 @@ function seed(){
   [["AB-01","Abrasives",'Garnet abrasive 30/60 — 25 kg bag',"Bag",245,"garnet 30/60"],["AB-02","Abrasives",'Copper slag abrasive — 25 kg bag',"Bag",95,"copper slag"],["HO-01","Hoses",'Blast hose 1-1/4" ID',"Metre",185,"blast hose"],["CN-01","Consumables",'Masking tape 2" — roll',"Roll",38,"masking tape"],["CN-02","Consumables",'Poly sheeting 6 mil — roll',"Roll",420,"poly sheeting masking"],["CN-03","Consumables",'Degreaser concentrate — 5 gal pail',"Pail",350,"degreaser 5 gal"],["CN-04","Consumables",'Reflective tape red/white 2" x 50 m',"Roll",310,"reflective tape"]]
     .forEach(([c,cat,d,u,p,t],i)=>{addItem(c,cat,d,u,t);PQ(c,SI,p,-4-i,i<2?"3M / local":"");});
   PQ("AB-01",SC,268,-5,"also stocks");
-  // ---------- jobs ----------
+  // ---------- projects ----------
   const qc=(s,d,note)=>({s,date:s?W(d):"",by:s?"R. Sookram":"",note:note||""});
   const J=(o)=>Object.assign({id:uid(),jobId:"",client:"",priority:"Medium",fileLocation:"",materialListLoc:"",notes:"",leadUnit:"working days",holds:[],updates:[],qc:{},phaseLog:[]},o);
   const A="Client A — Oilfield Services",B="Client B — Energy Services",C="Client C — Oilfield Logistics",D="Client D — Waste Management";
@@ -1264,13 +1264,13 @@ function seed(){
     meta:{clients:[A,B,C,D,"Other"],reminders,reminderSeq:6,inspectorName:"R. Sookram",demoPrices:true,isDemo:true,demoAnchor:T,emailSignoff:"Reynard Sookram\nMechanical Engineer"}};
   return out;
 }
-/* demo: build each job's schedule, then tick the human steps that are in the past */
+/* demo: build each project's schedule, then tick the human steps that are in the past */
 function seedSchedules(){
   const T=todayISO();
   (DB.jobs||[]).forEach(j=>{buildSchedule(j);});
-  const custom=(j,after,name,days,status,start)=>{const sec=(DB.tasks||[]).find(t=>t.jobRef===j.id&&t.stepKey==="sec:prod");if(!sec)return;const ref=(DB.tasks||[]).find(t=>t.jobRef===j.id&&t.stepKey===after);const s=start||T;DB.tasks.push({id:uid(),taskName:name,jobRef:j.id,parentTask:sec.id,assignee:"Welder",percent:status==="Done"?100:0,dependsOn:"",milestone:!days,status,stepKey:"custom:"+uid(),order:(ref?ref.order:sec.order+50)+0.5,startDate:s,endDate:days?addWorkingDays(s,days-1):s,doneDate:status==="Done"?s:""});};
+  const custom=(j,after,name,days,status,start,who)=>{const sec=(DB.tasks||[]).find(t=>t.jobRef===j.id&&t.stepKey==="sec:prod");if(!sec)return;const ref=(DB.tasks||[]).find(t=>t.jobRef===j.id&&t.stepKey===after);const s=start||T;DB.tasks.push({id:uid(),taskName:name,jobRef:j.id,parentTask:sec.id,assignee:who||"Welder",percent:status==="Done"?100:0,dependsOn:"",milestone:!days,status,stepKey:"custom:"+uid(),order:(ref?ref.order:sec.order+50)+0.5,startDate:s,endDate:days?addWorkingDays(s,days-1):s,doneDate:status==="Done"?s:""});};
   const bk=(DB.jobs||[]).find(j=>j.jobId==="004");
-  if(bk){custom(bk,"qcweld","Grind out & re-weld lifting lugs (B002)",2,"In Progress",wdOff(T,0));custom(bk,"qcweld","Repeat MPI on lifting lugs",0,"Not Started",wdOff(T,2));}
+  if(bk){custom(bk,"qcweld","Grind out & re-weld lifting lugs (B002)",2,"In Progress",wdOff(T,0));custom(bk,"qcweld","Repeat MPI on lifting lugs",0,"Not Started",wdOff(T,2),"Inspector");}
   (DB.tasks||[]).forEach(t=>{if(t.parentTask&&t.stepKey&&!t.auto&&(t.status!=="Done"||t.inferred)&&t.endDate&&t.endDate<T&&!/custom:/.test(t.stepKey)){t.status="Done";t.percent=100;t.doneDate=t.endDate;t.inferred=false;}});
   syncAllSchedules();
 }
@@ -1288,13 +1288,13 @@ function keepDemoCurrent(){
 
 /* ============ HELPERS ============ */
 function refName(table,id){ if(!id)return""; const r=(DB[table]||[]).find(x=>x.id===id); if(!r)return""; if(table==="jobs")return jobLabel(r); return r[SCHEMA[table].primary]||"(untitled)"; }
-/* ---- Job number, folder name, computed progress / current step ---- */
+/* ---- Project number, folder name, computed progress / current step ---- */
 function jobNo(j){return ((j&&j.jobId)||"").toString().trim();}
 function jobLabel(j){if(!j)return"";const n=jobNo(j);return (n?n+" · ":"")+(j.jobName||"(untitled)");}
 function nextJobNo(){let mx=0;(DB.jobs||[]).forEach(j=>{const m=/^\s*(\d+)\s*$/.exec(j.jobId||"");if(m)mx=Math.max(mx,+m[1]);});return String(mx+1).padStart(3,"0");}
 function jobNoQuery(q){q=(q||"").trim();return /^\d{1,6}$/.test(q)?+q:null;}
 function jobNoHit(j,n){const m=/^\s*(\d+)\s*$/.exec(j.jobId||"");return !!m&&+m[1]===n;}
-/* a search box typed with just a number finds that job number; anything else is a text search */
+/* a search box typed with just a number finds that project number; anything else is a text search */
 function jobQ(list,q,hay){const n=jobNoQuery(q);if(n!=null){const hit=list.filter(j=>jobNoHit(j,n));if(hit.length)return hit;}q=(q||"").trim().toLowerCase();if(!q)return list;return list.filter(j=>{const h=hay(j).toLowerCase();return q.split(/\s+/).every(w=>h.includes(w));});}
 function shortClient(c){c=(c||"").trim();if(!c||c==="Other")return"";return c.split(/\s+[—–]\s+/)[0].trim();}
 function folderName(j){const raw=[jobNo(j)?jobNo(j)+".":"",shortClient(j.client),j.jobName||""].filter(Boolean).join(" ");return raw.replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g," ").trim().replace(/[. ]+$/,"");}
@@ -1396,7 +1396,7 @@ function jobDueMeta(j){
   return{txt:pre+"due "+fmtShort(s.due),cls:"",s};
 }
 function prevOpenPhase(j){const l=(j.phaseLog||[]).slice().reverse().find(x=>!CLOSED.includes(x.phase));return l?l.phase:PH.RFQ;}
-/* has the job reached this phase? (dates typed for a later phase stay on the job after an undo, but only count once it's reached again) */
+/* has the project reached this phase? (dates typed for a later phase stay on the project after an undo, but only count once it's reached again) */
 const PH_ORDER=[PH.RFQ,PH.QUOTED,PH.PO,PH.PROC,PH.PROD,PH.DONE];
 const PH_DATE={quoteSentDate:PH.QUOTED,poDate:PH.PO,procStartDate:PH.PROC,prodStartDate:PH.PROD,deliveredDate:PH.DONE};
 function reached(j,ph){if(j.phase===PH.LOST)return true;return PH_ORDER.indexOf(j.phase)>=PH_ORDER.indexOf(ph);}
@@ -1416,7 +1416,7 @@ function setPhase(j,ph,opts){
   if(ph===PH.LOST)j.lostDate=date;
   if(!opts.silent)(j.updates=j.updates||[]).push({id:uid(),date,ts:Date.now(),text:"Phase → "+ph+(opts.note?" — "+opts.note:"")});
 }
-/* ---- Undo / redo phase changes (stored on the job, so it survives closing the app) ---- */
+/* ---- Undo / redo phase changes (stored on the project, so it survives closing the app) ---- */
 function lastPhaseEntry(j){const l=j.phaseLog||[],e=l[l.length-1];if(!e||e.phase!==j.phase||e.migrated)return null;const from=e.from||(l.length>1?l[l.length-2].phase:"");return from&&from!==e.phase?Object.assign({},e,{from}):null;}
 function canUndoPhase(j){return !!lastPhaseEntry(j);}
 function canRedoPhase(j){const r=j.phaseRedo||[],e=r[r.length-1];return !!e&&e.from===j.phase;}
@@ -1439,9 +1439,9 @@ function undoRedoBtns(j){
   return (canUndoPhase(j)?`<button class="btn sm ghost" title="Step back to ${esc(lastPhaseEntry(j).from)}" onclick="undoPhase('${j.id}')">↩ Undo</button>`:"")
     +(canRedoPhase(j)?`<button class="btn sm ghost" title="Re-apply ${esc(j.phaseRedo[j.phaseRedo.length-1].phase)}" onclick="redoPhase('${j.id}')">↪ Redo</button>`:"");
 }
-/* re-plan a job's schedule when its dates change (keeps ticked steps and hand-edited dates) */
+/* re-plan a project's schedule when its dates change (keeps ticked steps and hand-edited dates) */
 function replan(j){if((DB.tasks||[]).some(t=>t.jobRef===j.id&&t.stepKey))buildSchedule(j,true);}
-/* every material line fully received → production starts by itself (Undo on the toast or the job page) */
+/* every material line fully received → production starts by itself (Undo on the toast or the project page) */
 function autoProd(jobIds){
   const moved=[];
   Array.from(new Set(jobIds)).forEach(id=>{const j=(DB.jobs||[]).find(x=>x.id===id);if(!j||(j.phase!==PH.PO&&j.phase!==PH.PROC))return;
@@ -1452,7 +1452,7 @@ function autoProd(jobIds){
 }
 function autoProdToast(moved,pre){
   if(!moved.length)return false;const j=moved[0];
-  toast((pre?pre+" — ":"")+(moved.length>1?moved.length+" jobs":jobLabel(j))+" moved to In Production",moved.length===1?{label:"Undo",fn:()=>undoPhase(j.id)}:null);return true;
+  toast((pre?pre+" — ":"")+(moved.length>1?moved.length+" projects":jobLabel(j))+" moved to In Production",moved.length===1?{label:"Undo",fn:()=>undoPhase(j.id)}:null);return true;
 }
 const PHASE_ACTION={[PH.QUOTED]:"quoted",[PH.PO]:"po",[PH.PROC]:"proc",[PH.PROD]:"prod",[PH.DONE]:"done",[PH.LOST]:"lost"};
 function changePhase(j,val){
@@ -1484,7 +1484,7 @@ function phaseActions(j){
 function phaseStepper(j){
   const steps=[[PH.RFQ,"RFQ",j.rfqDate],[PH.QUOTED,"Quoted",j.quoteSentDate],[PH.PO,"PO",j.poDate],[PH.PROC,"Procurement",j.procStartDate],[PH.PROD,"Production",j.prodStartDate],[PH.DONE,"Delivered",j.deliveredDate]];
   const idx=steps.findIndex(s=>s[0]===j.phase);
-  const tip=(s,i)=>i===idx?"Current phase":j.phase===PH.LOST?"Reopen the job at "+s[0]:idx>=0&&i<idx?"Move back to "+s[0]:"Move to "+s[0];
+  const tip=(s,i)=>i===idx?"Current phase":j.phase===PH.LOST?"Reopen the project at "+s[0]:idx>=0&&i<idx?"Move back to "+s[0]:"Move to "+s[0];
   return `<div class="stepper ${j.phase===PH.LOST?"lost":""}">`+steps.map((s,i)=>`<button type="button" class="step ${idx>=0&&i<idx?"done":i===idx?"cur":""}" title="${esc(tip(s,i))}" data-ph="${esc(s[0])}" onclick="stepClick('${j.id}',this.dataset.ph)"><span class="sdot">${idx>=0&&i<idx?"✓":i+1}</span><span class="slbl">${s[1]}</span><span class="sdate">${s[2]&&(idx<0||i<=idx)?esc(fmtShort(s[2])):""}</span></button>`).join("")+`</div>`;
 }
 /* tap a step on the stepper: forward opens that phase's dialog (dates / PO / lead time); back asks first (↩ Undo still works) */
@@ -1499,7 +1499,7 @@ function stepClick(id,ph){
     if(!reached(j,PH.PO)||ph===PH.PO)return openPhaseAction(id,"po",{target:ph});
     return openPhaseAction(id,ph===PH.PROC?"proc":"prod");
   }
-  uiConfirm(`Move ${jobLabel(j)} back to “${ph}”? Dates, PO number and lead time stay on the job, and ↩ Undo puts it forward again.`,()=>{
+  uiConfirm(`Move ${jobLabel(j)} back to “${ph}”? Dates, PO number and lead time stay on the project, and ↩ Undo puts it forward again.`,()=>{
     setPhase(j,ph,{note:"moved back from the stepper"});replan(j);save();rerender();toast("Phase → "+ph,{label:"Undo",fn:()=>undoPhase(j.id)});
   },{ok:"Move back",danger:false});
 }
@@ -1513,11 +1513,11 @@ function openPhaseAction(jobId,action,opts){
   {const sb=document.getElementById("mainsave");if(sb)sb.textContent="Save";}
   const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;
   formMode="phase";phaseCtx={jobId,action,target:opts.target||""};
-  const title={quoted:"Quote submitted to "+managerLabel(),po:"Purchase order received",proc:"Start procurement",prod:"Start production",done:"Mark delivered",lost:"Mark lost / declined",reopen:"Reopen job"}[action]+(opts.target&&opts.target!==PH.PO?" → "+opts.target:"");
+  const title={quoted:"Quote submitted to "+managerLabel(),po:"Purchase order received",proc:"Start procurement",prod:"Start production",done:"Mark delivered",lost:"Mark lost / declined",reopen:"Reopen project"}[action]+(opts.target&&opts.target!==PH.PO?" → "+opts.target:"");
   const dl={quoted:"Submitted on",po:"PO received on",proc:"Procurement started on",prod:"Production started on",done:"Delivered on",lost:"Date",reopen:"Date"}[action];
   const had={quoted:j.quoteSentDate,po:j.poDate,proc:j.procStartDate,prod:j.prodStartDate}[action]||"";
   let body=`<div class="field"><label>${dl}</label><input type="date" data-k="date" value="${esc(had||todayISO())}"></div>`;
-  if(action==="quoted")body+=`<div class="field"><label>Follow up client on</label><input type="date" data-k="followUpDate" value="${esc(j.followUpDate||"")}"></div><div class="hint">Leave blank to follow up ${followUpDays()} working days after submission. While awaiting the PO the job is never "overdue" — it flags "chase client" instead.</div>
+  if(action==="quoted")body+=`<div class="field"><label>Follow up client on</label><input type="date" data-k="followUpDate" value="${esc(j.followUpDate||"")}"></div><div class="hint">Leave blank to follow up ${followUpDays()} working days after submission. While awaiting the PO the project is never "overdue" — it flags "chase client" instead.</div>
       <div class="fhead full">Lead time you're quoting <span style="font-weight:500;text-transform:none;letter-spacing:0">(optional — fills in the PO step for you)</span></div>${leadFields(j,"Lead time")}`;
   if(action==="po"){
     body+=`<div class="field"><label>PO number</label><input type="text" data-k="poNumber" value="${esc(j.poNumber||"")}"></div>
@@ -1575,7 +1575,7 @@ function jobTimeline(j){
     }
   }
   (j.holds||[]).forEach(hd=>R.push(row("⏸ Hold ("+({rfq:"quote clock",exec:"delivery clock",quote:"awaiting PO"}[hd.group]||hd.group)+")",fmtShort(hd.start)+" → "+(hd.end?fmtShort(hd.end):"ongoing")+" · "+holdDays(hd)+" wd",esc(hd.reason||""))));
-  return `<div class="dsection"><h3><span class="ic">⏱️</span> Timeline &amp; turnaround</h3>${R.length?R.join(""):`<div class="minimsg">Dates fill in as the job moves through each phase.</div>`}<div style="margin-top:8px;font-size:11.5px;color:var(--ink-soft)">wd = working days (weekends and Settings holidays excluded).</div></div>`;
+  return `<div class="dsection"><h3><span class="ic">⏱️</span> Timeline &amp; turnaround</h3>${R.length?R.join(""):`<div class="minimsg">Dates fill in as the project moves through each phase.</div>`}<div style="margin-top:8px;font-size:11.5px;color:var(--ink-soft)">wd = working days (weekends and Settings holidays excluded).</div></div>`;
 }
 
 /* ============ v2: DIALOGS ============ */
@@ -1652,7 +1652,7 @@ function migrateV2(){
 /* ============ v2: PRICE BOOK ============ */
 let _pbCache=null;
 const PB_TOK=new WeakMap();
-function pbT(it){let t=PB_TOK.get(it);if(!t){const hay=normText([it.code,it.category,it.description,it.tags,it.stockLength,it.grade,it.synonyms].join(" "));t={hay,tok:new Set(hay.split(" "))};PB_TOK.set(it,t);}return t;}
+function pbT(it){let t=PB_TOK.get(it);if(!t){const hay=normText([it.code,it.category,it.description,it.tags,it.stockLength,it.grade,it.synonyms].join(" "));t={hay,tok:pbTok(hay)};PB_TOK.set(it,t);}return t;}
 function pbInvalidate(){_pbCache=null;}
 function pbIndex(){
   if(_pbCache&&_pbCache.src===DB.priceItems&&_pbCache.qsrc===DB.priceQuotes&&_pbCache.n===(DB.priceItems||[]).length&&_pbCache.qn===(DB.priceQuotes||[]).length)return _pbCache;
@@ -1660,7 +1660,7 @@ function pbIndex(){
   (DB.priceQuotes||[]).forEach(q=>{(byItem[q.itemRef]=byItem[q.itemRef]||[]).push(q);});
   const sup={};(DB.priceQuotes||[]).forEach(q=>{sup[q.supplier]=(sup[q.supplier]||0)+1;});
   const suppliers=Object.keys(sup).sort((a,b)=>sup[b]-sup[a]);
-  const items={};(DB.priceItems||[]).forEach(it=>{items[it.id]=it;const hay=normText([it.code,it.category,it.description,it.tags,it.stockLength,it.grade,it.synonyms].join(" "));PB_TOK.set(it,{hay,tok:new Set(hay.split(" "))});delete it._hay;delete it._tok;});
+  const items={};(DB.priceItems||[]).forEach(it=>{items[it.id]=it;const hay=normText([it.code,it.category,it.description,it.tags,it.stockLength,it.grade,it.synonyms].join(" "));PB_TOK.set(it,{hay,tok:pbTok(hay)});delete it._hay;delete it._tok;});
   return (_pbCache={byItem,suppliers,items,src:DB.priceItems,qsrc:DB.priceQuotes,n:(DB.priceItems||[]).length,qn:(DB.priceQuotes||[]).length});
 }
 function priceItem(id){return pbIndex().items[id]||null;}
@@ -1679,14 +1679,33 @@ function normText(s){
     .replace(/(\d)\s*[x×*]\s*(?=\d)/g,"$1x")
     .replace(/sch(?:edule)?\s*(\d+)/g,"sch$1")
     .replace(/(\d)\s*-\s*(\d+\/\d+)/g,"$1-$2")
-    .replace(/[^a-z0-9/.\-x ]+/g," ").replace(/\s+/g," ").trim();
+    .replace(/[^a-z0-9/.\-x ]+/g," ").replace(/\s+/g," ").trim()
+    .replace(/([a-wyz])(?=\d[\d\/.\-]*(?:ft|mm)?x\d)/g,"$1 ")      // "rhs4x6" → "rhs 4x6"
+    .split(" ").map(canonDim).join(" ");
 }
+/* sizes match in any order: 4x6 = 6x4; for 3+ parts the last is the wall / thickness (6x4x1/4 = 4x6x1/4) */
+const DIM_RE=/^[\d\/.\-]+(?:ft|mm)?(?:x[\d\/.\-]+(?:ft|mm)?)+$/;
+function dimVal(p){const mm=/mm$/.test(p),ft=/ft$/.test(p);p=p.replace(/ft$|mm$/,"");let v;const m=/^(\d+)-(\d+)\/(\d+)$/.exec(p);if(m)v=+m[1]+m[2]/m[3];else if(/^\d+\/\d+$/.test(p)){const [a,b]=p.split("/");v=a/b;}else v=parseFloat(p);if(isNaN(v))v=0;return mm?v/25.4:ft?v*12:v;}
+function canonDim(t){
+  if(!DIM_RE.test(t))return t;
+  const ps=t.split("x").map(p=>p.replace(/ft$/,""));
+  const sides=ps.length>2?ps.slice(0,-1):ps.slice(),wall=ps.length>2?[ps[ps.length-1]]:[];
+  sides.sort((a,b)=>dimVal(b)-dimVal(a));
+  return sides.concat(wall).join("x");
+}
+/* a 3-part size also stands for its parts: "8x4x3/8" = sheet 8x4 + thickness 3/8 */
+function dimParts(t){if(!DIM_RE.test(t))return [];const ps=t.split("x");if(ps.length<3)return [];return [ps.slice(0,-1).join("x"),ps[ps.length-1]];}
+function pbTok(hay){const tok=new Set(hay.split(" "));hay.split(" ").forEach(t=>dimParts(t).forEach(p=>tok.add(p)));return tok;}
+function tokHit(T,t){if(T.tok.has(t)||T.hay.includes(t))return true;const p=dimParts(t);return p.length>0&&p.every(x=>T.tok.has(x));}
 function isDimTok(t){return /\d/.test(t)&&(/[x\/]/.test(t)||/^sch\d+$/.test(t)||/^\d+(\.\d+)?(mm|ft)?$/.test(t));}
 function scoreItem(it,qtoks){
   let s=0;const T=pbT(it);
   for(const t of qtoks){
     if(t.length<1)continue;
+    const P=dimParts(t);
     if(T.tok.has(t))s+=isDimTok(t)?(/[x\/]|sch/.test(t)?7:3):2;
+    else if(P.length&&P.every(x=>T.tok.has(x)))s+=6;
+    else if(P.length&&T.tok.has(P[1]))s+=3;            // right thickness, other sheet / stock size
     else if(t.length>2&&T.hay.includes(t))s+=1;
     else if(isDimTok(t))s-=3;
   }
@@ -1698,7 +1717,7 @@ function searchPrices(q,opts){
   if(opts.cat)list=list.filter(i=>i.category===opts.cat);
   if(!qt.length)return list.map(it=>({it,s:0}));
   const scored=list.map(it=>({it,s:scoreItem(it,qt)}));
-  if(opts.strict)return scored.filter(x=>qt.every(t=>pbT(x.it).hay.includes(t))).sort((a,b)=>b.s-a.s);
+  if(opts.strict)return scored.filter(x=>qt.every(t=>tokHit(pbT(x.it),t))).sort((a,b)=>b.s-a.s);
   return scored.filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
 }
 function matQuery(m){return [m.description,m.size,m.length&&/\d/.test(m.length)?"":""].join(" ");}
@@ -1757,10 +1776,15 @@ function renderPrices(c){
   c.innerHTML=demo+head+`<div id="prows"></div>`;
   renderPriceRows();
 }
+/* price book order: category, then size ascending (2x2 → 3x2 → 4x2 → 4x4…, thinner wall first), then name */
+function sizeKey(it){const toks=normText(it.description).split(" ");const d=toks.find(t=>DIM_RE.test(t));
+  if(d)return d.split("x").map(dimVal);const n=toks.find(t=>/\d/.test(t)&&/^[\d\/.\-]+(?:mm|ft)?$/.test(t));return n?[dimVal(n)]:[Infinity];}
+function sortBySize(res){const cats=priceCats(),ci=c=>{const i=cats.indexOf(c);return i<0?999:i;};
+  return res.map(x=>({x,c:ci(x.it.category),k:sizeKey(x.it)})).sort((a,b)=>{if(a.c!==b.c)return a.c-b.c;for(let i=0;i<Math.max(a.k.length,b.k.length);i++){const u=a.k[i]??-1,v=b.k[i]??-1;if(u!==v)return u-v;}return (a.x.it.description||"").localeCompare(b.x.it.description||"");}).map(o=>o.x);}
 function renderPriceRows(){
   const el=document.getElementById("prows");if(!el)return;
   const idx=pbIndex(),sups=idx.suppliers.slice(0,3),vat=priceVat?1+vatRate():1;
-  const res=searchPrices(priceQ,{cat:priceCat,strict:true});
+  const res=sortBySize(searchPrices(priceQ,{cat:priceCat,strict:true}));
   if(!res.length&&priceCat&&!priceQ){el.innerHTML=`<div class="empty">No items in <b>${esc(priceCat)}</b> yet. <button class="linkbtn" onclick="openPriceItemForm(null,priceCat)">+ Add the first item</button></div>`;return;}
   const rows=res.slice(0,150).map(({it})=>{
     const L=latestBySupplier(it.id),b=bestPrice(it);
@@ -1862,7 +1886,7 @@ function renderJobMaterials(j){
     <div class="msum"><div class="m"><b>${t.n}</b>lines</div><div class="m"><b>${money(t.cost)}</b>est. material cost excl. VAT${t.unpriced?` · ${t.unpriced} unpriced`:""}</div><div class="m"><b>${t.rec}/${t.n}</b>received</div><div class="m"><b>${ms.filter(m=>m.mtr).length}/${t.n}</b>MTRs on file</div></div>
     ${procReadyNudge(j)}
     <div class="tablewrap"><table class="mtab"><thead><tr><th><input type="checkbox" class="cbx" ${allSel?"checked":""} onchange="selAllMats('${j.id}',this.checked)"></th><th>#</th><th>Description</th><th>Qty</th><th>Price (best)</th><th>Status</th><th>MTR</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
-    <div class="impnote" style="margin-top:8px">Tick lines to send a supplier RFQ. Tap a status for its next step. Line totals assume qty is in the supplier's unit (sheet / length / each). The <b>Purchasing</b> page shows every job's lines by stage.</div>
+    <div class="impnote" style="margin-top:8px">Tick lines to send a supplier RFQ. Tap a status for its next step. Line totals assume qty is in the supplier's unit (sheet / length / each). The <b>Purchasing</b> page shows every project's lines by stage.</div>
     ${bulk}</div>`;
 }
 function toggleMatSel(id,on){if(on)matSel.add(id);else matSel.delete(id);renderDetail();}
@@ -1912,7 +1936,7 @@ function qcSet(jobId,stage,val){
   const cur=j.qc[stage]||{},label=(QC_STAGES.find(x=>x[0]===stage)||[])[1];
   if(cur.s===val){j.qc[stage]={s:"",date:"",by:"",note:""};save();rerender();toast(label+" cleared");return;}
   const apply=note=>{j.qc[stage]={s:val,date:todayISO(),by:inspector(),note:note||""};(j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"QC · "+label+": "+val+(note?" — "+note:"")});save();rerender();toast(label+": "+val);};
-  if(val==="Fail")uiAsk({title:label+" — FAIL",msg:"What failed? This note stays on the job until the stage is re-inspected.",input:true,placeholder:"e.g. undercut on lifting lug welds — grind & re-weld, MPI",ok:"Record fail",danger:true,onOk:v=>apply((v||"").trim())});
+  if(val==="Fail")uiAsk({title:label+" — FAIL",msg:"What failed? This note stays on the project until the stage is re-inspected.",input:true,placeholder:"e.g. undercut on lifting lug welds — grind & re-weld, MPI",ok:"Record fail",danger:true,onOk:v=>apply((v||"").trim())});
   else apply("");
 }
 function qcItems(jobId,stage){return (DB.checklists||[]).filter(c=>c.jobRef===jobId&&c.stage===stage);}
@@ -1952,13 +1976,13 @@ function renderQC(c){
       <div class="statcard clickable c-warn" onclick="qcFilter='final';render()"><div class="n">${list.filter(j=>!isClosed(j)&&!["Pass","N/A"].includes(((j.qc||{}).final||{}).s)).length}</div><div class="l">Awaiting final inspection</div></div>
       <div class="statcard clickable c-ok" onclick="qcFilter='done';render()"><div class="n">${list.filter(j=>((j.qc||{}).final||{}).s==="Pass").length}</div><div class="l">Final inspection passed</div></div></div>
     ${fails.length?`<div class="panel" style="margin-bottom:14px"><h3>Open fails</h3>${fails.map(f=>`<div class="tlrow" style="cursor:pointer" onclick="openJob('${f.j.id}','checklist')"><span class="tll"><b>${esc(jobLabel(f.j))}</b></span><span class="qcchip qc-Fail">${esc(f.l)}</span><span class="tln">${esc(fmtShort(f.r.date))} — ${esc(f.r.note||"no note")}</span></div>`).join("")}</div>`:""}
-    <div class="pchips">${[["","All"],["fail","Open fails"],["final","Awaiting final"],["done","Final passed"]].map(([k,l])=>`<button class="pchip ${qcFilter===k?'on':''}" onclick="qcFilter='${k}';render()">${l}</button>`).join("")}</div>${listSearch("Search by job name, job ID or client…")}
-    ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Job</th><th>Phase</th>${QC_STAGES.map(([,l])=>`<th style="text-align:center">${esc(l.replace(" / ","/"))}</th>`).join("")}</tr></thead><tbody>${rows.map(j=>`<tr><td><button class="joblink" onclick="openJob('${j.id}','checklist')">${esc(jobLabel(j))}</button><div class="resp">${esc(j.client||"")}</div></td><td><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span></td>${QC_STAGES.map(([k])=>`<td style="text-align:center">${chip(j,k)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">No jobs here.</div>`}
-    <div class="impnote" style="margin-top:8px">Jobs appear here once a PO is received. Tap any cell to open that job's QC.</div>`;
+    <div class="pchips">${[["","All"],["fail","Open fails"],["final","Awaiting final"],["done","Final passed"]].map(([k,l])=>`<button class="pchip ${qcFilter===k?'on':''}" onclick="qcFilter='${k}';render()">${l}</button>`).join("")}</div>${listSearch("Search by project name, project ID or client…")}
+    ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Project</th><th>Phase</th>${QC_STAGES.map(([,l])=>`<th style="text-align:center">${esc(l.replace(" / ","/"))}</th>`).join("")}</tr></thead><tbody>${rows.map(j=>`<tr><td><button class="joblink" onclick="openJob('${j.id}','checklist')">${esc(jobLabel(j))}</button><div class="resp">${esc(j.client||"")}</div></td><td><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span></td>${QC_STAGES.map(([k])=>`<td style="text-align:center">${chip(j,k)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">No projects here.</div>`}
+    <div class="impnote" style="margin-top:8px">Projects appear here once a PO is received. Tap any cell to open that project's QC.</div>`;
 }
 
 /* ============ v2: GLOBAL SEARCH & GUIDE ============ */
-function searchBox(){return `<div class="gsearch"><input id="gsq" placeholder="Search jobs, PO numbers, materials or steel prices…" oninput="globalSearch(this.value)" autocomplete="off"><div class="gsres" id="gsres"></div></div>`;}
+function searchBox(){return `<div class="gsearch"><input id="gsq" placeholder="Search projects, PO numbers, materials or steel prices…" oninput="globalSearch(this.value)" autocomplete="off"><div class="gsres" id="gsres"></div></div>`;}
 function globalSearch(q){
   const el=document.getElementById("gsres");if(!el)return;q=(q||"").trim().toLowerCase();if(q.length<2){el.innerHTML="";return;}
   const has=(...v)=>v.join(" ").toLowerCase().includes(q);
@@ -1966,7 +1990,7 @@ function globalSearch(q){
   const mats=(DB.materials||[]).filter(m=>has(m.description,m.size,m.grade,m.lineNo)).slice(0,5);
   const prices=searchPrices(q,{strict:true}).slice(0,5);
   const it=(on,a,b)=>`<div class="gsitem" onclick="${on}"><span>${a}</span><span class="s">${b}</span></div>`;
-  el.innerHTML=(jobs.length?`<div class="gsgrp">Jobs</div>`+jobs.map(j=>it(`openJob('${j.id}')`,esc(jobLabel(j)),esc(j.phase)+" · "+esc(jobDueMeta(j).txt))).join(""):"")
+  el.innerHTML=(jobs.length?`<div class="gsgrp">Projects</div>`+jobs.map(j=>it(`openJob('${j.id}')`,esc(jobLabel(j)),esc(j.phase)+" · "+esc(jobDueMeta(j).txt))).join(""):"")
     +(mats.length?`<div class="gsgrp">Materials</div>`+mats.map(m=>it(`openJob('${m.jobRef}','materials')`,esc(m.description+" "+(m.size||"")),esc(refName("jobs",m.jobRef)))).join(""):"")
     +(prices.length?`<div class="gsgrp">Price book</div>`+prices.map(({it:p})=>{const b=bestPrice(p);return it(`openPriceItem('${p.id}')`,esc(p.description),b?money(b.price)+" · "+esc(b.supplier):"no price");}).join(""):"")
     ||`<div class="gsitem">No matches for “${esc(q)}”</div>`;
@@ -1975,7 +1999,7 @@ function guideCard(){
   if(DB.meta.hideGuide)return"";
   return `<div class="guide"><h3>🧭 How Protrac works <button class="x" title="Hide" onclick="DB.meta.hideGuide=true;save();render()">×</button></h3><ol>
     <li><b>RFQ in</b> — log the client's request and their response deadline. It only goes overdue if <i>you</i> miss that deadline.</li>
-    <li><b>Quote submitted</b> — the clock stops; the job waits on the client and flags "chase client" after a few days.</li>
+    <li><b>Quote submitted</b> — the clock stops; the project waits on the client and flags "chase client" after a few days.</li>
     <li><b>PO received</b> — enter the lead time you quoted (e.g. 5–7 working days). That becomes the delivery due date.</li>
     <li><b>Materials</b> — paste the material list from Excel, price it from the supplier price book, and send supplier RFQs in one tap.</li>
     <li><b>QC &amp; deliver</b> — one tap per QC stage (Pass / Fail / N/A), then mark delivered. Holds pause the clock automatically.</li></ol></div>`;
@@ -2130,7 +2154,7 @@ function impRender(){
     ${tabs}
     <div class="impnote">${hr>=0?`Header found on row ${hr+1} of <b>${esc(s.name)}</b>.`:`No header row found in <b>${esc(s.name)}</b> — columns guessed; please check.`} ${recs.length} row${recs.length===1?"":"s"} here.</div>
     ${mapUI}${prev}
-    ${existing?`<label class="impnote" style="display:flex;gap:8px;align-items:center"><input type="checkbox" class="cbx" ${impCtx.replace?"checked":""} onchange="impCtx.replace=this.checked"> Replace the ${existing} existing line${existing>1?"s":""} on this job (otherwise add to them)</label>`:""}
+    ${existing?`<label class="impnote" style="display:flex;gap:8px;align-items:center"><input type="checkbox" class="cbx" ${impCtx.replace?"checked":""} onchange="impCtx.replace=this.checked"> Replace the ${existing} existing line${existing>1?"s":""} on this project (otherwise add to them)</label>`:""}
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="impCommit()" ${total?"":"disabled"}>Import ${total} line${total===1?"":"s"}${impCtx.sel.size>1?` from ${impCtx.sel.size} sheets`:""}</button><button class="btn" onclick="openImport('${impCtx.target}','${impCtx.jobId||""}')">← Start over</button></div>
   </div>`;
 }
@@ -2225,7 +2249,7 @@ function purCounts(){
 function jobNoFilter(q,jobRef){const n=jobNoQuery(q);if(n==null||!(DB.jobs||[]).some(j=>jobNoHit(j,n)))return null;const j=(DB.jobs||[]).find(x=>x.id===jobRef);return !!j&&jobNoHit(j,n);}
 function purMatch(m){if(!purQ)return true;{const r=jobNoFilter(purQ,m.jobRef);if(r!=null)return r;}const q=purQ.toLowerCase();const j=(DB.jobs||[]).find(x=>x.id===m.jobRef)||{};const hay=[m.description,m.size,m.grade,m.notes,m.poRef,j.jobName,j.jobId,j.client,j.poNumber,refName("suppliers",m.supplierRef)].join(" ").toLowerCase();return q.split(/\s+/).every(w=>hay.includes(w));}
 function jobHead(j,extra){
-  if(!j)return `<div class="pghead"><span class="t">No job</span><span class="sp"></span>${extra||""}</div>`;
+  if(!j)return `<div class="pghead"><span class="t">No project</span><span class="sp"></span>${extra||""}</div>`;
   const dm=jobDueMeta(j);
   return `<div class="pghead"><span class="t"><button onclick="openJob('${j.id}','materials')">${esc(jobLabel(j))}</button></span><span class="m">${esc(j.client||"")}</span><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span><span class="m ${dm.cls}">${esc(dm.txt)}</span><span class="sp"></span>${extra||""}</div>`;
 }
@@ -2243,13 +2267,13 @@ function renderPurchasing(c){
     ${card("toorder","To order",C.toorder,C.toorder?`lines · est. ${money(t.cost)}`:"nothing waiting")}
     ${card("waiting","Waiting on suppliers",C.waiting,C.waiting?`RFQs · ${replied}/${lines.length} replied${oldest?` · oldest ${oldest} wd`:""}`:"no open RFQs")}
     ${card("ordered","Ordered",C.ordered,C.ordered?(late?`<span class="late">${late} past ETA</span>`:"lines on order"):"nothing on order")}
-    ${card("received","Received",C.received,C.received?(noMtr?`<span class="late">${noMtr} missing MTR</span>`:"all MTRs on file"):"open jobs only")}</div>`;
-  const help={toorder:"Lines from your job material lists that haven't gone to suppliers yet. Tick lines and send one RFQ, or mark them ordered if you're buying direct.",
+    ${card("received","Received",C.received,C.received?(noMtr?`<span class="late">${noMtr} missing MTR</span>`:"all MTRs on file"):"open projects only")}</div>`;
+  const help={toorder:"Lines from your project material lists that haven't gone to suppliers yet. Tick lines and send one RFQ, or mark them ordered if you're buying direct.",
     waiting:"RFQs out to suppliers, oldest first. When a supplier replies, tap <b>Enter quote</b> and type their price per item — it goes into the price book. Then <b>Compare &amp; order</b>.",
     ordered:"On order, grouped by supplier. Tap <b>Received</b> as deliveries arrive.",
-    received:"Received for jobs still open. Tap <b>MTR</b> when the mill cert is filed — DNV / certified work needs them."}[purStage];
+    received:"Received for projects still open. Tap <b>MTR</b> when the mill cert is filed — DNV / certified work needs them."}[purStage];
   const tools=`<div class="tbar"><button class="btn primary" onclick="pickJobThen('add')">⊞ Add materials (table)</button><button class="btn" onclick="pickJobThen('import')">📋 Paste from Excel</button></div>
-    <div class="lsearch"><input id="purq" type="search" value="${esc(purQ)}" placeholder="Search by item, size, job name, job ID or supplier…" oninput="purQ=this.value;renderPurBody()"></div>`;
+    <div class="lsearch"><input id="purq" type="search" value="${esc(purQ)}" placeholder="Search by item, size, project name, project ID or supplier…" oninput="purQ=this.value;renderPurBody()"></div>`;
   c.innerHTML=cards+`<div class="stagehelp">${help}</div>`+tools+`<div id="purbody"></div>`;
   renderPurBody();
 }
@@ -2268,7 +2292,7 @@ function renderPurBody(){
       const cost=matTotals(ms);
       return `<div class="pgroup">${jobHead(j,`<span class="m">${ms.length} line${ms.length>1?"s":""} · ${money(cost.cost)}</span><label class="m" style="display:flex;gap:6px;align-items:center"><input type="checkbox" class="cbx" ${all?"checked":""} onchange="purSelMany('${j?j.id:""}',this.checked)"> all</label>`)}
         ${ms.map(m=>`<div class="pline"><input type="checkbox" class="cbx" ${purSel.has(m.id)?"checked":""} onchange="purToggle('${m.id}',this.checked)"><div>${desc(m)}</div><div class="q">${qty(m)}</div><div class="q">${priceCell(m)}</div></div>`).join("")}</div>`;}).join("")
-      :empty(purQ?"No lines match that filter.":"Nothing to order. Add a material list to a job (📋 Paste from Excel) and its lines appear here.");
+      :empty(purQ?"No lines match that filter.":"Nothing to order. Add a material list to a project (📋 Paste from Excel) and its lines appear here.");
     const sel=ms.filter(m=>purSel.has(m.id)&&matStage(m)==="toorder");
     if(sel.length)html+=`<div class="bulkbar"><b>${sel.length} selected</b><span style="flex:1"></span><button class="btn primary" onclick="purRfq()">✉️ Send RFQ to suppliers</button><button class="btn" onclick="openOrderModal()">Ordered direct (no RFQ)</button><button class="btn" onclick="purSel=new Set();renderPurBody()">✕</button></div>`;
   }
@@ -2292,7 +2316,7 @@ function renderPurBody(){
     const groups=jobsOf(list);
     html=groups.length?groups.map(({j,ms})=>`<div class="pgroup">${jobHead(j,`<span class="m">${ms.filter(m=>m.mtr).length}/${ms.length} MTRs</span>`)}
       ${ms.map(m=>`<div class="pline nocb"><div>${desc(m)}<div class="x">${esc(refName("suppliers",m.supplierRef)||"")}${m.receivedDate?" · received "+esc(fmtShort(m.receivedDate)):""}${m.heatNo?" · heat "+esc(m.heatNo):""}</div></div><div class="q">${qty(m)}</div><div class="a"><button class="mchip" style="${tokStyle(m.mtr?"ok":"bad")}" onclick="toggleMTR('${m.id}')">${m.mtr?"MTR ✓":"MTR missing"}</button><button class="btn sm" onclick='openForm("${m.id}","materials")'>Heat no.</button></div></div>`).join("")}</div>`).join("")
-      :empty("Nothing received yet for open jobs.");
+      :empty("Nothing received yet for open projects.");
   }
   el.innerHTML=html;
 }
@@ -2302,7 +2326,7 @@ function purRfq(){matSel=new Set(Array.from(purSel));const first=(DB.materials||
 function pickJobThen(what){
   formMode="view";
   const js=(DB.jobs||[]).filter(j=>!isClosed(j)).sort((a,b)=>a.jobName.localeCompare(b.jobName));
-  openModal(what==="add"?"Add materials to which job?":"Paste material list into which job?",`<div class="imp"><div class="jobpick">${js.map(j=>`<button onclick="closeForm();${what==="add"?`openJob('${j.id}','materials');startGrid('${j.id}')`:`openImport('materials','${j.id}')`}"><b>${esc(jobLabel(j))}</b><div class="resp">${esc(j.client||"")} · ${esc(j.phase)}</div></button>`).join("")||'<div class="minimsg">No open jobs.</div>'}</div></div>`,{noFooter:true});
+  openModal(what==="add"?"Add materials to which project?":"Paste material list into which project?",`<div class="imp"><div class="jobpick">${js.map(j=>`<button onclick="closeForm();${what==="add"?`openJob('${j.id}','materials');startGrid('${j.id}')`:`openImport('materials','${j.id}')`}"><b>${esc(jobLabel(j))}</b><div class="resp">${esc(j.client||"")} · ${esc(j.phase)}</div></button>`).join("")||'<div class="minimsg">No open projects.</div>'}</div></div>`,{noFooter:true});
 }
 function matAction(id){
   const m=(DB.materials||[]).find(x=>x.id===id);if(!m)return;const st=matStage(m);
@@ -2336,7 +2360,7 @@ function receiveMats(ids){
   save();rerender();
   if(autoProdToast(moved,ids.length+" line"+(ids.length>1?"s":"")+" received"))return;
   const ready=[];
-  toast(ids.length+" line"+(ids.length>1?"s":"")+" received"+(ready.length?` — all materials in for ${ready[0].jobName}; move it to production from the job page`:""));
+  toast(ids.length+" line"+(ids.length>1?"s":"")+" received"+(ready.length?` — all materials in for ${ready[0].jobName}; move it to production from the project page`:""));
 }
 
 /* ---- RFQ card, quotes, compare ---- */
@@ -2354,7 +2378,7 @@ function rfqCard2(r,inJob){
   const mats=rfqMats(r),linked=mats.length>0,sups=r.suppliers||[];
   const quoted=sups.filter(s=>s.status==="Quote Received"||s.prices).length;
   const jobs=Array.from(new Set(mats.map(m=>m.jobRef).concat(r.jobRef?[r.jobRef]:[]))).filter(Boolean);
-  const jobTxt=jobs.length>1?"Multiple jobs":jobs.length?`<button onclick="openJob('${jobs[0]}','materials')">${esc(refName("jobs",jobs[0])||"")}</button>`:"";
+  const jobTxt=jobs.length>1?"Multiple projects":jobs.length?`<button onclick="openJob('${jobs[0]}','materials')">${esc(refName("jobs",jobs[0])||"")}</button>`:"";
   const replyLate=r.replyBy&&r.replyBy<todayISO()&&sups.some(s=>s.status==="RFQ Sent");
   const rows=sups.map(s=>`<div class="srow"><div><div class="n">${esc(refName("suppliers",s.supplierRef)||"(removed supplier)")}</div><div class="resp">${s.dateSent?"sent "+esc(fmtShort(s.dateSent)):""}${s.quoteDate?" · quoted "+esc(fmtShort(s.quoteDate)):""}${s.lead?" · "+esc(s.lead):""}${s.notes?" · "+esc(s.notes):""}</div></div>${lineChip(s,r)}<div class="a" style="display:flex;gap:6px">${
       ["Ordered","Received"].includes(s.status)?"":`<button class="btn sm ${s.status==="RFQ Sent"?"primary":""}" onclick="openQuote('${r.id}','${s.id}')">${s.prices||s.status==="Quote Received"?"Edit quote":"Enter quote"}</button>`}<button class="icobtn del" title="Remove supplier from RFQ" onclick="delLine('${r.id}','${s.id}')">🗑</button></div></div>`).join("")||`<div class="srow"><div class="resp">No suppliers on this RFQ yet.</div></div>`;
@@ -2434,7 +2458,7 @@ function saveCompare(){
 
 /* ============ v4: LIST SEARCH ============ */
 function listSearchPH(){
-  return current==="jobs"?"Search jobs by name, job ID, client or PO number…":current==="suppliers"?"Search suppliers by name, contact or what they supply…":"Search…";
+  return current==="jobs"?"Search projects by name, project ID, client or PO number…":current==="suppliers"?"Search suppliers by name, contact or what they supply…":"Search…";
 }
 function listSearch(ph){return `<div class="lsearch"><input id="lsearch" type="search" value="${esc(listQ)}" placeholder="${esc(ph||listSearchPH())}" oninput="setListQ(this.value)" autocomplete="off"></div>`;}
 function setListQ(v){
@@ -2664,7 +2688,7 @@ const WF_DEFAULT=[
   {key:"final",name:"Final inspection",sec:"close",days:0,auto:"final"},
   {key:"delivered",name:"Delivery / client collection",sec:"close",days:0,auto:"delivered"}
 ];
-const AUTO_HINT={rfq:"ticks itself: RFQ date",suprfq:"ticks itself when a supplier RFQ is sent",quoted:"ticks itself when the quote is submitted",po:"ticks itself when the PO is recorded",order:"ticks itself when every material line is ordered",received:"ticks itself when every material line is received",fab:"ticks itself when fabrication QC is recorded",qcweld:"ticks itself from the QC tab",blast:"ticks itself when blast QC is recorded",coat:"ticks itself when coating QC is recorded",qcpaint:"ticks itself from the QC tab",final:"ticks itself when final inspection passes",delivered:"ticks itself when the job is delivered"};
+const AUTO_HINT={rfq:"ticks itself: RFQ date",suprfq:"ticks itself when a supplier RFQ is sent",quoted:"ticks itself when the quote is submitted",po:"ticks itself when the PO is recorded",order:"ticks itself when every material line is ordered",received:"ticks itself when every material line is received",fab:"ticks itself when fabrication QC is recorded",qcweld:"ticks itself from the QC tab",blast:"ticks itself when blast QC is recorded",coat:"ticks itself when coating QC is recorded",qcpaint:"ticks itself from the QC tab",final:"ticks itself when final inspection passes",delivered:"ticks itself when the project is delivered"};
 function wfSteps(){const s=DB.meta&&DB.meta.wfSteps;return Array.isArray(s)&&s.length?s:WF_DEFAULT;}
 function wfSig(j){return [j.jobType,j.optSite,j.optConcept,j.optFab,j.optCoat,j.optAssembly].map(v=>v?String(v):"").join("|");}
 function wfStepsFor(j){return wfSteps().filter(s=>!s.when||j[s.when]);}
@@ -2764,11 +2788,11 @@ function tickStep(id){
 }
 function rebuildSchedule(jobId){
   const j=DB.jobs.find(x=>x.id===jobId);if(!j)return;
-  uiConfirm("Rebuild this job's schedule from the template? Planned dates are recalculated; steps you've ticked keep their dates, and dates you've edited by hand are kept.",()=>{buildSchedule(j,true);save();renderDetail();toast("Schedule rebuilt");},{ok:"Rebuild",danger:false});
+  uiConfirm("Rebuild this project's schedule from the template? Planned dates are recalculated; steps you've ticked keep their dates, and dates you've edited by hand are kept.",()=>{buildSchedule(j,true);save();renderDetail();toast("Schedule rebuilt");},{ok:"Rebuild",danger:false});
 }
 function startSchedule(jobId,type){
   const j=DB.jobs.find(x=>x.id===jobId);if(!j)return;
-  j.jobType=type;Object.assign(j,JOB_TYPES[type]||{});buildSchedule(j);save();renderDetail();toast("Schedule built — edit any step to suit this job");
+  j.jobType=type;Object.assign(j,JOB_TYPES[type]||{});buildSchedule(j);save();renderDetail();toast("Schedule built — edit any step to suit this project");
 }
 function stepDue(t){
   if(t.status==="Done")return t.inferred?`<span class="sdone inf" title="Assumed done — a later step has happened">≈ ${esc(fmtShort(t.doneDate))}</span>`:`<span class="sdone">✓ ${esc(fmtShort(t.doneDate))}</span>`;
@@ -2786,7 +2810,7 @@ function renderWorkflow(j,tree,gantt){
   const opts=[["optSite","site visit"],["optConcept","concept"],["optFab","fabrication"],["optCoat","coating"],["optAssembly","assembly"]].filter(([k])=>j[k]).map(([,l])=>l);
   if(!secs.length){
     return `<div class="dsection"><h3><span class="ic">🗓️</span> Schedule</h3>
-      <div class="wfstart"><div class="impnote" style="margin-bottom:10px">Pick the job type and Protrac lays out the whole workflow — RFQ to delivery — with planned dates in working days. Steps the app already tracks (quote, PO, materials, QC, delivery) tick themselves with the real date.</div>
+      <div class="wfstart"><div class="impnote" style="margin-bottom:10px">Pick the project type and Protrac lays out the whole workflow — RFQ to delivery — with planned dates in working days. Steps the app already tracks (quote, PO, materials, QC, delivery) tick themselves with the real date.</div>
       <div class="wftypes">${Object.keys(JOB_TYPES).map(tn=>`<button class="wftype" onclick="startSchedule('${j.id}','${tn}')"><b>${esc(tn)}</b><span>${esc(wfStepsFor(Object.assign({},JOB_TYPES[tn])).length+" steps · "+Object.entries(JOB_TYPES[tn]).filter(([,v])=>v).map(([k])=>({optSite:"site visit",optConcept:"concept",optFab:"fabrication",optCoat:"coating",optAssembly:"assembly"})[k]).join(", "))}</span></button>`).join("")}</div></div>
       ${other.length?`<h4 class="wfsub">Other tasks</h4>${tree}`:""}
       <button class="miniadd" onclick="addTask('${j.id}')">+ Add a one-off task</button>
@@ -2927,7 +2951,7 @@ function updThemeBtn(t){ const sw=document.getElementById("tswitch"); if(sw){sw.
 /* ============ NAV ============ */
 function buildNav(){
   const nav=document.getElementById("nav");
-  const items=[["dashboard","Dashboard","🏠"],["jobs","Jobs","📋"],["purchasing","Purchasing","📦"],["prices","Price Book","💲"],["qc","QC","✅"],["suppliers","Suppliers","🏭"],["reminders","Reminders","📌"],["settings","Settings","⚙️"]];
+  const items=[["dashboard","Dashboard","🏠"],["jobs","Projects","📋"],["purchasing","Purchasing","📦"],["prices","Price Book","💲"],["qc","QC","✅"],["suppliers","Suppliers","🏭"],["reminders","Reminders","📌"],["settings","Settings","⚙️"]];
   nav.innerHTML=items.map(([id,label,ic])=>{
     let cnt="";
     if(id==="reminders"){const oc=openReminderCount();cnt=oc?`<span class="cnt">${oc}</span>`:"";}
@@ -2941,11 +2965,11 @@ function buildNav(){
 }
 function toggleSide(){const a=document.querySelector(".app");const c=!a.classList.contains("collapsed");a.classList.toggle("collapsed",c);try{localStorage.setItem("protrac_side",c?"1":"0");}catch(e){}const b=document.getElementById("sidetog");if(b){b.textContent=c?"›":"‹";b.title=c?"Expand menu":"Collapse menu";}}
 function initSide(){let c=false;try{c=localStorage.getItem("protrac_side")==="1";}catch(e){}if(c){document.querySelector(".app").classList.add("collapsed");const b=document.getElementById("sidetog");if(b){b.textContent="›";b.title="Expand menu";}}const w=document.getElementById("sidewho");if(w)w.textContent=(DB.meta&&DB.meta.inspectorName)||"";}
-function go(id){ setTimeout(pageAnim,0); listQ=""; gridFilters={}; supView=null; supCat=""; supRating=""; if(id==="materials"||id==="procurement"){if(id==="procurement")purStage="waiting";id="purchasing";} if(id!=="purchasing"){purQ="";} detailJob=null; current=id; sortKey=null; jobFilter=null; currentView=SCHEMA[id]?SCHEMA[id].views[0]:id; matFilter=""; window.scrollTo&&window.scrollTo(0,0);  render(); buildNav(); }
-function dashFilter(kind){ setTimeout(pageAnim,0); detailJob=null; current="jobs"; currentView="grid"; sortKey=null; jobFilter=kind; listQ=""; gridFilters={}; render(); buildNav(); }
+function go(id){ setTimeout(pageAnim,0); listQ=""; gridFilters={}; supView=null; supCat=""; supRating=""; if(id==="materials"||id==="procurement"){if(id==="procurement")purStage="waiting";id="purchasing";} if(id!=="purchasing"){purQ="";} detailJob=null; current=id; sortKey=id==="jobs"?"jobName":null; sortDir=id==="jobs"?-1:1; jobFilter=null; currentView=SCHEMA[id]?SCHEMA[id].views[0]:id; matFilter=""; window.scrollTo&&window.scrollTo(0,0);  render(); buildNav(); }
+function dashFilter(kind){ setTimeout(pageAnim,0); detailJob=null; current="jobs"; currentView="grid"; sortKey="jobName"; sortDir=-1; jobFilter=kind; listQ=""; gridFilters={}; render(); buildNav(); }
 function dashGo(page){ if(page==="procurement")purStage="waiting"; go(page); }
 function clearJobFilter(){ jobFilter=null; render(); }
-const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Jobs overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active jobs (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded"};
+const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Projects overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active projects (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded"};
 function rerender(){ if(detailJob)renderDetail(); else render(); buildNav(); }
 
 /* ============ ROUTER ============ */
@@ -2992,7 +3016,7 @@ function filteredRows(){
     const key=sortKey==="_pct"?jobPct:j=>currentStep(j).toLowerCase();
     rows.sort((a,b)=>{const x=key(a),y=key(b);return x<y?-sortDir:x>y?sortDir:0;});
   }else if(sortKey==="jobName"&&current==="jobs"){
-    const key=j=>{const m=/^\s*(\d+)\s*$/.exec(j.jobId||"");return m?String(+m[1]).padStart(8,"0"):"~"+(j.jobName||"").toLowerCase();};
+    const key=j=>{const m=/^\s*(\d+)\s*$/.exec(j.jobId||"");return m?"1"+String(+m[1]).padStart(8,"0"):"0"+(j.jobName||"").toLowerCase();};   // numbered projects by number; others sort to the end of the newest-first list
     rows.sort((a,b)=>{const x=key(a),y=key(b);return x<y?-sortDir:x>y?sortDir:0;});
   }else if(sortKey){
     const f=SCHEMA[current].fields.find(x=>x.k===sortKey);
@@ -3022,7 +3046,7 @@ function renderGrid(c){
       let acts="";
       if(isJobs){
         acts+=`<button class="icobtn open" title="Open file" onclick="openJobFile('${r.id}')">📁</button>`;
-        acts+=`<button class="icobtn open" title="Open job" onclick="openJob('${r.id}')">▸</button>`;
+        acts+=`<button class="icobtn open" title="Open project" onclick="openJob('${r.id}')">▸</button>`;
       }
       acts+=`<button class="icobtn" title="Edit" onclick="openForm('${r.id}')">✏️</button><button class="icobtn del" title="Delete" onclick="del('${r.id}')">🗑</button>`;
       return `<tr>${tds}<td><div class="rowact">${acts}</div></td></tr>`;
@@ -3081,7 +3105,7 @@ function quickSet(tbl,id,k,val){
   const f=SCHEMA[tbl].fields.find(x=>x.k===k); toast((f?f.l:k)+" → "+val);
 }
 
-/* ============ BOARD (jobs by phase) ============
+/* ============ BOARD (projects by phase) ============
    Lanes fill the screen height and scroll on their own. Desktop: ‹ › arrows (one lane per click) over edge fades;
    wheel over a lane scrolls its cards, elsewhere it scrolls the board sideways; Shift+wheel / touchpad swipe = sideways.
    Drag a card (mouse, or press-and-hold on a phone) onto another lane — the phase dialog opens as usual. */
@@ -3091,8 +3115,8 @@ function renderKanban(c){
   const rows=filteredRows();
   const lanes=opts.map(st=>{
     const items=rows.filter(r=>(r[kf]||opts[0])===st);
-    const add=current==="jobs"&&st===PH.RFQ?`<button class="laneadd" onclick="openForm(null,'jobs')">+ Add job</button>`:"";
-    return `<section class="lane" data-status="${esc(st)}"><header class="lanehd"><span class="dot" style="background:var(${dotVar(st)})"></span><span class="ln">${esc(st)}</span><span class="lcnt">${items.length}</span></header><div class="lanebody">${items.map(r=>kCard(r,sch)).join("")||`<div class="laneempty">No jobs</div>`}</div>${add}</section>`;
+    const add=current==="jobs"&&st===PH.RFQ?`<button class="laneadd" onclick="openForm(null,'jobs')">+ Add project</button>`:"";
+    return `<section class="lane" data-status="${esc(st)}"><header class="lanehd"><span class="dot" style="background:var(${dotVar(st)})"></span><span class="ln">${esc(st)}</span><span class="lcnt">${items.length}</span></header><div class="lanebody">${items.map(r=>kCard(r,sch)).join("")||`<div class="laneempty">No projects</div>`}</div>${add}</section>`;
   }).join("");
   c.innerHTML=listSearch()+`<div class="board kanban" id="board"><div class="boardscroll" id="boardscroll">${lanes}</div><button class="barrow l" aria-label="Previous lane" onclick="boardStep(-1)">‹</button><button class="barrow r" aria-label="Next lane" onclick="boardStep(1)">›</button></div>`;
   initBoard();
@@ -3182,7 +3206,7 @@ function kMove(e){
 function kUp(){
   if(!kdrag)return;const d=kdrag;
   if(d.active){const ln=kLaneAt();kEndDrag();if(ln){const st=ln.dataset.status,r=(DB.jobs||[]).find(x=>x.id===d.id);if(r&&r.phase!==st)changePhase(r,st);}return;}
-  kEndDrag();if(!d.moved)openJob(d.id);   // a plain tap / click opens the job
+  kEndDrag();if(!d.moved)openJob(d.id);   // a plain tap / click opens the project
 }
 function kCancel(){kEndDrag();}
 function kEndDrag(){
@@ -3307,22 +3331,22 @@ function renderDashboard(c){
   const n=f=>S.filter(f).length;
   const kpis=[
     ["c-bad",n(x=>x.s.kind==="quote"&&x.s.overdue),"Quotes overdue","quoteover"],
-    ["c-bad",n(x=>x.s.kind==="delivery"&&x.s.overdue),"Jobs overdue","jobover"],
+    ["c-bad",n(x=>x.s.kind==="delivery"&&x.s.overdue),"Projects overdue","jobover"],
     ["c-warn",n(x=>x.s.soon),"Due ≤ 5 working days","soon"],
     ["c-info",n(x=>x.j.phase===PH.RFQ),"RFQs to quote","rfq"],
     ["c-info",n(x=>x.j.phase===PH.QUOTED),"Awaiting PO","awaitingpo"],
-    ["c-ok",n(x=>EXEC.includes(x.j.phase)),"Active jobs","active"]
+    ["c-ok",n(x=>EXEC.includes(x.j.phase)),"Active projects","active"]
   ];
-  const cards=kpis.map(([cl,v,l,k])=>`<div class="statcard clickable ${cl}" onclick="dashFilter('${k}')" title="Show ${l.toLowerCase()} in Jobs"><div class="n">${v}</div><div class="l">${l}</div><span class="kpi-go">→</span></div>`).join("");
+  const cards=kpis.map(([cl,v,l,k])=>`<div class="statcard clickable ${cl}" onclick="dashFilter('${k}')" title="Show ${l.toLowerCase()} in Projects"><div class="n">${v}</div><div class="l">${l}</div><span class="kpi-go">→</span></div>`).join("");
   const awaiting=allLines().filter(x=>x.s.status==="RFQ Sent");
   const chase=n(x=>x.s.chase), held=n(x=>!isClosed(x.j)&&isOnHold(x.j)), noDue=n(x=>(x.s.kind==="quote"||x.s.kind==="delivery")&&!x.s.due);
   const sub=(cls,ic,cnt,txt,fn)=>cnt?`<div class="kpi-sub ${cls}" onclick="${fn}"><span>${ic}</span> <b>${cnt}</b> ${txt} <span class="kpi-go">→</span></div>`:"";
   const subline=sub("","☎",chase,"quote"+(chase>1?"s":"")+" past follow-up — chase client for PO","dashFilter('chase')")
     +sub("","🔖",awaiting.length,"supplier quote"+(awaiting.length>1?"s":"")+" awaited — chase suppliers","dashGo('procurement')")
-    +sub("warn","⏸",held,"job"+(held>1?"s":"")+" on hold (clock paused)","dashFilter('onhold')")
-    +sub("warn","❔",noDue,"job"+(noDue>1?"s":"")+" missing a deadline or lead time — can't track overdue","dashFilter('nodue')");
+    +sub("warn","⏸",held,"project"+(held>1?"s":"")+" on hold (clock paused)","dashFilter('onhold')")
+    +sub("warn","❔",noDue,"project"+(noDue>1?"s":"")+" missing a deadline or lead time — can't track overdue","dashFilter('nodue')");
   const noChkCount=jobs.filter(jobNeedsChecklist).length;
-  const chkNudge=noChkCount?`<div class="kpi-sub warn" onclick="dashFilter('nochecklist')" title="Show these jobs"><span>⚠️</span> <b>${noChkCount}</b> job${noChkCount>1?"s":""} in production with no QC recorded <span class="kpi-go">→</span></div>`:"";
+  const chkNudge=noChkCount?`<div class="kpi-sub warn" onclick="dashFilter('nochecklist')" title="Show these projects"><span>⚠️</span> <b>${noChkCount}</b> job${noChkCount>1?"s":""} in production with no QC recorded <span class="kpi-go">→</span></div>`:"";
   // Reminders / notes (dashboard glance: open items, urgent first)
   const rem=(DB.meta&&DB.meta.reminders)||[];
   const openRem=rem.filter(r=>r.bucket!=="completed").sort((a,b)=>(a.bucket==="urgent"?0:1)-(b.bucket==="urgent"?0:1));
@@ -3335,7 +3359,7 @@ function renderDashboard(c){
   jobs.forEach(j=>(j.updates||[]).forEach((u,idx)=>feed.push({j,u,idx})));
   feed.sort((a,b)=>{const d=(b.u.date||"").localeCompare(a.u.date||"");if(d)return d;return ((b.u.ts||0)-(a.u.ts||0))||(b.idx-a.idx);});
   const recent=feed.slice(0,8);
-  const recentHtml=recent.length?recent.map(({j,u})=>`<div class="rc-item" onclick="openJob('${j.id}')"><div class="rc-top"><span class="rc-job">${esc(jobLabel(j))}</span><span class="rc-date">${esc(fmtShort(u.date))}</span></div><div class="rc-text">${esc(u.text).replace(/\n/g,"<br>")}</div></div>`).join(""):`<div class="minimsg">No updates logged yet. Open a job and post an update — your latest notes show here so you can pick up where you left off.</div>`;
+  const recentHtml=recent.length?recent.map(({j,u})=>`<div class="rc-item" onclick="openJob('${j.id}')"><div class="rc-top"><span class="rc-job">${esc(jobLabel(j))}</span><span class="rc-date">${esc(fmtShort(u.date))}</span></div><div class="rc-text">${esc(u.text).replace(/\n/g,"<br>")}</div></div>`).join(""):`<div class="minimsg">No updates logged yet. Open a project and post an update — your latest notes show here so you can pick up where you left off.</div>`;
   const recentPanel=`<div class="panel"><h3>🕘 Recent updates</h3><div class="recent">${recentHtml}</div></div>`;
   // Pipeline by phase
   const max=Math.max(1,...PHASES.map(p=>jobs.filter(j=>j.phase===p).length));
@@ -3384,7 +3408,7 @@ function renderReminders(c){
     const body=items.length?items.map(card).join(""):`<div class="minimsg">Nothing here${b==='completed'?' yet':''}.</div>`;
     return `<div class="rcol ${cls}"><h3>${label} <span class="cnt">${items.length}</span></h3>${add}<div class="rcol-body">${body}</div></div>`;
   }).join("");
-  c.innerHTML=`<div class="reminfo">Your personal to-dos and notes, kept separate from formal job statuses. <b>Urgent</b> shows first — the quick things to clear each morning.</div>${listSearch("Search reminders…")}<div class="remcols">${colHtml}</div>`;
+  c.innerHTML=`<div class="reminfo">Your personal to-dos and notes, kept separate from formal project statuses. <b>Urgent</b> shows first — the quick things to clear each morning.</div>${listSearch("Search reminders…")}<div class="remcols">${colHtml}</div>`;
 }
 
 /* ============ SETTINGS ============ */
@@ -3396,7 +3420,7 @@ function pillRow(item,i,pfx){
   return `<div class="setrow"><span class="badge setpill" style="${tokStyle(item.tok)}">${esc(item.name)}</span><span class="swrow">${sw}</span><span class="spacer"></span><button class="icobtn" title="Move up" onclick="moveItemAt('${kind}',${i},-1)">↑</button><button class="icobtn" title="Move down" onclick="moveItemAt('${kind}',${i},1)">↓</button><button class="icobtn del" title="Remove" onclick="${rmFn}(${i})">🗑</button></div>`;
 }
 let setTab="general";
-const SET_TABS=[["general","General","⚙️"],["workflow","Workflow & holidays","⏱️"],["templates","Job templates","🧩"],["lists","Lists","🏷️"],["qc","QC checklists","✅"],["data","Data & backup","💾"]];
+const SET_TABS=[["general","General","⚙️"],["workflow","Workflow & holidays","⏱️"],["templates","Project templates","🧩"],["lists","Lists","🏷️"],["qc","QC checklists","✅"],["data","Data & backup","💾"]];
 function renderSettings(c){
   renderSettingsRaw(c);
   const pick=t=>{t=t.toLowerCase();
@@ -3424,17 +3448,17 @@ function templatesPanel(){
       <span class="autocell">${s.auto?`<span class="autotag" title="${esc(AUTO_HINT[s.auto]||"")}">auto</span>`:""}</span>
       <span class="tplbtns"><button class="icobtn" title="Move up" onclick="wfMove(${i},-1)">↑</button><button class="icobtn" title="Move down" onclick="wfMove(${i},1)">↓</button><button class="icobtn del" title="Remove" onclick="wfDel(${i})">🗑</button></span></div>`).join("");
   const types=Object.keys(JOB_TYPES).map(t=>`<div class="setrow"><b style="min-width:180px">${esc(t)}</b><span class="resp">${wfStepsFor(Object.assign({},JOB_TYPES[t])).length} steps · ${Object.entries(JOB_TYPES[t]).filter(([,v])=>v).map(([k])=>cond.find(c=>c[0]===k)[1].toLowerCase()).join(", ")}</span></div>`).join("");
-  return `<div class="panel"><h3>🧩 Job workflow template</h3>
-    <div class="setnote">Every new job's schedule is built from these steps. <b>Days</b> are working days (0 = a milestone on one day). <b>Included when</b> decides which jobs get the step — tick the options on the job (site visit, concept, fabrication, coating, assembly). Steps marked <span class="autotag">auto</span> tick themselves from the app. Changes apply to new schedules and to “Rebuild from template”.</div>
+  return `<div class="panel"><h3>🧩 Project workflow template</h3>
+    <div class="setnote">Every new project's schedule is built from these steps. <b>Days</b> are working days (0 = a milestone on one day). <b>Included when</b> decides which projects get the step — tick the options on the project (site visit, concept, fabrication, coating, assembly). Steps marked <span class="autotag">auto</span> tick themselves from the app. Changes apply to new schedules and to “Rebuild from template”.</div>
     <div class="tplhead2"><span>#</span><span>Step</span><span>Section</span><span>Days</span><span>Included when</span><span></span><span></span></div>
     <div class="tpllist">${rows}</div>
     <div class="setadd"><button class="btn primary" onclick="wfAdd()">+ Add step</button><span class="spacer"></span><button class="btn" onclick="wfReset()">Reset to default</button></div></div>
-    <div class="panel"><h3>Job types</h3><div class="setnote">Picking a type on a job ticks these options for you — you can still change them per job.</div>${types}</div>`;
+    <div class="panel"><h3>Project types</h3><div class="setnote">Picking a type on a project ticks these options for you — you can still change them per project.</div>${types}</div>`;
 }
 function wfStore(){if(!Array.isArray(DB.meta.wfSteps)||!DB.meta.wfSteps.length)DB.meta.wfSteps=JSON.parse(JSON.stringify(WF_DEFAULT));return DB.meta.wfSteps;}
 function wfEdit(i,k,v){const s=wfStore()[i];if(!s)return;s[k]=k==="days"?Math.max(0,Math.round(+v||0)):v;if(k==="when"&&!v)delete s.when;save();toast("Template updated");}
 function wfMove(i,d){const a=wfStore(),j=i+d;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];save();render();}
-function wfDel(i){const a=wfStore(),s=a[i];if(!s)return;uiConfirm(`Remove “${s.name}” from the template? Existing job schedules keep it until you rebuild them.`,()=>{a.splice(i,1);save();render();},{ok:"Remove"});}
+function wfDel(i){const a=wfStore(),s=a[i];if(!s)return;uiConfirm(`Remove “${s.name}” from the template? Existing project schedules keep it until you rebuild them.`,()=>{a.splice(i,1);save();render();},{ok:"Remove"});}
 function wfAdd(){uiAsk({title:"New template step",msg:"Step name (e.g. Load test, Hydro test, Third-party inspection):",input:true,ok:"Add",onOk:v=>{const n=(v||"").trim();if(!n)return;const a=wfStore();const i=a.findIndex(s=>s.key==="final");a.splice(i<0?a.length:i,0,{key:"u"+uid(),name:n,sec:"prod",days:1});save();render();toast("Step added before final inspection — set its section and days");}});}
 function wfReset(){uiConfirm("Reset the workflow template to Protrac's default steps?",()=>{DB.meta.wfSteps=JSON.parse(JSON.stringify(WF_DEFAULT));save();render();},{ok:"Reset"});}
 function renderSettingsRaw(c){
@@ -3444,11 +3468,11 @@ function renderSettingsRaw(c){
   const colSel=id=>`<select id="${id}" class="colsel">${COLOR_TOKENS.map(([t,l])=>`<option value="${t}">${l}</option>`).join("")}</select>`;
   const theme=(document.documentElement.getAttribute("data-theme")||"light");
   c.innerHTML=`<div class="setgrid">
-    <div class="panel"><h3>⏱️ Workflow &amp; deadlines</h3><div class="setnote">Every job runs through <b>RFQ → Quoted → PO → Procurement → Production → Delivered</b>. The <b>RFQ</b> clock runs to the client's response deadline and stops when the quote is submitted. <b>Quoted</b> jobs are never overdue — they flag "chase client" instead. From the <b>PO</b>, the due date is PO date + the max quoted lead time in working days. Holds pause the clock and push the due date out.</div>
+    <div class="panel"><h3>⏱️ Workflow &amp; deadlines</h3><div class="setnote">Every project runs through <b>RFQ → Quoted → PO → Procurement → Production → Delivered</b>. The <b>RFQ</b> clock runs to the client's response deadline and stops when the quote is submitted. <b>Quoted</b> projects are never overdue — they flag "chase client" instead. From the <b>PO</b>, the due date is PO date + the max quoted lead time in working days. Holds pause the clock and push the due date out.</div>
       <div class="setrow"><span>Quotes are submitted to</span><span class="spacer"></span><input id="mgr-in" style="max-width:190px" value="${esc(managerLabel())}" onchange="setManagerLabel(this.value)"></div>
       <div class="setrow"><span>Chase client for PO after (working days)</span><span class="spacer"></span><input id="fu-in" type="number" min="1" style="width:80px" value="${followUpDays()}" onchange="setFollowUpDays(this.value)"></div>
       <div class="setrow"><span>Default client deadline for a new RFQ (working days)</span><span class="spacer"></span><input id="qd-in" type="number" min="1" style="width:80px" value="${quoteDays()}" onchange="DB.meta.quoteDays=Math.max(1,Math.round(+this.value||5));save();toast('New RFQs default to '+DB.meta.quoteDays+' working days')"></div>
-      <div class="setrow" style="align-items:flex-start"><span>Projects folder<br><small style="color:var(--ink-soft)">e.g. <span class="mono">P:\\Projects</span> — new jobs get their File location as this folder + “${esc(folderName({jobId:"006",client:"Client A — Oilfield Services",jobName:"Tank hatch cover"}))}”</small></span><span class="spacer"></span><input id="pp-in" style="max-width:240px" placeholder="P:\\Projects" value="${esc(DB.meta.projectsPath||"")}" onchange="DB.meta.projectsPath=this.value.trim();save();toast('Projects folder saved')"></div></div>
+      <div class="setrow" style="align-items:flex-start"><span>Projects folder<br><small style="color:var(--ink-soft)">e.g. <span class="mono">P:\\Projects</span> — new projects get their File location as this folder + “${esc(folderName({jobId:"006",client:"Client A — Oilfield Services",jobName:"Tank hatch cover"}))}”</small></span><span class="spacer"></span><input id="pp-in" style="max-width:240px" placeholder="P:\\Projects" value="${esc(DB.meta.projectsPath||"")}" onchange="DB.meta.projectsPath=this.value.trim();save();toast('Projects folder saved')"></div></div>
     <div class="panel"><h3>📅 Public holidays <small style="color:var(--ink-soft);text-transform:none;letter-spacing:0">(skipped when counting working days)</small></h3><div class="setnote">Pre-filled with T&amp;T fixed-date holidays plus Good Friday, Easter Monday and Corpus Christi (Sunday holidays move to Monday). <b>Add Eid-ul-Fitr and Divali each year</b> once the dates are gazetted.</div>
       <div class="setlist holist">${holidayRows()}</div>
       <div class="setadd"><input type="date" id="hol-date"><input id="hol-name" placeholder="Holiday name (e.g. Divali)" onkeydown="if(event.key==='Enter')addHoliday()"><button class="btn primary" onclick="addHoliday()">Add</button></div>
@@ -3463,7 +3487,7 @@ function renderSettingsRaw(c){
       <div class="setadd"><button class="btn" onclick="addPriceCat(()=>render())">+ Add category</button></div></div>
     <div class="panel"><h3>⚑ Priorities</h3><div class="setnote">Add or remove priority levels (e.g. Cancelled, Postponed) and set their colour.</div><div class="setlist">${pr}</div>
       <div class="setadd"><input id="pr-name" placeholder="New priority (e.g. Postponed)" onkeydown="if(event.key==='Enter')addPriority()">${colSel("pr-col")}<button class="btn primary" onclick="addPriority()">Add</button></div></div>
-    <div class="panel"><h3>🏢 Clients</h3><div class="setnote">Manage the client list used across jobs. You can also add a client on the fly from the job form.</div><div class="setlist">${cl}</div>
+    <div class="panel"><h3>🏢 Clients</h3><div class="setnote">Manage the client list used across projects. You can also add a client on the fly from the project form.</div><div class="setlist">${cl}</div>
       <div class="setadd"><input id="cl-name" placeholder="New client name" onkeydown="if(event.key==='Enter')addClientS()"><button class="btn primary" onclick="addClientS()">Add</button></div></div>
     <div class="panel"><h3>🎨 Appearance</h3><div class="setrow"><span>Menu</span><span class="spacer"></span><button class="btn" onclick="toggleSide()">Collapse / expand side menu</button></div><div class="setrow"><span>Theme</span><span class="spacer"></span><button class="btn ${theme==='light'?'primary':''}" onclick="setTheme('light')">☀️ Light</button><button class="btn ${theme==='dark'?'primary':''}" onclick="setTheme('dark')">🌙 Dark</button></div></div>
     <div class="panel"><h3>💾 Data &amp; backup</h3>
@@ -3478,7 +3502,7 @@ function renderSettingsRaw(c){
       <p><b>Windows desktop (Chrome / Edge):</b> browser menu ⋮ → <b>Cast, save and share</b> → <b>Install page as app</b> (Edge: <b>Apps → Install this site as an app</b>). You get a Protrac icon on the taskbar.</p>
       <p style="color:var(--ink-soft)">Each device keeps its own data — use <b>Backup</b> / <b>Restore</b> to move it between them.</p>
     </div></div>
-    <div class="panel wide"><h3>✅ QC detailed checks (optional, per stage)</h3><div class="setnote">Each job has four one-tap QC stages: Welding / Fabrication, Sandblasting, Painting and Final Inspection. If you want item-by-item checks too, they come from these lists — tap "Add standard checks" inside a stage on the job's QC tab.</div>
+    <div class="panel wide"><h3>✅ QC detailed checks (optional, per stage)</h3><div class="setnote">Each project has four one-tap QC stages: Welding / Fabrication, Sandblasting, Painting and Final Inspection. If you want item-by-item checks too, they come from these lists — tap "Add standard checks" inside a stage on the project's QC tab.</div>
       <div class="tplgrid">${(meta.checklistTemplates||[]).map((t,i)=>`<div class="tplcard"><div class="tplhead"><b>${esc(t.type)}</b><span class="cnt">${t.items.length}</span><span class="spacer"></span><button class="icobtn del" title="Delete template" onclick="removeChecklistTypeAt(${i})">🗑</button></div><div class="tplitems">${t.items.map((it,ii)=>`<div class="tplitem"><span>${esc(it)}</span><button class="rem-x" title="Remove" onclick="removeChecklistItemAt(${i},${ii})">×</button></div>`).join("")||'<div class="minimsg">No items yet.</div>'}</div><div class="tpladd"><input id="ct-item-${i}" placeholder="Add check item…" onkeydown="if(event.key==='Enter')addChecklistItem(${i})"><button class="btn sm primary" onclick="addChecklistItem(${i})">Add</button></div></div>`).join("")||'<div class="minimsg">No templates yet.</div>'}</div>
       <div class="setadd" style="margin-top:12px"><input id="ct-name" placeholder="New process type (e.g. Hydro Test)" onkeydown="if(event.key==='Enter')addChecklistType()"><button class="btn primary" onclick="addChecklistType()">Add process</button></div></div>
   </div>`;
@@ -3494,25 +3518,25 @@ function addTTYear(){const y=parseInt((document.getElementById("hol-year")||{}).
 function setManagerLabel(v){DB.meta.managerLabel=(v||"").trim()||"Manager";save();toast("Quotes now go to “"+DB.meta.managerLabel+"”");}
 function setFollowUpDays(v){const n=Math.max(1,Math.round(+v||5));DB.meta.followUpDays=n;save();toast("Follow-up after "+n+" working days");}
 function addPriority(){const nm=(document.getElementById("pr-name").value||"").trim();const tok=(document.getElementById("pr-col")||{}).value||"idle";if(!nm)return;DB.meta.priorities=DB.meta.priorities||[];if(DB.meta.priorities.some(p=>p.name.toLowerCase()===nm.toLowerCase())){toast("That priority already exists");return;}DB.meta.priorities.push({name:nm,tok});save();render();toast("Priority “"+nm+"” added");}
-function removePriorityAt(i){const p=(DB.meta.priorities||[])[i];if(!p)return;const used=(DB.jobs||[]).filter(j=>j.priority===p.name).length;uiConfirm(`Remove priority “${p.name}”?`+(used?` ${used} job(s) use it.`:""),()=>{DB.meta.priorities.splice(i,1);save();render();toast("Priority removed");});}
+function removePriorityAt(i){const p=(DB.meta.priorities||[])[i];if(!p)return;const used=(DB.jobs||[]).filter(j=>j.priority===p.name).length;uiConfirm(`Remove priority “${p.name}”?`+(used?` ${used} project(s) use it.`:""),()=>{DB.meta.priorities.splice(i,1);save();render();toast("Priority removed");});}
 function setPriorityColorAt(i,tok){if(DB.meta.priorities&&DB.meta.priorities[i]){DB.meta.priorities[i].tok=tok;save();render();}}
 function jobNeedsChecklist(j){const q=j.qc||{};return !isClosed(j)&&j.phase===PH.PROD&&!QC_STAGES.some(([k])=>q[k]&&q[k].s&&!q[k].auto);}
-/* QC stages the job's workflow leaves out are set to N/A once (tap again to clear; it won't come back) */
+/* QC stages the project's workflow leaves out are set to N/A once (tap again to clear; it won't come back) */
 function qcAutoNA(j){
   if(!j.jobType)return;j.qc=j.qc||{};if(!j.qcAuto||typeof j.qcAuto!=="object")j.qcAuto={};
   const out={weld:!j.optFab,blast:!j.optCoat,paint:!j.optCoat};
   Object.keys(out).forEach(k=>{const r=j.qc[k];
-    if(out[k]){if(!j.qcAuto[k]){if(!(r&&r.s))j.qc[k]={s:"N/A",date:j.rfqDate||todayISO(),by:"auto",note:"Not in this job's scope",auto:true};j.qcAuto[k]=true;}}
+    if(out[k]){if(!j.qcAuto[k]){if(!(r&&r.s))j.qc[k]={s:"N/A",date:j.rfqDate||todayISO(),by:"auto",note:"Not in this project's scope",auto:true};j.qcAuto[k]=true;}}
     else{if(r&&r.auto)j.qc[k]={s:"",date:"",by:"",note:""};if(j.qcAuto[k])delete j.qcAuto[k];}
   });
 }
 function addChecklistType(){const nm=(document.getElementById("ct-name").value||"").trim();if(!nm)return;DB.meta.checklistTemplates=DB.meta.checklistTemplates||[];if(DB.meta.checklistTemplates.some(t=>t.type.toLowerCase()===nm.toLowerCase())){toast("That type already exists");return;}DB.meta.checklistTemplates.push({id:uid(),type:nm,items:[]});save();render();toast("Template “"+nm+"” added");}
-function removeChecklistTypeAt(i){const t=(DB.meta.checklistTemplates||[])[i];if(!t)return;uiConfirm(`Delete template “${t.type}” and its ${t.items.length} item(s)? Checklist items already added to jobs are not affected.`,()=>{DB.meta.checklistTemplates.splice(i,1);save();render();toast("Template deleted");});}
+function removeChecklistTypeAt(i){const t=(DB.meta.checklistTemplates||[])[i];if(!t)return;uiConfirm(`Delete template “${t.type}” and its ${t.items.length} item(s)? Checklist items already added to projects are not affected.`,()=>{DB.meta.checklistTemplates.splice(i,1);save();render();toast("Template deleted");});}
 function addChecklistItem(i){const el=document.getElementById("ct-item-"+i);if(!el)return;const v=(el.value||"").trim();if(!v)return;const t=(DB.meta.checklistTemplates||[])[i];if(!t)return;t.items.push(v);save();render();}
 function removeChecklistItemAt(ti,ii){const t=(DB.meta.checklistTemplates||[])[ti];if(!t)return;t.items.splice(ii,1);save();render();}
 function moveItemAt(kind,i,dir){const a=DB.meta[kind];if(!a)return;const j=i+dir;if(j<0||j>=a.length)return;const t=a[i];a[i]=a[j];a[j]=t;save();render();}
 function addClientS(){const nm=(document.getElementById("cl-name").value||"").trim();if(!nm)return;DB.meta.clients=DB.meta.clients||[];if(DB.meta.clients.some(c=>c.toLowerCase()===nm.toLowerCase())){toast("Client already exists");return;}DB.meta.clients.push(nm);DB.meta.clients.sort((a,b)=>a.localeCompare(b));save();render();toast("Client “"+nm+"” added");}
-function removeClientAt(i){const name=(DB.meta.clients||[])[i];if(name==null)return;const used=(DB.jobs||[]).filter(j=>j.client===name).length;uiConfirm(`Remove client “${name}”?`+(used?` ${used} job(s) use it — they keep the label.`:""),()=>{DB.meta.clients.splice(i,1);save();render();toast("Client removed");});}
+function removeClientAt(i){const name=(DB.meta.clients||[])[i];if(name==null)return;const used=(DB.jobs||[]).filter(j=>j.client===name).length;uiConfirm(`Remove client “${name}”?`+(used?` ${used} project(s) use it — they keep the label.`:""),()=>{DB.meta.clients.splice(i,1);save();render();toast("Client removed");});}
 
 /* ============ PROCUREMENT (RFQ) ============ */
 function delLine(rfqId,lineId){const r=DB.procurement.find(x=>x.id===rfqId);const ln=r.suppliers.find(s=>s.id===lineId);uiConfirm(`Remove ${refName("suppliers",ln.supplierRef)||"this supplier"} from the RFQ?`,()=>{r.suppliers=r.suppliers.filter(s=>s.id!==lineId);save();rerender();toast("Removed");});}
@@ -3564,10 +3588,10 @@ function renderDetail(){
     ${step?`<span class="chip nextchip" title="Next open step on the schedule">▸ Next: ${esc(step)}</span>`:""}
     ${j.fileLocation?`<button class="chipbtn" onclick="openJobFile('${j.id}')">📁 Open file</button>`:""}
     ${j.materialListLoc?`<button class="chipbtn" onclick="openMatList('${j.id}')">📋 Material list</button>`:""}
-    <button class="chipbtn" title="Copy “${esc(folderName(j))}” for the job folder" onclick="copyFolderName('${j.id}')">⧉ Copy folder name</button>`;
-  const head=`<button class="backbtn" onclick="go('jobs')">← Back to Jobs</button>
+    <button class="chipbtn" title="Copy “${esc(folderName(j))}” for the project folder" onclick="copyFolderName('${j.id}')">⧉ Copy folder name</button>`;
+  const head=`<button class="backbtn" onclick="go('jobs')">← Back to Projects</button>
     <div class="dhead">
-      <div class="dtoprow"><div class="dt">${esc(jobLabel(j))}</div><button class="btn sm" onclick="openForm('${j.id}','jobs')">Edit job</button></div>
+      <div class="dtoprow"><div class="dt">${esc(jobLabel(j))}</div><button class="btn sm" onclick="openForm('${j.id}','jobs')">Edit project</button></div>
       <div class="dmeta">${meta}</div>
       ${phaseStepper(j)}
       <div class="phacts">${phaseActions(j)}${isClosed(j)?"":`<button class="btn sm" onclick="toggleHold('${j.id}')">${oh?"▶ Resume (restart clock)":"⏸ Put on hold"}</button>`}${undoRedoBtns(j)}</div>
@@ -3585,7 +3609,7 @@ function renderDetail(){
     <div class="updbox"><textarea id="updtext" placeholder="Type an update… (e.g. Sent follow-up RFQ to Supplier A)"></textarea><button class="btn primary" onclick="postUpdate('${j.id}')">Post</button></div>
     <div class="updlist">${ups.length?ups.slice(0,5).map(upRow).join(""):`<div class="minimsg">No updates yet. Add the first one above.</div>`}
     ${ups.length>5?`<details class="olderups"><summary>Show ${ups.length-5} older update${ups.length-5>1?"s":""}</summary>${ups.slice(5).map(upRow).join("")}</details>`:""}</div></div>`;
-  const overview=`${jobNeedsChecklist(j)?`<div class="nudge click" onclick="setDetailTab('checklist')">⚠️ This job is in production but no QC is recorded yet — tap to record it.</div>`:""}
+  const overview=`${jobNeedsChecklist(j)?`<div class="nudge click" onclick="setDetailTab('checklist')">⚠️ This project is in production but no QC is recorded yet — tap to record it.</div>`:""}
     ${procReadyNudge(j)}
     ${updates}
     ${jobTimeline(j)}
@@ -3595,7 +3619,7 @@ function renderDetail(){
   let tree=legacyTops.length?`<div class="tasktree">`+legacyTops.map(t=>{
     const tp=taskPct(t),kids=taskKids(t.id);
     return taskNode(t,false,tp)+kids.map(s=>taskNode(s,true,+s.percent||0)).join("")+`<button class="miniadd sub" onclick="addSubtask('${j.id}','${t.id}')">+ Add subtask under “${esc(t.taskName.slice(0,26))}”</button>`;
-  }).join("")+`</div>`:`<div class="minimsg">No tasks yet for this job.</div>`;
+  }).join("")+`</div>`:`<div class="minimsg">No tasks yet for this project.</div>`;
   const miniGantt=ganttSVG(j.id,{labelW:230});
   const schedule=renderWorkflow(j,tree,miniGantt);
 
@@ -3630,7 +3654,7 @@ function addSubtask(jobId,parentId){ const p=(DB.tasks||[]).find(t=>t.id===paren
 function openJobFile(id){const j=DB.jobs.find(x=>x.id===id);openFile(j&&j.fileLocation);}
 function openMatList(id){const j=DB.jobs.find(x=>x.id===id);openFile(j&&j.materialListLoc);}
 function openFile(path){
-  if(!path||!path.trim()){toast("No file location set — add one via Edit job");return;}
+  if(!path||!path.trim()){toast("No file location set — add one via Edit project");return;}
   let p=path.trim();
   if(/^https?:\/\//i.test(p)){window.open(p,"_blank");return;}
   let url=p.replace(/\\/g,"/");
@@ -3670,14 +3694,14 @@ function openForm(id,table,preset){
   document.getElementById("scrim").classList.add("show");
   const first=document.querySelector(formTable==="materials"&&rec.jobRef?'#mbody [data-k="description"]':"#mbody [data-k]");if(first&&first.focus)setTimeout(()=>first.focus(),30);
 }
-/* ---- Job form: 5 fields for a new job, everything else under "More" ---- */
+/* ---- Project form: 5 fields for a new project, everything else under "More" ---- */
 function quoteDays(){return (DB.meta&&+DB.meta.quoteDays>0)?+DB.meta.quoteDays:5;}
 const OPT_LABEL={optSite:"Site visit",optConcept:"Concept design",optFab:"Fabrication / welding",optCoat:"Blast & coating",optAssembly:"Assembly / fit-out"};
 function jobTypeHTML(rec){
   const jt=rec.jobType||"";
-  return `<div class="field full"><label>Job type</label><input type="hidden" data-k="jobType" value="${esc(jt)}"><div class="segbtns">${Object.keys(JOB_TYPES).map(t=>`<button type="button" class="segbtn ${jt===t?"on":""}" data-jt="${esc(t)}" onclick="pickJobType(this.dataset.jt)">${esc(t)}</button>`).join("")}</div></div>`;
+  return `<div class="field full"><label>Project type</label><input type="hidden" data-k="jobType" value="${esc(jt)}"><div class="segbtns">${Object.keys(JOB_TYPES).map(t=>`<button type="button" class="segbtn ${jt===t?"on":""}" data-jt="${esc(t)}" onclick="pickJobType(this.dataset.jt)">${esc(t)}</button>`).join("")}</div></div>`;
 }
-function optsHTML(rec){return `<div class="field full"><label>Workflow options <span class="lblnote">— the job type ticks these; change them per job</span></label><div class="optchks">${Object.keys(OPT_LABEL).map(k=>`<label class="optchk"><input type="checkbox" data-k="${k}" ${rec[k]?"checked":""}><span>${OPT_LABEL[k]}</span></label>`).join("")}</div></div>`;}
+function optsHTML(rec){return `<div class="field full"><label>Workflow options <span class="lblnote">— the project type ticks these; change them per project</span></label><div class="optchks">${Object.keys(OPT_LABEL).map(k=>`<label class="optchk"><input type="checkbox" data-k="${k}" ${rec[k]?"checked":""}><span>${OPT_LABEL[k]}</span></label>`).join("")}</div></div>`;}
 function jobFormHTML(rec,isNew){
   const F=k=>SCHEMA.jobs.fields.find(f=>f.k===k),fh=k=>fieldHTML(F(k),rec);
   const dl=rec.rfqDueDate||rfqBaseDue(rec)||"";
@@ -3690,11 +3714,11 @@ function jobFormHTML(rec,isNew){
     if(rec.phase===PH.DONE)html+=fh("deliveredDate");
   }
   const fp=folderPath(rec);
-  const start=isNew?`<div class="field full"><label>Already past RFQ? Start at phase…</label><select data-k="_startPhase"><option value="">RFQ Received (new enquiry)</option>${[PH.QUOTED,PH.PO,PH.PROC,PH.PROD].map(p=>`<option>${esc(p)}</option>`).join("")}</select><div class="lblnote">For a job that's already moving — the next dialog asks for its dates.</div></div>`:"";
+  const start=isNew?`<div class="field full"><label>Already past RFQ? Start at phase…</label><select data-k="_startPhase"><option value="">RFQ Received (new enquiry)</option>${[PH.QUOTED,PH.PO,PH.PROC,PH.PROD].map(p=>`<option>${esc(p)}</option>`).join("")}</select><div class="lblnote">For a project that's already moving — the next dialog asks for its dates.</div></div>`:"";
   const more=fh("jobId")+fh("priority")+optsHTML(rec)
     +`<div class="field full"><label>File location (folder or link)</label><input type="text" data-k="fileLocation" value="${esc(rec.fileLocation||"")}" placeholder="${esc(fp?fp+"  (filled in for you)":"Set your Projects folder in Settings to fill this in")}"></div>`
     +fh("materialListLoc")+fh("notes")+start;
-  html+=`<details class="more full"><summary>More — job no., priority, workflow options, files, notes${isNew?", starting phase":""}</summary><div class="moregrid">${more}</div></details>`;
+  html+=`<details class="more full"><summary>More — project no., priority, workflow options, files, notes${isNew?", starting phase":""}</summary><div class="moregrid">${more}</div></details>`;
   return html;
 }
 function wireJobForm(){
@@ -3714,7 +3738,7 @@ function pickDeadline(n){
   dd.value=addWorkingDays((rd&&rd.value)||todayISO(),n);
   document.querySelectorAll("#mbody .qchip").forEach(b=>b.classList.toggle("on",+b.dataset.n===n));
 }
-/* Schedule tab → "Workflow options": job type + the five options only; the schedule rebuilds itself */
+/* Schedule tab → "Workflow options": project type + the five options only; the schedule rebuilds itself */
 function openWfOpts(jobId){
   const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;
   formMode="wfopts";editingId=jobId;
@@ -3824,7 +3848,7 @@ function del(id,table){
   const tbl=table||current,sch=SCHEMA[tbl],r=DB[tbl].find(x=>x.id===id);
   let extra="";
   if(tbl==="tasks"&&taskKids(id).length)extra=" Its subtasks will also be deleted.";
-  if(tbl==="jobs")extra=" Linked records will keep their reference but the job will be gone.";
+  if(tbl==="jobs")extra=" Linked records will keep their reference but the project will be gone.";
   uiConfirm(`Delete "${r[sch.primary]||'this record'}"? This cannot be undone.${extra}`,()=>{
   DB[tbl]=DB[tbl].filter(x=>x.id!==id);
   if(tbl==="tasks")DB.tasks=DB.tasks.filter(x=>x.parentTask!==id);
@@ -3894,7 +3918,7 @@ function exportCSV(){
       if((r.suppliers||[]).length)r.suppliers.forEach(s=>rows.push(base.concat([refName("suppliers",s.supplierRef),s.status,s.dateSent,lineWait(s)??"",s.eta,s.awarded?"Yes":"No",s.notes])));
       else rows.push(base.concat(["","","","","","",""]));
     });
-    const head=["RFQ Number","Date","Job","Items Requested","Qty Requested","Supplier","Status","Date Sent","Days Waiting","ETA","Awarded","Line Notes"];
+    const head=["RFQ Number","Date","Project","Items Requested","Qty Requested","Supplier","Status","Date Sent","Days Waiting","ETA","Awarded","Line Notes"];
     csvDownload(head,rows,"procurement");return;
   }
   const sch=SCHEMA[current],data=DB[current]||[];

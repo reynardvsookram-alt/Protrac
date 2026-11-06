@@ -160,7 +160,7 @@ run(c, 'sortKey=null');
 const smoke = (label, code) => { try { run(c, code); ok(true, label); } catch (e) { ok(false, label + ' threw: ' + e.stack.split('\n').slice(0, 3).join(' | ')); } };
 smoke('dashboard', 'go("dashboard")');
 const dash = N.els.content.innerHTML;
-ok(dash.includes('Quotes overdue') && dash.includes('Jobs overdue') && dash.includes('Pipeline by phase'), 'dashboard content');
+ok(dash.includes('Quotes overdue') && dash.includes('Projects overdue') && dash.includes('Pipeline by phase'), 'dashboard content');
 smoke('reminders', 'go("reminders")');
 /* settings uses real DOM — covered in browser suites */
 smoke('jobs grid', 'go("jobs")');
@@ -279,5 +279,17 @@ g('qcSet("q1","weld","N/A");save()');
 ok(!g('R.qc.weld.s'), 'tapping N/A again clears it, and it does not come back');
 g('R.optFab=true;R.qc.weld={s:"N/A",auto:true};save()');
 ok(!g('R.qc.weld.s'), 'turning the option back on clears an automatic N/A');
+
+// ---- 11. price-book search: size order doesn't matter, no spaces needed, plate sheet + thickness ----
+{ const H = makeCtx({}); vm.runInContext(appCode, H.ctx); const p = s => run(H.ctx, s);
+  const names = q => p(`searchPrices(${JSON.stringify(q)},{strict:true}).map(x=>x.it.description).sort().join("|")`);
+  ok(names('RHS 6 x 4') !== '' && names('RHS 4 x 6') === names('RHS 6 x 4') && names('rhs4x6') === names('RHS 6 x 4'), 'RHS 4 x 6 = RHS 6 x 4 = rhs4x6');
+  ok(names('rhs 4x6x1/4') === 'RHS 6" x 4" x 1/4"', 'wall thickness stays last: 4x6x1/4 finds 6x4x1/4 only');
+  ok(names('Plate 4 x 8 x 3/8') === names('plate 3/8') && names('plate 3/8') !== '', 'plate 4 x 8 x 3/8 finds the 3/8 plate (4x8 sheet)');
+  ok(p('searchPrices("Plate 8 x 20 x 3/8")[0].it.description') === 'Plate 3/8" thk', 'other sheet sizes still suggest the right thickness');
+  ok(names('sch40').includes('Sch 40') && names('2x2x5mm') === 'SHS 2" x 2" x 5mm (≈3/16")', 'schedule and mm sizes still match');
+  const order = p('sortBySize(searchPrices("rhs",{strict:true})).map(x=>x.it.description.replace(/^(RHS|SHS) /,"").split(" x ").slice(0,2).join("x"))');
+  ok(order.indexOf('2"x2"') < order.indexOf('3"x2"') && order.indexOf('3"x2"') < order.indexOf('4"x2"') && order.indexOf('4"x4"') < order.indexOf('6"x4"'), 'price book lists sizes smallest first: ' + order.slice(0, 6).join(', '));
+}
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

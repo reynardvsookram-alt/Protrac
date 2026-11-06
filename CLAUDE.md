@@ -53,6 +53,10 @@ grep -nE 'fetch\(|XMLHttpRequest|cdnjs|googleapis|jsdelivr|unpkg|<link |<script 
 ```
 Playwright and Chromium are needed (`pip install playwright && playwright install chromium` if missing; in a cloud session Chromium is pre-installed — `pip install playwright==<node playwright version>` and set `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`). Fixtures are in `tests/fixtures/`, all anonymised. Screenshots go to `tests/out/` (git-ignored). Update tests when the demo data changes; don't weaken a test to make it pass. Look at real screenshots of anything visual before saying it's done.
 
+## Wording
+- **The UI says "Project", never "Job"** (his request): nav "Projects", "Add Project", "Project no.", "Back to Projects"… The code, data keys and storage keep `job` (`DB.jobs`, `jobRef`, `openJob`, `go('jobs')`) so saved data and tests don't change. New UI text must say "project".
+- App subtitle: "FabShop Project tracker".
+
 ## Architecture
 `DB = { jobs, tasks, procurement, materials, suppliers, checklists, priceItems, priceQuotes, meta }` persisted by `save()`, which also runs `syncAllSchedules()` and invalidates the price index.
 
@@ -75,6 +79,7 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 ### Job numbers and folders
 - `jobId` is a plain running number (`001`, `002`…). `nextJobNo()` = highest numeric ID + 1; non-numeric IDs are left alone. `jobLabel(j)` = "006 · Tank hatch cover" is used everywhere a job is shown (`refName("jobs")` returns it too).
 - Typing just a number in any job search finds that job number (`jobQ`, `jobNoFilter`).
+- The project list defaults to **newest first** (job no. descending); tapping the header toggles.
 - `folderName(j)` = "006. Client A Tank hatch cover" (client cut at " — ", Windows-illegal characters replaced). `meta.projectsPath` + folder name pre-fills a new job's File location (`folderPath`). "Copy folder name" is on the job page.
 
 ### Job templates and the auto timeline (Schedule tab)
@@ -96,6 +101,8 @@ Each phase owns its own clock: **overdue = today is past the active phase's due 
 ### Price book and suppliers
 - **Data**: `DB.priceItems` and `DB.priceQuotes` (`supplier` is the supplier's name).
 - **Lookups**: `latestBySupplier`, `bestPrice`, size-aware search (`normText`, `scoreItem`, index in `pbIndex`/WeakMap `pbT`), and `autoPriceMaterials`, which links only confident matches.
+- **Size matching ignores order and spacing**: `normText` splits "rhs4x6" → "rhs 4x6" and `canonDim` sorts the sides of every size (4x6 = 6x4; with 3+ parts the last one, the wall / thickness, stays last). `dimParts` lets "4x8x3/8" match a 3/8 plate on a 4x8 sheet; `tokHit` is the strict check.
+- **Price book order**: `sortBySize` — category, then size ascending (2x2 → 3x2 → 4x2 → 4x4…, thinner wall first).
 - **Import**: `importPriceWorkbook` reads a workbook with "Price Book" + "Quote Log" sheets.
 - **Suppliers page**: `renderSuppliers` shows cards; `renderSupplier` is the profile, showing what they sell, stats (`supStats`) and RFQ history. Supplier `rating` is Preferred / Approved / Backup / Avoid.
 

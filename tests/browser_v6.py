@@ -44,11 +44,11 @@ async def desktop(b):
     await E("closeForm()")
 
     # ---- already past RFQ → start at a later phase ----
-    await E("openForm(null,'jobs')"); await pg.fill("#mbody [data-k=jobName]", "Running job")
+    await E("openForm(null,'jobs')"); await pg.fill("#mbody [data-k=jobName]", "Running project")
     await E("document.querySelector('#mbody [data-k=_startPhase]').value='In Production'"); await E("saveForm()")
     ok(await E("formMode") == "phase" and await E("!!document.querySelector('#mbody [data-k=leadMax]')"), "start at Production → PO dialog opens")
     await pg.fill("#mbody [data-k=leadMax]", "15"); await E("saveForm()")
-    rj = await E("DB.jobs.find(j=>j.jobName==='Running job')")
+    rj = await E("DB.jobs.find(j=>j.jobName==='Running project')")
     ok(rj["phase"] == "In Production" and rj["poDate"] and rj["prodStartDate"], "job lands in production with its PO date")
 
     # ---- job page: no duplicates, 4 tabs, copy folder name ----
@@ -135,6 +135,16 @@ async def desktop(b):
     ok(await pg.locator(".jbody button", has_text="Mark delivered").count() == 1, "final inspection passed → Mark delivered button")
     ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').qc.weld.s") == "N/A", "repair job without fabrication: welding QC auto N/A")
 
+    # ---- projects: newest first by default, header still toggles; "Project" wording ----
+    await E("go('jobs')")
+    nos = await E("Array.from(document.querySelectorAll('tbody tr .jno')).map(e=>e.textContent)")
+    ok(nos == sorted(nos, reverse=True) and nos[0] == "013", f"project list newest first ({nos[:3]})")
+    await pg.click("thead th:first-child")
+    nos2 = await E("Array.from(document.querySelectorAll('tbody tr .jno')).map(e=>e.textContent)")
+    ok(nos2 == sorted(nos2), "tap the header → oldest first")
+    await E("go('jobs')")
+    ok(await E("!/\\bjobs?\\b/i.test(document.body.innerText)") and "Projects" in await pg.inner_text("#nav"), "UI says Project, not Job")
+    ok(await E("document.querySelector('.brand .sub, .bname .sub').textContent") == "FabShop Project tracker", "subtitle")
     # ---- search by job number ----
     await E("go('jobs')"); await pg.fill("#lsearch", "4"); await pg.wait_for_timeout(50)
     ok(await E("document.querySelectorAll('tbody tr').length") == 1 and "004" in await pg.inner_text("tbody"), "typing 4 finds job 004")
