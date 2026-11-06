@@ -111,6 +111,18 @@ async def main():
         for theme in ("light", "dark"):
             await E(f"setTheme('{theme}');openJob('{jid}')"); await pg.wait_for_timeout(150)
             await pg.screenshot(path=os.path.join(OUT, f"v8_job_{theme}.png"))
+        # ---- his icon sheet + logo: SVG nav icons, gear app icon, hover / press animation ----
+        await E("go('dashboard')"); await pg.wait_for_timeout(100)
+        ok(await E("document.querySelectorAll('.nav button svg.nic').length") == 8 and await E("![...document.querySelectorAll('.nav button .ic')].some(e=>/\\p{Extended_Pictographic}/u.test(e.textContent))"), "8 SVG nav icons, no emoji left in the sidebar")
+        ok(await E("document.querySelectorAll('.nav svg.nic .ac, .nav svg.nic .acf').length") >= 8, "every icon has its orange accent")
+        ok(await E("!!document.querySelector('#applogo svg .lg-gear')") and await E("document.querySelector('.brand h1').textContent") == "PROTRAC", "brand: gear app icon + PROTRAC")
+        ok((await E("(document.querySelector('link[rel~=icon]')||{}).href||''")).startswith("data:image/svg+xml"), "favicon is the gear icon (inline, offline)")
+        await pg.hover(".nav button:nth-child(5)"); await pg.wait_for_timeout(60)
+        ok(await E("getComputedStyle(document.querySelector('.nav button:nth-child(5) .nic')).transform") != "none", "hover lifts the icon")
+        await pg.locator(".nav button", has_text="Suppliers").click(); await pg.wait_for_timeout(30)
+        ok(await E("current") == "suppliers" and await E("document.querySelector('.nav button.active').classList.contains('pop')"), "press opens the page and the icon pops")
+        await pg.wait_for_timeout(500); await E("go('dashboard')")
+        ok(await E("!document.querySelector('.nav button.pop')"), "the pop plays once (gone on the next page)")
         ok(not errs, "no page errors: " + "; ".join(errs[:3]))
         await b.close()
     for c, m in res: print(("PASS " if c else "FAIL ") + m)

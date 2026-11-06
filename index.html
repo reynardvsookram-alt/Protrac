@@ -46,13 +46,39 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .side{width:230px;flex-shrink:0;background:var(--steel-900);color:#cfd8e3;display:flex;flex-direction:column;box-shadow:var(--raise-lg)}
 .brand{padding:20px 18px 16px;border-bottom:1px solid var(--steel-700)}
 .brand .mark{display:flex;align-items:center;gap:10px}
-.brand .weldbar{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--weld),var(--weld-dim));position:relative;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 8px rgba(255,122,24,.45)}
-.brand .weldbar::after{content:"";position:absolute;inset:7px;border:2px solid #fff;border-radius:2px;opacity:.9}
+.brand .applogo{width:34px;height:34px;flex-shrink:0;border-radius:9px;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 2px 8px rgba(0,0,0,.35);display:block}
+.brand .applogo svg{width:100%;height:100%;display:block}
+.brand .applogo .lg-gear{transform-box:fill-box;transform-origin:center;transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
+.brand:hover .applogo .lg-gear{transform:rotate(30deg)}
 .brand h1{font-size:15px;letter-spacing:.5px;margin:0;color:#fff;font-weight:700}
 .brand .sub{font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--weld-dim);margin-top:2px}
 .nav{padding:10px 8px;flex:1;overflow-y:auto}
 .nav button{display:flex;align-items:center;gap:11px;width:100%;background:none;border:0;color:#aebacb;padding:10px 12px;border-radius:9px;font-size:13.5px;text-align:left;margin-bottom:2px}
-.nav button .ic{width:18px;text-align:center;font-size:15px;opacity:.85}
+.nav button .ic{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+/* nav icons: line in the label colour, accent in safety orange; hover = a small lift + each icon's own move; press = a quick pop */
+.nic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;overflow:visible;transition:transform .18s cubic-bezier(.3,1.5,.5,1)}
+.nic .ac{stroke:#E8641B}.nic .acf{fill:#E8641B;stroke:none}.nic .cut{stroke:#fff;stroke-width:1.5}
+.nic g,.nic path,.nic circle,.nic rect{transform-box:fill-box;transform-origin:center}
+.nav button{transition:background .15s,color .15s,transform .1s}
+.nav button:hover .nic{transform:translateY(-1.5px)}
+.nav button:active{transform:scale(.97)}.nav button:active .nic{transform:scale(.86)}
+.nav button.pop .nic{animation:nicPop .42s cubic-bezier(.3,1.6,.5,1)}
+@keyframes nicPop{0%{transform:scale(.8)}55%{transform:scale(1.18)}100%{transform:scale(1)}}
+.nic .nx-trend{stroke-dasharray:24;stroke-dashoffset:0}
+.nav button:hover .nic .nx-trend{animation:nicDraw .55s ease-out}
+@keyframes nicDraw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+.nic .nx-back{transition:transform .22s ease}.nav button:hover .nic .nx-back{transform:translate(1px,-1.5px)}
+.nav button:hover .nic .nx-cart{animation:nicRoll .5s ease}
+@keyframes nicRoll{0%,100%{transform:translateX(0)}40%{transform:translateX(2px)}70%{transform:translateX(-.6px)}}
+.nav button:hover .nic .nx-coin{animation:nicFlip .6s ease}
+@keyframes nicFlip{0%{transform:scaleX(1)}50%{transform:scaleX(-1)}100%{transform:scaleX(1)}}
+.nic .nx-chk{stroke-dasharray:9}.nav button:hover .nic .nx-chk{animation:nicChk .45s ease-out}
+@keyframes nicChk{from{stroke-dashoffset:9}to{stroke-dashoffset:0}}
+.nic .nx-cap{transform-origin:20% 100%;transition:transform .25s ease}.nav button:hover .nic .nx-cap{transform:rotate(-14deg)}
+.nav button:hover .nic .nx-pin{animation:nicPin .5s ease}
+@keyframes nicPin{0%,100%{transform:translate(0,0)}45%{transform:translate(-1.6px,1.6px)}70%{transform:translate(.4px,-.4px)}}
+.nic .nx-wr{transition:transform .3s cubic-bezier(.3,1.5,.5,1)}.nav button:hover .nic .nx-wr{transform:rotate(-22deg)}
+@media (prefers-reduced-motion:reduce){.nic,.nic *,.nav button,.brand .applogo .lg-gear{animation:none!important;transition:none!important}}
 .nav button:hover{background:var(--steel-700);color:#fff}
 .nav button.active{background:linear-gradient(180deg,var(--steel-700),var(--steel-800));color:#fff;box-shadow:inset 3px 0 0 var(--weld),inset 0 1px 0 rgba(255,255,255,.05)}
 .nav .cnt{margin-left:auto;font-size:11px;color:#8090a2;background:rgba(0,0,0,.3);padding:1px 7px;border-radius:10px;font-family:var(--mono)}
@@ -673,8 +699,9 @@ th{font-weight:600}
 .side{transition:width .22s ease}
 .brand{display:flex;align-items:center;gap:8px;padding:18px 14px 14px 16px}
 .brand .mark{flex:1;min-width:0}
-.brand h1{font-size:17px;letter-spacing:.2px;font-weight:700;text-transform:none}
-.brand .sub{letter-spacing:.4px;text-transform:none;font-size:11px;color:#8fa0b3}
+.brand h1{font-size:17px;letter-spacing:1.4px;font-weight:700;text-transform:uppercase}
+.brand .sub{letter-spacing:0;text-transform:none;font-size:11px;color:#8fa0b3;white-space:nowrap}
+.brand .mark{gap:9px}.brand .bname{min-width:0}
 .sidetog{background:none;border:1px solid var(--steel-700);color:#aebacb;width:26px;height:26px;border-radius:7px;font-size:15px;line-height:1;cursor:pointer;flex-shrink:0;padding:0}
 .sidetog:hover{color:#fff;border-color:#8fa0b3}
 .side-foot{padding:12px 16px;font-size:11.5px;color:#8090a2}
@@ -683,7 +710,7 @@ th{font-weight:600}
 .app.collapsed .brand{flex-direction:column;padding:14px 8px}
 .app.collapsed .bname,.app.collapsed .nav .lbl,.app.collapsed .nav .cnt,.app.collapsed .side-foot .who{display:none}
 .app.collapsed .nav button{justify-content:center;padding:10px 0}
-.app.collapsed .nav .ic{margin:0;font-size:17px}
+.app.collapsed .nav .ic{margin:0}
 /* top bar tools */
 .tools{display:flex;gap:6px;align-items:center;margin-left:6px;padding-left:10px;border-left:1px solid var(--line)}
 .tool{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:6px 9px;font:inherit;font-size:12.5px;cursor:pointer}
@@ -1047,8 +1074,8 @@ svg.ic{width:18px;height:18px;flex:0 0 18px}
 <body>
 <div class="app">
   <aside class="side">
-    <div class="brand"><div class="mark"><div class="weldbar"></div>
-      <div class="bname"><h1>Protrac</h1><div class="sub">FabShop Project tracker</div></div></div>
+    <div class="brand"><div class="mark"><span class="applogo" id="applogo"></span>
+      <div class="bname"><h1>PROTRAC</h1><div class="sub">FabShop Project tracker</div></div></div>
       <button class="sidetog" id="sidetog" title="Collapse menu" onclick="toggleSide()">‹</button></div>
     <nav class="nav" id="nav"></nav>
     <div class="side-foot"><span class="who" id="sidewho"></span>
@@ -3362,9 +3389,29 @@ function toggleTheme(){ const cur=document.documentElement.getAttribute("data-th
 function updThemeBtn(t){ const sw=document.getElementById("tswitch"); if(sw){sw.setAttribute("aria-checked",t==="dark"?"true":"false");sw.title=t==="dark"?"Switch to light mode":"Switch to dark mode";} const lb=document.getElementById("themelbl"); if(lb)lb.textContent=t==="dark"?"Dark":"Light"; }
 
 /* ============ NAV ============ */
+/* ---- brand + nav icons (his icon sheet v1: 24 grid, 1.75 stroke, duotone line — line in the label colour + safety-orange accent) ---- */
+const NI={
+ dashboard:'<rect x="3" y="3.5" width="18" height="12.5" rx="2"/><path d="M12 16v4M8 20h8"/><path d="M8 13.5v-1.5M11.5 13.5v-2.5M15 13.5v-1"/><g class="ac nx-trend"><path d="M6.5 10.5 9.5 7.8 12.5 9.3 17.2 5.8"/><path d="M14.6 5.6h2.8v2.8"/></g>',
+ jobs:'<g class="ac nx-back"><path d="M7.5 6.5v-.5A1.5 1.5 0 0 1 9 4.5h2.6l1.5 1.5H19a1.5 1.5 0 0 1 1.5 1.5V15"/></g><path d="M3.5 10a1.5 1.5 0 0 1 1.5-1.5h3.6l1.5 1.5H17a1.5 1.5 0 0 1 1.5 1.5V18a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 18z"/>',
+ purchasing:'<g class="nx-cart"><path d="M2.8 4.5h2.4l2.1 10h10.6l2-7.8H6.1"/><circle cx="9.3" cy="18.6" r="1.6"/><circle cx="16.3" cy="18.6" r="1.6"/><rect class="ac" x="9.6" y="8.7" width="6" height="4" rx=".9"/></g>',
+ prices:'<path d="M11 6.2C8.5 4.6 5.8 4.4 3 5.4v13c2.8-1 5.5-.8 8 .8 2.5-1.6 5.2-1.8 8-.8v-3.6"/><path d="M11 6.2c2.5-1.6 5.2-1.8 8-.8v4.1"/><path d="M11 6.2v13"/><g class="nx-coin"><circle class="acf" cx="17.6" cy="16.8" r="4.6"/><path class="cut" d="M19.1 14.9h-2a1.05 1.05 0 0 0 0 2.1h1a1.05 1.05 0 0 1 0 2.1h-2.1M17.6 14v.9M17.6 19.1v.9"/></g>',
+ qc:'<circle cx="12" cy="9.5" r="6.3"/><path d="M8.6 14.9 7.5 21.2l4.5-2.4 4.5 2.4-1.1-6.3"/><path class="ac nx-chk" d="M9.4 9.6l1.9 1.9 3.5-3.7"/>',
+ suppliers:'<circle cx="12" cy="8.6" r="3.2"/><g class="ac nx-cap"><path d="M8.8 7.4a3.2 3.2 0 0 1 6.4 0z"/><path d="M15.2 7.4h2.4"/></g><path d="M4.8 20.5v-1.3A4.7 4.7 0 0 1 9.5 14.5h5a4.7 4.7 0 0 1 4.7 4.7v1.3"/><g class="ac"><rect x="9.6" y="15.7" width="4.8" height="4.8" rx=".7"/><path d="M12 15.7v1.6"/></g>',
+ reminders:'<g class="nx-pin"><path class="ac" d="M14.3 3.4 20.6 9.7l-1.9.4-3.6 3.6.4 3.2-1.5 1.5-7-7 1.5-1.5 3.2.4 3.6-3.6z"/><path d="M8.8 15.2 3.6 20.4"/></g>',
+ settings:'<path d="M5.2 3.6 3.6 5.2l2.7 2.7 1.7-.1 6.2 6.2"/><circle cx="6.4" cy="17.6" r="2.6"/><path d="M8.3 15.7l3.2-3.2"/><g class="ac nx-wr"><path d="M14.8 9.2a3.6 3.6 0 0 1 4.7-4.7l-2.3 2.3.4 1.6 1.6.4 2.3-2.3a3.6 3.6 0 0 1-4.7 4.7"/><path d="M13.6 10.4l6.4 6.4a1.5 1.5 0 0 1-2.1 2.1l-6.4-6.4"/></g>'
+};
+const GEAR_D="M18.94 9.37L18.84 6.96L21.16 6.96L21.06 9.37L23.15 9.93L24.26 7.79L26.28 8.96L24.99 10.99L26.51 12.51L28.54 11.22L29.71 13.24L27.57 14.35L28.13 16.44L30.54 16.34L30.54 18.66L28.13 18.56L27.57 20.65L29.71 21.76L28.54 23.78L26.51 22.49L24.99 24.01L26.28 26.04L24.26 27.21L23.15 25.07L21.06 25.63L21.16 28.04L18.84 28.04L18.94 25.63L16.85 25.07L15.74 27.21L13.72 26.04L15.01 24.01L13.49 22.49L11.46 23.78L10.29 21.76L12.43 20.65L11.87 18.56L9.46 18.66L9.46 16.34L11.87 16.44L12.43 14.35L10.29 13.24L11.46 11.22L13.49 12.51L15.01 10.99L13.72 8.96L15.74 7.79L16.85 9.93Z";
+/* app icon from his logo sheet: steel-navy tile, white 12-tooth gear, orange hub, QUOTE · FAB · QC · DELIVER bars (the last one orange) */
+function appLogoSVG(){return `<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#1B2A3A"/><g class="lg-gear"><path d="${GEAR_D}" fill="#fff"/><circle cx="20" cy="17.5" r="3.9" fill="#1B2A3A"/><circle cx="20" cy="17.5" r="1.9" fill="#E8641B"/></g><rect x="10" y="32" width="4.3" height="1.7" rx=".4" fill="#fff"/><rect x="15.3" y="32" width="4.3" height="1.7" rx=".4" fill="#fff"/><rect x="20.6" y="32" width="4.3" height="1.7" rx=".4" fill="#fff"/><rect x="25.9" y="32" width="4.3" height="1.7" rx=".4" fill="#E8641B"/></svg>`;}
+function navIcon(id){return `<svg class="nic nic-${id}" viewBox="0 0 24 24" aria-hidden="true">${NI[id]||""}</svg>`;}
+let navPop=null;   // the item just pressed: its icon plays the press "pop" once after the nav is rebuilt
+function navPress(id){navPop=id;setTimeout(()=>{navPop=null;},450);go(id);}
+function initBrand(){const el=document.getElementById("applogo");if(el)el.innerHTML=appLogoSVG();
+  try{let l=document.querySelector("link[rel~=icon]");if(!l){l=document.createElement("link");l.rel="icon";document.head.appendChild(l);}
+    l.href="data:image/svg+xml,"+encodeURIComponent(appLogoSVG().replace('aria-hidden="true"','xmlns="http://www.w3.org/2000/svg"'));}catch(e){}}
 function buildNav(){
-  const nav=document.getElementById("nav");
-  const items=[["dashboard","Dashboard","🏠"],["jobs","Projects","📋"],["purchasing","Purchasing","📦"],["prices","Price Book","💲"],["qc","QC","✅"],["suppliers","Suppliers","🏭"],["reminders","Reminders","📌"],["settings","Settings","⚙️"]];
+  const nav=document.getElementById("nav");{const lg=document.getElementById("applogo");if(lg&&!lg.firstChild)initBrand();}
+  const items=[["dashboard","Dashboard"],["jobs","Projects"],["purchasing","Purchasing"],["prices","Price Book"],["qc","QC"],["suppliers","Suppliers"],["reminders","Reminders"],["settings","Settings"]];
   nav.innerHTML=items.map(([id,label,ic])=>{
     let cnt="";
     if(id==="reminders"){const oc=openReminderCount();cnt=oc?`<span class="cnt">${oc}</span>`:"";}
@@ -3373,7 +3420,7 @@ function buildNav(){
     else if(id==="purchasing"){const n=purCounts().toorder;cnt=n?`<span class="cnt">${n}</span>`:"";}
     else if(SCHEMA[id])cnt=`<span class="cnt">${(DB[id]||[]).length}</span>`;
     const active=(!detailJob&&id===current)||(detailJob&&id==="jobs");
-    return `<button class="${active?'active':''}" title="${label}" onclick="go('${id}')"><span class="ic">${ic}</span><span class="lbl">${label}</span>${cnt}</button>`;
+    return `<button class="${active?'active':''}${navPop===id?' pop':''}" title="${label}" onclick="navPress('${id}')"><span class="ic">${navIcon(id)}</span><span class="lbl">${label}</span>${cnt}</button>`;
   }).join("");
 }
 function toggleSide(){const a=document.querySelector(".app");const c=!a.classList.contains("collapsed");a.classList.toggle("collapsed",c);try{localStorage.setItem("protrac_side",c?"1":"0");}catch(e){}const b=document.getElementById("sidetog");if(b){b.textContent=c?"›":"‹";b.title=c?"Expand menu":"Collapse menu";}}
