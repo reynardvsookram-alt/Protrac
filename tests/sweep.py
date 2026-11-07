@@ -12,7 +12,7 @@ STATES=[("dashboard","go('dashboard')"),("jobs-grid","go('jobs')"),("jobs-board"
  ("prices","go('prices')"),("qc","go('qc')"),("suppliers","go('suppliers')"),("reminders","go('reminders')"),("settings","go('settings')"),
  ("sup-profile","go('suppliers');openSupplier(DB.suppliers.find(s=>s.company==='Coatings Distributor').id)"),("sup-profile-steel","go('suppliers');openSupplier(DB.suppliers[0].id)"),
  ("set-workflow","go('settings');setTab='workflow';render()"),("set-templates","go('settings');setTab='templates';render()"),("set-lists","go('settings');setTab='lists';render()"),("set-qc","go('settings');setTab='qc';render()"),("set-data","go('settings');setTab='data';render()"),
- ("vac-schedule","openJob(DB.jobs.find(j=>j.jobId==='Q-26-022').id,'schedule')"),
+ ("vac-schedule","openJob(DB.jobs.find(j=>j.jobId==='011').id,'schedule')"),
  ("grid-editor","startGrid(DB.jobs.find(j=>j.jobName.startsWith('200 BBL')).id)")]
 for pre in ["200 BBL","Sand storage","Container box","DNV pump"]:
   for t in ["overview","checklist","schedule","materials","procurement","updates"]:

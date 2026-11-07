@@ -48,13 +48,13 @@ async def main():
             for i,m in enumerate(mids): await pg.fill(f'#mbody [data-mp="{m}"]',str(1000+i*100))
             await pg.fill('#mbody [data-k="lead"]',"ex stock")
             await pg.screenshot(path=os.path.join(OUT,"p_quote.png"))
-            pq0=await E("DB.priceQuotes.length"); await E("saveForm()")
+            pq0=await E("DB.priceQuotes.length"); await E("saveForm()"); await E("(()=>{const s=document.getElementById('askscrim');if(s&&s.classList.contains('show'))document.getElementById('askok').onclick();})()")   # test prices are made up, so 'Check this price' may ask — Keep
             ok(await E("DB.priceQuotes.length")>pq0,"quote logged to price book")
             await E(f"openQuote('{rid}','{lb}')")
             for i,m in enumerate(mids):
                 if i%2==0: await pg.fill(f'#mbody [data-mp="{m}"]',str(900+i*100))
             await E(f"document.querySelector('#mbody [data-mr=\"{mids[1]}\"]').value='No stock'")
-            await E("saveForm()")
+            await E("saveForm()"); await E("(()=>{const s=document.getElementById('askscrim');if(s&&s.classList.contains('show'))document.getElementById('askok').onclick();})()")
             ok("2/2 replied" in await pg.inner_text("#purbody"),"card shows 2/2 replied")
             await E(f"openCompare('{rid}')"); await pg.screenshot(path=os.path.join(OUT,"p_compare.png"))
             tot=await pg.inner_text("#cmptot"); ok("Supplier B" in tot and "Supplier A" in tot,"compare totals split by supplier")
