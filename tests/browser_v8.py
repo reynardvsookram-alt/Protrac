@@ -129,6 +129,20 @@ async def main():
         await E("go('jobs')"); await pg.locator("tbody tr").nth(0).locator(".kebab").click(); await pg.wait_for_timeout(100)
         await pg.keyboard.press("Escape")
         ok(not await E("document.getElementById('rowmenu').classList.contains('show')"), "Escape closes the menu")
+        # keyboard only (I3): Tab to the ⋯, Enter opens and focuses the first option, arrows move, Escape returns to the ⋯
+        await E("go('jobs')"); await pg.wait_for_timeout(400); await E("document.querySelectorAll('tbody tr .kebab')[2].focus()")
+        await pg.keyboard.press("Enter"); await pg.wait_for_timeout(80)
+        ae = await E("[document.activeElement.tagName,document.activeElement.className,document.activeElement.textContent.slice(0,24),(document.getElementById('rowmenu')||{}).className]")
+        ok(await E("!!(document.activeElement.closest('#rowmenu')&&document.activeElement.textContent.includes('Open project'))"), f"keyboard: Enter on ⋯ opens the menu with Open project focused ({ae})")
+        await pg.keyboard.press("ArrowDown"); await pg.keyboard.press("ArrowDown")
+        ok(await E("!!document.activeElement.closest('#rowmenu')&&document.activeElement.textContent.includes('Edit')"), "keyboard: arrow keys move through the options")
+        await pg.keyboard.press("ArrowUp"); await pg.keyboard.press("ArrowUp"); await pg.keyboard.press("ArrowUp")
+        ok(await E("!!document.activeElement.closest('#rowmenu')&&document.activeElement.textContent.includes('Delete')"), "keyboard: arrows wrap round")
+        await pg.keyboard.press("Escape"); await pg.wait_for_timeout(50)
+        ok(await E("document.activeElement.classList.contains('kebab')&&document.activeElement.getAttribute('aria-expanded')==='false'") and not await E("document.getElementById('rowmenu').classList.contains('show')"), "keyboard: Escape closes and returns to the ⋯")
+        await pg.keyboard.press("Enter"); await pg.wait_for_timeout(60); await pg.keyboard.press("ArrowDown"); await pg.keyboard.press("ArrowDown"); await pg.keyboard.press("Enter"); await pg.wait_for_timeout(100)
+        ok(await E("document.getElementById('scrim').classList.contains('show')&&!!editingId"), "keyboard: Enter on Edit opens the project form")
+        await E("closeForm()")
 
         # ---- review fixes: list wording (B1), filter, 1366 px fit (I1), in-stock message (B4), delivery asked when unknown (I5) ----
         await E("go('jobs');setView('grid')"); await pg.wait_for_timeout(100)

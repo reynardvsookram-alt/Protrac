@@ -142,6 +142,8 @@ tr:hover .kebab,.kebab.on,.kebab:focus-visible{border-color:var(--line);backgrou
 .rowmenu.show{opacity:1;transform:none;pointer-events:auto}
 .rowmenu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:7px;padding:8px 10px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}
 .rowmenu button:hover,.rowmenu button:focus-visible{background:var(--hover)}
+.rowmenu button:focus-visible{outline:2px solid var(--weld);outline-offset:-2px}
+.kebab:focus-visible{outline:2px solid var(--weld);outline-offset:1px}
 .rowmenu button.del{color:var(--bad)}.rowmenu button.del:hover{background:var(--bad-bg)}
 .rowmenu .rmi{width:18px;text-align:center;font-size:13px}
 @media (prefers-reduced-motion:reduce){.rowmenu,.kebab{transition:none}}
@@ -3509,17 +3511,28 @@ let _rmTimer=null,_rmFor=null,_rmBtn=null,_rmClicked=false;
 function rowMenuItems(id){const isJobs=current==="jobs";const it=[];
   if(isJobs){it.push(["Open project",`openJob('${id}')`,"▸"]);it.push(["Open file",`openJobFile('${id}')`,"📁"]);}
   it.push(["Edit",`openForm('${id}')`,"✏️"]);it.push(["Delete",`del('${id}')`,"🗑","del"]);return it;}
-function rowMenuOpen(btn,toggle){
+function rowMenuOpen(btn,toggle,kb){
   clearTimeout(_rmTimer);let m=document.getElementById("rowmenu");
   // a click on a menu that hover already opened keeps it open (and pinned); a second click closes it
-  if(toggle&&m&&m.classList.contains("show")&&_rmFor===btn.dataset.id){if(_rmClicked){rowMenuClose();return;}_rmClicked=true;return;}
+  if(toggle&&m&&m.classList.contains("show")&&_rmFor===btn.dataset.id){if(_rmClicked&&!kb){rowMenuClose();return;}_rmClicked=true;if(kb)rowMenuFocus(0);return;}
   if(!(m&&m.classList.contains("show")&&_rmFor===btn.dataset.id))_rmClicked=!!toggle;
   if(!m){m=document.createElement("div");m.id="rowmenu";m.className="rowmenu";m.setAttribute("role","menu");
-    m.onmouseenter=()=>clearTimeout(_rmTimer);m.onmouseleave=rowMenuLeave;document.body.appendChild(m);}
+    m.onmouseenter=()=>clearTimeout(_rmTimer);m.onmouseleave=rowMenuLeave;m.onkeydown=rowMenuKey;document.body.appendChild(m);}
   const id=btn.dataset.id;_rmFor=id;
   m.innerHTML=rowMenuItems(id).map(([l,fn,ic,cls])=>`<button type="button" role="menuitem" class="${cls||""}" onclick="rowMenuClose();${fn}"><span class="rmi">${ic}</span>${l}</button>`).join("");
   document.querySelectorAll(".kebab.on").forEach(b=>b.classList.remove("on"));btn.classList.add("on");
+  document.querySelectorAll('.kebab[aria-expanded="true"]').forEach(b=>b.setAttribute("aria-expanded","false"));btn.setAttribute("aria-expanded","true");
   m.classList.add("show");_rmBtn=btn;rowMenuPlace();
+  if(kb)rowMenuFocus(0);   // opened with Enter / Space: put the keyboard in the menu
+}
+/* keyboard: ↑ ↓ Home End move, Enter / Space choose, Escape or Tab close and go back to the ⋯ */
+function rowMenuFocus(i){const its=[...document.querySelectorAll("#rowmenu button")];if(!its.length)return;its[(i+its.length)%its.length].focus();}
+function rowMenuKey(e){const its=[...document.querySelectorAll("#rowmenu button")],i=its.indexOf(document.activeElement);
+  if(e.key==="ArrowDown"){e.preventDefault();rowMenuFocus(i+1);}
+  else if(e.key==="ArrowUp"){e.preventDefault();rowMenuFocus(i<0?-1:i-1);}
+  else if(e.key==="Home"){e.preventDefault();rowMenuFocus(0);}
+  else if(e.key==="End"){e.preventDefault();rowMenuFocus(-1);}
+  else if(e.key==="Escape"||e.key==="Tab"){e.preventDefault();e.stopPropagation();const b=_rmBtn;rowMenuClose();if(b&&b.isConnected)b.focus();}
 }
 /* keep the menu next to its ⋯ when the page or table scrolls; close it once the row scrolls out of view */
 function rowMenuPlace(){const m=document.getElementById("rowmenu"),btn=_rmBtn;if(!m||!btn||!m.classList.contains("show"))return;
@@ -3528,7 +3541,7 @@ function rowMenuPlace(){const m=document.getElementById("rowmenu"),btn=_rmBtn;if
   const mw=m.offsetWidth,mh=m.offsetHeight;let left=r.right-mw,top=r.bottom+4;if(top+mh>innerHeight-8)top=r.top-mh-4;
   m.style.left=Math.max(8,left)+"px";m.style.top=Math.max(8,top)+"px";}
 function rowMenuLeave(){if(_rmClicked)return;clearTimeout(_rmTimer);_rmTimer=setTimeout(rowMenuClose,220);}
-function rowMenuClose(){clearTimeout(_rmTimer);const m=document.getElementById("rowmenu");if(m)m.classList.remove("show");document.querySelectorAll(".kebab.on").forEach(b=>b.classList.remove("on"));_rmFor=null;_rmBtn=null;_rmClicked=false;}
+function rowMenuClose(){clearTimeout(_rmTimer);const m=document.getElementById("rowmenu");if(m)m.classList.remove("show");document.querySelectorAll(".kebab.on").forEach(b=>b.classList.remove("on"));document.querySelectorAll('.kebab[aria-expanded="true"]').forEach(b=>b.setAttribute("aria-expanded","false"));_rmFor=null;_rmBtn=null;_rmClicked=false;}
 if(typeof document!=="undefined"&&document.addEventListener){document.addEventListener("pointerdown",e=>{if(e.target&&e.target.closest&&!e.target.closest(".rowmenu,.kebab"))rowMenuClose();});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")rowMenuClose();});document.addEventListener("scroll",()=>rowMenuPlace(),true);}
 function setView(v){currentView=v;render();pageAnim();}
@@ -3583,7 +3596,7 @@ function renderGrid(c){
         return `<td>${cellHTML(f,r)}</td>`;
       }).join("");
       // one ⋯ button per row; hover (or click) opens a floating menu with the row's actions (his request: the 4 icons took too much width)
-      return `<tr>${tds}<td class="kcol"><button type="button" class="kebab" title="Actions" aria-haspopup="menu" data-id="${r.id}" onmouseenter="rowMenuOpen(this)" onmouseleave="rowMenuLeave()" onclick="event.stopPropagation();rowMenuOpen(this,true)">⋯</button></td></tr>`;
+      return `<tr>${tds}<td class="kcol"><button type="button" class="kebab" title="Actions" aria-haspopup="menu" data-id="${r.id}" onmouseenter="rowMenuOpen(this)" onmouseleave="rowMenuLeave()" aria-expanded="false" onclick="event.stopPropagation();rowMenuOpen(this,true,event.detail===0)">⋯</button></td></tr>`;
     }).join("");
     body=`<div class="tablewrap"><table><thead><tr>${head}</tr></thead><tbody>${trs}</tbody></table></div>`;
   }
