@@ -619,6 +619,14 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .emailprev{background:#fff;color:#1d1d1f;border:1px solid var(--line);border-radius:10px;padding:16px 18px;font:13.5px/1.5 Arial,Helvetica,sans-serif;max-height:340px;overflow:auto}
 .emailprev table{border-collapse:collapse}
 .subjrow{display:flex;gap:8px;align-items:center}
+.rfqto{border:1px solid var(--line);border-radius:10px;background:var(--card-alt);padding:8px 12px}
+.rfqto-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft);margin-bottom:4px}
+.rfqto-row{display:grid;grid-template-columns:minmax(120px,200px) minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.rfqto-row:first-of-type{border-top:0}
+.rfqto-co{font-weight:700;font-size:13.5px}
+.rfqto-mail{font:600 14px var(--mono);color:var(--info);cursor:pointer;user-select:all;overflow-wrap:anywhere}
+.rfqto-mail:hover{text-decoration:underline}
+.rfqto-none{font-size:13px;color:var(--warn);font-weight:600}
 .subjrow input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--ink);font:inherit}
 .mgrid{border-collapse:separate;border-spacing:0;width:100%}
 .mgrid th{position:sticky;top:0;background:var(--card-alt);z-index:1;font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:7px 6px;text-align:left;border-bottom:1px solid var(--line)}
@@ -3005,11 +3013,17 @@ function rfqMailto(rfq){
 function showRfqText(id){
   const r=(DB.procurement||[]).find(x=>x.id===id);if(!r)return;formMode="view";
   const {subject}=rfqParts(r);
-  const emails=(r.suppliers||[]).map(s=>{const sp=(DB.suppliers||[]).find(x=>x.id===s.supplierRef)||{};return sp.company?(sp.company+(sp.email?" <"+sp.email+">":" (no email on file)")):"";}).filter(Boolean);
+  // his request: each supplier's email on its own line, easy to read and copy (Copy per supplier + Copy all for the To box)
+  const sups=(r.suppliers||[]).map(s=>(DB.suppliers||[]).find(x=>x.id===s.supplierRef)).filter(sp=>sp&&sp.company);
+  const withMail=sups.filter(sp=>(sp.email||"").trim());
+  const toRows=sups.map(sp=>`<div class="rfqto-row"><span class="rfqto-co">${esc(sp.company)}</span>${(sp.email||"").trim()
+      ?`<span class="rfqto-mail" title="Click to copy" onclick="copyText(this.textContent,'${esc(sp.company).replace(/'/g,"\\'")} email copied')">${esc(sp.email.trim())}</span><button class="btn sm" onclick="copyText(${esc(JSON.stringify(sp.email.trim()))},'Email copied')">Copy</button>`
+      :`<span class="rfqto-none">No email on file</span><button class="btn sm" onclick="closeForm();openForm('${sp.id}','suppliers')">Add email</button>`}</div>`).join("");
   openModal("RFQ "+(r.rfqNumber||"")+" — ready to send",`<div class="imp">
     <div class="impnote"><b>Best way:</b> tap <b>Copy email with table</b>, then paste into the body of your email. The table keeps its columns in Gmail and Outlook, and the two yellow columns are left blank for the supplier to fill in.</div>
-    <div><div class="impnote" style="margin-bottom:4px"><b>To:</b> ${emails.length?esc(emails.join(", ")):"add suppliers to this RFQ"}</div>
-      <div class="subjrow"><input id="rfqsubj" readonly value="${esc(subject)}"><button class="btn sm" onclick="copyText(document.getElementById('rfqsubj').value,'Subject copied')">Copy subject</button></div></div>
+    <div class="rfqto"><div class="rfqto-hd"><b>Send to</b>${withMail.length>1?`<button class="btn sm" onclick="copyText(${esc(JSON.stringify(withMail.map(sp=>sp.email.trim()).join("; ")))},'${withMail.length} emails copied — paste into the To box')">Copy all ${withMail.length} emails</button>`:""}</div>
+      ${toRows||`<div class="rfqto-none">No suppliers on this RFQ yet.</div>`}</div>
+    <div><div class="subjrow"><input id="rfqsubj" readonly value="${esc(subject)}"><button class="btn sm" onclick="copyText(document.getElementById('rfqsubj').value,'Subject copied')">Copy subject</button></div></div>
     <div class="emailprev" id="rfqprev">${rfqEmailHTML(r)}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn primary" onclick="copyRich(rfqEmailHTML(DB.procurement.find(x=>x.id==='${id}')),rfqEmailText(DB.procurement.find(x=>x.id==='${id}')),'Email copied — paste it into the body of your email')">📋 Copy email with table</button>

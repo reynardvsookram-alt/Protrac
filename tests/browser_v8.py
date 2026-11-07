@@ -129,6 +129,17 @@ async def main():
         await pg.keyboard.press("Escape")
         ok(not await E("document.getElementById('rowmenu').classList.contains('show')"), "Escape closes the menu")
 
+        # ---- RFQ ready to send: supplier emails on their own lines, copy each or all (his request) ----
+        rid = await E("(DB.procurement.find(r=>(r.suppliers||[]).filter(s=>((DB.suppliers.find(x=>x.id===s.supplierRef)||{}).email||'').trim()).length>=2)||{}).id")
+        if rid:
+            await E(f"showRfqText('{rid}')"); await pg.wait_for_timeout(100)
+            n = await E(f"DB.procurement.find(r=>r.id==='{rid}').suppliers.length")
+            ok(await pg.locator(".rfqto-row").count() == n, f"Send to: one line per supplier ({n})")
+            mails = await E("[...document.querySelectorAll('.rfqto-mail')].map(e=>e.textContent)")
+            ok(all("@" in m for m in mails) and await E("parseFloat(getComputedStyle(document.querySelector('.rfqto-mail')).fontSize)") >= 14, f"emails shown large and readable ({mails})")
+            ok(await pg.locator(".rfqto button", has_text="Copy all").count() == 1 and await pg.locator(".rfqto-row button", has_text="Copy").count() == len(mails), "Copy all + a Copy button per email")
+            await E("closeForm()")
+
         # ---- his icon sheet + logo: SVG nav icons, gear app icon, hover / press animation ----
         await E("go('dashboard')"); await pg.wait_for_timeout(100)
         ok(await E("document.querySelectorAll('.nav button svg.nic').length") == 8 and await E("![...document.querySelectorAll('.nav button .ic')].some(e=>/\\p{Extended_Pictographic}/u.test(e.textContent))"), "8 SVG nav icons, no emoji left in the sidebar")
