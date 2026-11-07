@@ -17,10 +17,10 @@ async def main():
         await pg.goto(APP); await pg.wait_for_timeout(400)
         await E("DB.meta.hideGuide=true;save()")
 
-        # ---- board: no Procurement lane, Documents & handover before Delivered / Collected ----
+        # ---- board: no Procurement lane, Documents & handover before Complete ----
         await E("go('jobs');setView('kanban')"); await pg.wait_for_timeout(100)
         lanes = await E("[...document.querySelectorAll('.lane .ln')].map(e=>e.textContent)")
-        ok(lanes == ["RFQ Received", "Quoted – Awaiting PO", "PO Received", "In Production", "Documents & Handover", "Delivered / Collected", "Lost / Declined"], f"board lanes ({lanes})")
+        ok(lanes == ["RFQ Received", "Quoted – Awaiting PO", "PO Received", "In Production", "Documents & handover", "Complete", "Lost / Declined"], f"board lanes ({lanes})")
         ok(await pg.locator(".kcard .matbadge").count() >= 2, "board cards show the materials badge")
 
         # ---- new project: requirement ticks + delivery, pre-ticked by project type ----
@@ -78,9 +78,10 @@ async def main():
         await E(f"openJob('{jid}')"); await pg.locator(".phacts button", has_text="Collected by client").click()
         ok("Documents & handover" in await pg.inner_text("#mbody"), "collect dialog says the documents phase comes next")
         await E("saveForm()"); await pg.wait_for_timeout(80)
-        ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').phase") == "Documents & Handover", "collected → Documents & handover")
+        ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').phase") == "Documents & handover", "collected → Documents & handover")
         steps = await E("[...document.querySelectorAll('.stepper .slbl')].map(e=>e.textContent)")
-        ok(steps == ["RFQ", "Quoted", "PO", "Production", "Collected", "Documents"], f"stepper: … Production → Collected → Documents ({steps})")
+        ok(steps == ["RFQ", "Quoted", "PO", "Production", "Documents", "Complete"], f"stepper matches the board: … Production → Documents → Complete ({steps})")
+        ok((await E("document.querySelectorAll('.stepper .sdate')[4].textContent")).startswith("Collected "), "the Documents step is dated by the collection")
         ok("Documents due" in await pg.inner_text(".dmeta"), "documents due date shown")
         await E("go('dashboard')")
         ok(await pg.locator(".attcard", has_text="Documents to hand over").count() == 1, "dashboard: Documents to hand over card")
@@ -128,6 +129,27 @@ async def main():
         await E("go('jobs')"); await pg.locator("tbody tr").nth(0).locator(".kebab").click(); await pg.wait_for_timeout(100)
         await pg.keyboard.press("Escape")
         ok(not await E("document.getElementById('rowmenu').classList.contains('show')"), "Escape closes the menu")
+
+        # ---- review fixes: list wording (B1), filter, 1366 px fit (I1), in-stock message (B4), delivery asked when unknown (I5) ----
+        await E("go('jobs');setView('grid')"); await pg.wait_for_timeout(100)
+        badge = await E(f"[...document.querySelectorAll('tbody tr')].find(tr=>tr.textContent.includes('Pad-eye test frame')).querySelector('.badge').textContent")
+        ok(badge == "Complete", f"list: a project with documents handed over reads Complete ({badge})")
+        await E("const j=DB.jobs.find(x=>x.jobId==='006');j.phase=PH.DONE;j.deliveredDate=todayISO();save();render()")
+        badge = await E("[...document.querySelectorAll('tbody tr')].find(tr=>tr.textContent.includes('006'))?.querySelector('.badge')?.textContent")
+        ok(badge == "Collected", f"list: client-collected project without documents reads Collected ({badge})")
+        opts = await E("[...document.querySelector('select[data-filter=phase]').options].map(o=>o.textContent)")
+        ok("Complete (delivered / collected)" in opts and "Delivered" not in opts, f"phase filter uses the same words ({opts[-2:]})")
+        await pg.set_viewport_size({"width": 1366, "height": 768}); await E("render()"); await pg.wait_for_timeout(100)
+        ok(await E("(()=>{const t=document.querySelector('.tablewrap');return t.scrollWidth<=t.clientWidth+1})()"), "project list fits at 1366 px without a sideways scroll")
+        await pg.set_viewport_size({"width": 1440, "height": 900})
+        await E(f"matAction('is1')"); await pg.wait_for_timeout(50)
+        ok("From our stock" in await pg.inner_text("#toast"), "tapping an In stock chip explains it (not 'Already received')")
+        oj = await E("(()=>{const j=DB.jobs.find(x=>x.jobId==='009');delete j.deliverySet;j.delivery='us';save();return j.id})()")
+        await E(f"openPhaseAction('{oj}','quoted')")
+        dlg = await pg.inner_text("#mbody"); lit = await pg.locator("#mbody .dvbtns .segbtn.on").count()
+        ok(lit == 0 and "who moves the units" in dlg.lower() and "transport isn't costed" not in dlg.lower(), f"delivery never chosen → the quote dialog asks instead of warning about transport (lit {lit})")
+        await pg.locator("#mbody .dvbtns .segbtn", has_text="Client collects").click(); await E("saveForm()")
+        ok(await E(f"(()=>{{const j=DB.jobs.find(x=>x.id==='{oj}');return j.delivery==='client'&&j.deliverySet===true}})()"), "…and the answer is saved on the project")
 
         # ---- RFQ ready to send: supplier emails on their own lines, copy each or all (his request) ----
         rid = await E("(DB.procurement.find(r=>(r.suppliers||[]).filter(s=>((DB.suppliers.find(x=>x.id===s.supplierRef)||{}).email||'').trim()).length>=2)||{}).id")
