@@ -16,8 +16,8 @@ async def desktop(b):
     # ---- new-job form: 5 fields up front, the rest under More ----
     await E("go('jobs');openForm(null,'jobs')")
     vis = await E("Array.from(document.querySelectorAll('#mbody [data-k]')).filter(e=>!e.closest('details')&&e.type!=='hidden').map(e=>e.dataset.k)")
-    ok(vis == ["jobName", "client", "rfqDate", "rfqDueDate"] and await E("document.querySelectorAll('#mbody .segbtn').length") == 3,
-       f"new job: name, client, 3 job-type buttons, RFQ date, deadline up front ({vis})")
+    ok(vis == ["jobName", "client", "reqMPI", "reqLoad", "reqWeldMap", "rfqDate", "rfqDueDate"] and await E("document.querySelectorAll('#mbody .segbtn').length") == 5,
+       f"new job: name, client, 3 job-type buttons, client requirements + delivery (v8), RFQ date, deadline up front ({vis})")
     ok(await E("!document.querySelector('#mbody [data-k=phase],#mbody [data-k=stage],#mbody [data-k=percent],#mbody [data-k=rfqDays]')"), "no Phase / Stage / % / within-N-days fields")
     ok(await E("document.querySelector('#mbody details.more').open") is False, "More is collapsed")
     ok(await E("document.querySelector('#mbody [data-k=jobId]').value") == "012", "job no. pre-filled with the next number")
@@ -70,7 +70,7 @@ async def desktop(b):
     await E(f"openJob('{jid}')")
     ok(await pg.locator(".phacts button", has_text="Undo").count() == 1 and await pg.locator(".phacts button", has_text="Redo").count() == 0, "Undo shown, Redo hidden")
     await pg.locator(".phacts button", has_text="Undo").click()
-    ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').phase") == "Procurement", "Undo steps back to Procurement")
+    ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').phase") == "PO Received", "Undo steps back to PO Received (no Procurement phase)")
     await pg.locator(".phacts button", has_text="Redo").click()
     ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').phase") == "In Production", "Redo re-applies")
     await pg.reload(); await pg.wait_for_timeout(300)
@@ -109,7 +109,7 @@ async def desktop(b):
 
     # ---- workflow options dialog → auto rebuild (M3 + A2) ----
     await E(f"openJob('{rfqj}','schedule')"); await pg.locator("button", has_text="Workflow options").click()
-    ok(await E("formMode") == "wfopts" and await E("document.querySelectorAll('#mbody [data-k]').length") == 6, "workflow options dialog: job type + 5 options only")
+    ok(await E("formMode") == "wfopts" and await E("document.querySelectorAll('#mbody [data-k]').length") == 10, "workflow options dialog: job type + 5 options + 3 client requirements + delivery")
     had = await E(f"DB.tasks.some(t=>t.jobRef==='{rfqj}'&&t.stepKey==='assembly')")
     await E("document.querySelector('#mbody [data-k=optAssembly]').checked=" + ("false" if had else "true")); await E("saveForm()")
     ok(await E(f"DB.tasks.some(t=>t.jobRef==='{rfqj}'&&t.stepKey==='assembly')") != had, "schedule rebuilt by itself")
@@ -122,17 +122,22 @@ async def desktop(b):
     await E("saveForm()")
     ok(await E(f"(()=>{{const j=DB.jobs.find(x=>x.id==='{rfqj}');return DB.tasks.find(t=>t.jobRef===j.id&&t.stepKey==='delivered').endDate===execDue(j)}})()"), "delivery step re-planned to the PO due date")
 
-    # ---- A3: all received → production, with Undo on the toast ----
+    # ---- v8: all received → production is OFFERED (he starts production himself), Undo after ----
     pj = await E("DB.jobs.find(j=>j.jobId==='007').id")
+    ok(await E(f"DB.jobs.find(j=>j.id==='{pj}').phase") == "PO Received", "demo 007 waits at PO Received (no Procurement phase)")
     await E(f"openJob('{pj}','materials');receiveMats(jobMats('{pj}').map(m=>m.id))")
-    ok(await E(f"DB.jobs.find(j=>j.id==='{pj}').phase") == "In Production", "all lines received → In Production")
-    ok(await pg.locator("#toast .toastbtn", has_text="Undo").count() == 1, "toast offers Undo")
-    await pg.locator("#toast .toastbtn").click()
-    ok(await E(f"DB.jobs.find(j=>j.id==='{pj}').phase") == "Procurement", "toast Undo moves it back")
+    ok(await E(f"DB.jobs.find(j=>j.id==='{pj}').phase") == "PO Received", "all lines received → still PO Received")
+    ok(await pg.locator("#toast .toastbtn", has_text="Start production").count() == 1, "toast offers Start production")
+    await pg.locator("#toast .toastbtn").click(); await pg.wait_for_timeout(60)
+    ok(await E("formMode") == "phase" and await E("phaseCtx.action") == "prod", "…which opens the Start production dialog")
+    await E("saveForm()")
+    ok(await E(f"DB.jobs.find(j=>j.id==='{pj}').phase") == "In Production", "saved → In Production")
+    await E(f"openJob('{pj}')"); await pg.locator(".phacts button", has_text="Undo").click()
+    ok(await E(f"DB.jobs.find(j=>j.id==='{pj}').phase") == "PO Received", "Undo moves it back to PO Received")
 
     # ---- A4 + D4: QC ----
     await E(f"openJob('{jid}','checklist');qcSet('{jid}','final','Pass')")
-    ok(await pg.locator(".jbody button", has_text="Mark delivered").count() == 1, "final inspection passed → Mark delivered button")
+    ok(await pg.locator(".jbody button", has_text="Mark collected").count() == 1, "final inspection passed → Mark collected button (client collects 006)")
     ok(await E(f"DB.jobs.find(j=>j.id==='{jid}').qc.weld.s") == "N/A", "repair job without fabrication: welding QC auto N/A")
 
     # ---- projects: newest first by default, header still toggles; "Project" wording ----
