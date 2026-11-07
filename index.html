@@ -75,8 +75,9 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .nic .nx-chk{stroke-dasharray:9}.nav button:hover .nic .nx-chk{animation:nicChk .45s ease-out}
 @keyframes nicChk{from{stroke-dashoffset:9}to{stroke-dashoffset:0}}
 .nic .nx-cap{transform-origin:20% 100%;transition:transform .25s ease}.nav button:hover .nic .nx-cap{transform:rotate(-14deg)}
-.nav button:hover .nic .nx-pin{animation:nicPin .5s ease}
-@keyframes nicPin{0%,100%{transform:translate(0,0)}45%{transform:translate(-1.6px,1.6px)}70%{transform:translate(.4px,-.4px)}}
+/* Reminders (his request): the pin turns a full 360° about its own long axis (needle tip → head, the icon's diagonal through the centre) */
+.nav button:hover .nic-reminders{animation:nicTwirl .8s cubic-bezier(.45,0,.25,1)}
+@keyframes nicTwirl{from{transform:perspective(90px) rotate3d(1,-1,0,0deg)}to{transform:perspective(90px) rotate3d(1,-1,0,360deg)}}
 /* Settings (his request): screwdriver + spanner; on hover the spanner spins a full turn clockwise, the screwdriver a full turn anticlockwise */
 .nic .nx-sd,.nic .nx-sp{transform-box:view-box;transform-origin:12px 12px}
 .nav button:hover .nic .nx-sp{animation:nicCW .8s cubic-bezier(.45,0,.25,1)}
