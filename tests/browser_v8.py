@@ -111,6 +111,24 @@ async def main():
         for theme in ("light", "dark"):
             await E(f"setTheme('{theme}');openJob('{jid}')"); await pg.wait_for_timeout(150)
             await pg.screenshot(path=os.path.join(OUT, f"v8_job_{theme}.png"))
+        # ---- project list: one ⋯ per row, hover → floating menu with the 4 actions; wider Project column ----
+        await E("go('jobs');setView('grid')"); await pg.wait_for_timeout(150)
+        ok(await E("document.querySelectorAll('tbody tr .icobtn').length") == 0 and await E("document.querySelectorAll('tbody tr .kebab').length") == await E("filteredRows().length"), "one ⋯ button per row, no icon strip")
+        ok(await E("document.querySelector('thead th.pcol').getBoundingClientRect().width") >= 260, "Project column gets the freed width (≥ 260 px)")
+        await pg.locator("tbody tr").nth(1).locator(".kebab").hover(); await pg.wait_for_timeout(200)
+        items = await E("[...document.querySelectorAll('#rowmenu.show button')].map(b=>b.textContent.trim())")
+        ok(items == ["▸Open project", "📁Open file", "✏️Edit", "🗑Delete"], f"hover shows the floating menu ({items})")
+        ok(await E("(()=>{const m=document.getElementById('rowmenu').getBoundingClientRect();return m.right<=innerWidth&&m.bottom<=innerHeight})()"), "menu stays inside the window")
+        await pg.locator("#rowmenu button", has_text="Edit").click(); await pg.wait_for_timeout(100)
+        ok(await E("document.getElementById('scrim').classList.contains('show')") and await E("!!editingId"), "Edit opens the project form")
+        await E("closeForm()")
+        await pg.locator("tbody tr").nth(0).locator(".kebab").click(); await pg.wait_for_timeout(150)
+        await pg.locator("#rowmenu button", has_text="Open project").click(); await pg.wait_for_timeout(100)
+        ok(await E("!!detailJob"), "click works too: Open project")
+        await E("go('jobs')"); await pg.locator("tbody tr").nth(0).locator(".kebab").click(); await pg.wait_for_timeout(100)
+        await pg.keyboard.press("Escape")
+        ok(not await E("document.getElementById('rowmenu').classList.contains('show')"), "Escape closes the menu")
+
         # ---- his icon sheet + logo: SVG nav icons, gear app icon, hover / press animation ----
         await E("go('dashboard')"); await pg.wait_for_timeout(100)
         ok(await E("document.querySelectorAll('.nav button svg.nic').length") == 8 and await E("![...document.querySelectorAll('.nav button .ic')].some(e=>/\\p{Extended_Pictographic}/u.test(e.textContent))"), "8 SVG nav icons, no emoji left in the sidebar")

@@ -77,7 +77,12 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .nic .nx-cap{transform-origin:20% 100%;transition:transform .25s ease}.nav button:hover .nic .nx-cap{transform:rotate(-14deg)}
 .nav button:hover .nic .nx-pin{animation:nicPin .5s ease}
 @keyframes nicPin{0%,100%{transform:translate(0,0)}45%{transform:translate(-1.6px,1.6px)}70%{transform:translate(.4px,-.4px)}}
-.nic .nx-wr{transition:transform .3s cubic-bezier(.3,1.5,.5,1)}.nav button:hover .nic .nx-wr{transform:rotate(-22deg)}
+/* Settings (his request): screwdriver + spanner; on hover the spanner spins a full turn clockwise, the screwdriver a full turn anticlockwise */
+.nic .nx-sd,.nic .nx-sp{transform-box:view-box;transform-origin:12px 12px}
+.nav button:hover .nic .nx-sp{animation:nicCW .8s cubic-bezier(.45,0,.25,1)}
+.nav button:hover .nic .nx-sd{animation:nicCCW .8s cubic-bezier(.45,0,.25,1)}
+@keyframes nicCW{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes nicCCW{from{transform:rotate(0)}to{transform:rotate(-360deg)}}
 @media (prefers-reduced-motion:reduce){.nic,.nic *,.nav button,.brand .applogo .lg-gear{animation:none!important;transition:none!important}}
 .nav button:hover{background:var(--steel-700);color:#fff}
 .nav button.active{background:linear-gradient(180deg,var(--steel-700),var(--steel-800));color:#fff;box-shadow:inset 3px 0 0 var(--weld),inset 0 1px 0 rgba(255,255,255,.05)}
@@ -125,6 +130,19 @@ tbody tr:hover{background:var(--hover)}
 .joblink{font-weight:700;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;text-align:left;font-size:13px}
 .joblink:hover{color:var(--weld)}
 .rowact{display:flex;gap:6px;opacity:0;transition:opacity .12s}
+th.kcol,td.kcol{width:44px;padding-left:4px;padding-right:10px;text-align:right}
+th.pcol,td.pcol{min-width:260px;width:28%}
+td .pbar{min-width:90px}
+.kebab{width:30px;height:28px;border-radius:8px;border:1px solid transparent;background:none;color:var(--ink-soft);font-size:18px;line-height:1;letter-spacing:1px;cursor:pointer;transition:background .12s,border-color .12s,color .12s,transform .1s}
+tr:hover .kebab,.kebab.on,.kebab:focus-visible{border-color:var(--line);background:var(--card);color:var(--ink)}
+.kebab:active{transform:scale(.92)}
+.rowmenu{position:fixed;z-index:70;min-width:170px;padding:5px;display:flex;flex-direction:column;gap:1px;background:var(--card);border:1px solid var(--line);border-radius:11px;box-shadow:var(--raise-lg);opacity:0;transform:translateY(-4px) scale(.98);transform-origin:top right;pointer-events:none;transition:opacity .12s,transform .14s}
+.rowmenu.show{opacity:1;transform:none;pointer-events:auto}
+.rowmenu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:7px;padding:8px 10px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}
+.rowmenu button:hover,.rowmenu button:focus-visible{background:var(--hover)}
+.rowmenu button.del{color:var(--bad)}.rowmenu button.del:hover{background:var(--bad-bg)}
+.rowmenu .rmi{width:18px;text-align:center;font-size:13px}
+@media (prefers-reduced-motion:reduce){.rowmenu,.kebab{transition:none}}
 tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .icobtn{border:1px solid var(--line);background:linear-gradient(180deg,var(--card),var(--card-alt));border-radius:7px;width:28px;height:28px;font-size:13px;display:inline-flex;align-items:center;justify-content:center;padding:0;box-shadow:inset 0 1px 0 var(--emboss-hi)}
 .icobtn:hover{filter:brightness(1.04)}
@@ -3398,7 +3416,7 @@ const NI={
  qc:'<circle cx="12" cy="9.5" r="6.3"/><path d="M8.6 14.9 7.5 21.2l4.5-2.4 4.5 2.4-1.1-6.3"/><path class="ac nx-chk" d="M9.4 9.6l1.9 1.9 3.5-3.7"/>',
  suppliers:'<circle cx="12" cy="8.6" r="3.2"/><g class="ac nx-cap"><path d="M8.8 7.4a3.2 3.2 0 0 1 6.4 0z"/><path d="M15.2 7.4h2.4"/></g><path d="M4.8 20.5v-1.3A4.7 4.7 0 0 1 9.5 14.5h5a4.7 4.7 0 0 1 4.7 4.7v1.3"/><g class="ac"><rect x="9.6" y="15.7" width="4.8" height="4.8" rx=".7"/><path d="M12 15.7v1.6"/></g>',
  reminders:'<g class="nx-pin"><path class="ac" d="M14.3 3.4 20.6 9.7l-1.9.4-3.6 3.6.4 3.2-1.5 1.5-7-7 1.5-1.5 3.2.4 3.6-3.6z"/><path d="M8.8 15.2 3.6 20.4"/></g>',
- settings:'<path d="M5.2 3.6 3.6 5.2l2.7 2.7 1.7-.1 6.2 6.2"/><circle cx="6.4" cy="17.6" r="2.6"/><path d="M8.3 15.7l3.2-3.2"/><g class="ac nx-wr"><path d="M14.8 9.2a3.6 3.6 0 0 1 4.7-4.7l-2.3 2.3.4 1.6 1.6.4 2.3-2.3a3.6 3.6 0 0 1-4.7 4.7"/><path d="M13.6 10.4l6.4 6.4a1.5 1.5 0 0 1-2.1 2.1l-6.4-6.4"/></g>'
+ settings:'<g class="nx-sd"><g transform="rotate(-45 12 12)"><path d="M12 3.2v8.6"/><path d="M11.1 3.2h1.8"/><rect x="9.9" y="12.3" width="4.2" height="8.5" rx="1.7"/><path d="M12 14.6v3.9"/></g></g><g class="ac nx-sp"><g transform="rotate(45 12 12)"><path d="M10.9 7.9v8.3M13.1 7.9v8.3"/><path d="M10.9 7.9A3.4 3.4 0 0 1 9.4 2.6l1.2 1.3v1.6h2.8V3.9l1.2-1.3a3.4 3.4 0 0 1-1.5 5.3"/><circle cx="12" cy="18.5" r="2.4"/></g></g>'
 };
 const GEAR_D="M18.94 9.37L18.84 6.96L21.16 6.96L21.06 9.37L23.15 9.93L24.26 7.79L26.28 8.96L24.99 10.99L26.51 12.51L28.54 11.22L29.71 13.24L27.57 14.35L28.13 16.44L30.54 16.34L30.54 18.66L28.13 18.56L27.57 20.65L29.71 21.76L28.54 23.78L26.51 22.49L24.99 24.01L26.28 26.04L24.26 27.21L23.15 25.07L21.06 25.63L21.16 28.04L18.84 28.04L18.94 25.63L16.85 25.07L15.74 27.21L13.72 26.04L15.01 24.01L13.49 22.49L11.46 23.78L10.29 21.76L12.43 20.65L11.87 18.56L9.46 18.66L9.46 16.34L11.87 16.44L12.43 14.35L10.29 13.24L11.46 11.22L13.49 12.51L15.01 10.99L13.72 8.96L15.74 7.79L16.85 9.93Z";
 /* app icon from his logo sheet: steel-navy tile, white 12-tooth gear, orange hub, QUOTE · FAB · QC · DELIVER bars (the last one orange) */
@@ -3455,6 +3473,33 @@ function render(){
   if(currentView==="calendar")return renderCalendar(c);
 }
 function viewLabel(v){return{grid:"Grid",kanban:"Board",calendar:"Calendar"}[v];}
+/* ---- row actions menu (⋯): one floating panel, placed next to the button, kept inside the window ---- */
+let _rmTimer=null,_rmFor=null,_rmBtn=null,_rmClicked=false;
+function rowMenuItems(id){const isJobs=current==="jobs";const it=[];
+  if(isJobs){it.push(["Open project",`openJob('${id}')`,"▸"]);it.push(["Open file",`openJobFile('${id}')`,"📁"]);}
+  it.push(["Edit",`openForm('${id}')`,"✏️"]);it.push(["Delete",`del('${id}')`,"🗑","del"]);return it;}
+function rowMenuOpen(btn,toggle){
+  clearTimeout(_rmTimer);let m=document.getElementById("rowmenu");
+  // a click on a menu that hover already opened keeps it open (and pinned); a second click closes it
+  if(toggle&&m&&m.classList.contains("show")&&_rmFor===btn.dataset.id){if(_rmClicked){rowMenuClose();return;}_rmClicked=true;return;}
+  if(!(m&&m.classList.contains("show")&&_rmFor===btn.dataset.id))_rmClicked=!!toggle;
+  if(!m){m=document.createElement("div");m.id="rowmenu";m.className="rowmenu";m.setAttribute("role","menu");
+    m.onmouseenter=()=>clearTimeout(_rmTimer);m.onmouseleave=rowMenuLeave;document.body.appendChild(m);}
+  const id=btn.dataset.id;_rmFor=id;
+  m.innerHTML=rowMenuItems(id).map(([l,fn,ic,cls])=>`<button type="button" role="menuitem" class="${cls||""}" onclick="rowMenuClose();${fn}"><span class="rmi">${ic}</span>${l}</button>`).join("");
+  document.querySelectorAll(".kebab.on").forEach(b=>b.classList.remove("on"));btn.classList.add("on");
+  m.classList.add("show");_rmBtn=btn;rowMenuPlace();
+}
+/* keep the menu next to its ⋯ when the page or table scrolls; close it once the row scrolls out of view */
+function rowMenuPlace(){const m=document.getElementById("rowmenu"),btn=_rmBtn;if(!m||!btn||!m.classList.contains("show"))return;
+  if(!btn.isConnected){rowMenuClose();return;}
+  const r=btn.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight){rowMenuClose();return;}
+  const mw=m.offsetWidth,mh=m.offsetHeight;let left=r.right-mw,top=r.bottom+4;if(top+mh>innerHeight-8)top=r.top-mh-4;
+  m.style.left=Math.max(8,left)+"px";m.style.top=Math.max(8,top)+"px";}
+function rowMenuLeave(){if(_rmClicked)return;clearTimeout(_rmTimer);_rmTimer=setTimeout(rowMenuClose,220);}
+function rowMenuClose(){clearTimeout(_rmTimer);const m=document.getElementById("rowmenu");if(m)m.classList.remove("show");document.querySelectorAll(".kebab.on").forEach(b=>b.classList.remove("on"));_rmFor=null;_rmBtn=null;_rmClicked=false;}
+if(typeof document!=="undefined"&&document.addEventListener){document.addEventListener("pointerdown",e=>{if(e.target&&e.target.closest&&!e.target.closest(".rowmenu,.kebab"))rowMenuClose();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")rowMenuClose();});document.addEventListener("scroll",()=>rowMenuPlace(),true);}
 function setView(v){currentView=v;render();pageAnim();}
 
 /* ============ FILTER ============ */
@@ -3498,21 +3543,16 @@ function renderGrid(c){
   let body;
   if(!rows.length)body=(listQ||Object.values(gridFilters).some(Boolean)||jobFilter)?`<div class="empty"><div class="big">🔍</div>No ${sch.label.toLowerCase()} match. <button class="linkbtn" onclick="listQ='';gridFilters={};jobFilter=null;render()">Clear search &amp; filters</button></div>`:`<div class="empty"><div class="big">${sch.icon}</div>No ${sch.label.toLowerCase()} yet. Click <b>+ Add</b> to create one.</div>`;
   else{
-    const head=cols.map(f=>`<th onclick="setSort('${f.k}')">${f.l}${sortKey===f.k?`<span class="arr">${sortDir>0?'▲':'▼'}</span>`:''}</th>`).join("")+`<th></th>`;
     const isJobs=current==="jobs";
+    const head=cols.map(f=>`<th${isJobs&&f.k===sch.primary?' class="pcol"':''} onclick="setSort('${f.k}')">${f.l}${sortKey===f.k?`<span class="arr">${sortDir>0?'▲':'▼'}</span>`:''}</th>`).join("")+`<th class="kcol"></th>`;
     const trs=rows.map(r=>{
       const tds=cols.map(f=>{
-        if(isJobs&&f.k===sch.primary)return `<td><button class="joblink" onclick="openJob('${r.id}')">${jobNo(r)?`<span class="jno">${esc(jobNo(r))}</span> · `:""}${esc(r[f.k]||"(untitled)")}</button></td>`;
+        if(isJobs&&f.k===sch.primary)return `<td class="pcol"><button class="joblink" onclick="openJob('${r.id}')">${jobNo(r)?`<span class="jno">${esc(jobNo(r))}</span> · `:""}${esc(r[f.k]||"(untitled)")}</button></td>`;
         if(f.quick)return `<td>${quickCell(f,r,current)}</td>`;
         return `<td>${cellHTML(f,r)}</td>`;
       }).join("");
-      let acts="";
-      if(isJobs){
-        acts+=`<button class="icobtn open" title="Open file" onclick="openJobFile('${r.id}')">📁</button>`;
-        acts+=`<button class="icobtn open" title="Open project" onclick="openJob('${r.id}')">▸</button>`;
-      }
-      acts+=`<button class="icobtn" title="Edit" onclick="openForm('${r.id}')">✏️</button><button class="icobtn del" title="Delete" onclick="del('${r.id}')">🗑</button>`;
-      return `<tr>${tds}<td><div class="rowact">${acts}</div></td></tr>`;
+      // one ⋯ button per row; hover (or click) opens a floating menu with the row's actions (his request: the 4 icons took too much width)
+      return `<tr>${tds}<td class="kcol"><button type="button" class="kebab" title="Actions" aria-haspopup="menu" data-id="${r.id}" onmouseenter="rowMenuOpen(this)" onmouseleave="rowMenuLeave()" onclick="event.stopPropagation();rowMenuOpen(this,true)">⋯</button></td></tr>`;
     }).join("");
     body=`<div class="tablewrap"><table><thead><tr>${head}</tr></thead><tbody>${trs}</tbody></table></div>`;
   }
@@ -3743,7 +3783,9 @@ function ganttSVG(jobFilter,opts){
   while(cur<=end){
     const px=labelW+Math.round((cur-start)/86400000)*dayW;
     const isMonth=cur.getDate()===1,isMon=((cur.getDay()+6)%7)===0;
-    if(isMonth||cur.getTime()===start.getTime()){g+=`<text class="gaxis gmonth" x="${px+3}" y="14">${cur.toLocaleDateString(undefined,{month:'short',year:cur.getMonth()===0||cur.getTime()===start.getTime()?'numeric':undefined})}</text>`;}
+    // the chart's first (part-)month gets a label only if there's room before the next month's label ("Sep 2026" ran into "Oct")
+    const roomFirst=cur.getTime()===start.getTime()&&!isMonth?(new Date(cur.getFullYear(),cur.getMonth()+1,1)-cur)/86400000*dayW>=58:false;
+    if(isMonth||roomFirst){g+=`<text class="gaxis gmonth" x="${px+3}" y="14">${cur.toLocaleDateString(undefined,{month:'short',year:cur.getMonth()===0||!g.includes("gmonth")?'numeric':undefined})}</text>`;}
     if(isMonth)g+=`<line class="g-month" x1="${px}" y1="2" x2="${px}" y2="${svgH}" stroke-width="1.2"/>`;
     if(isMon){g+=`<line class="g-week" x1="${px}" y1="${headH-14}" x2="${px}" y2="${svgH}" stroke-width="1"/>`;if(px-lastLbl>=22){g+=`<text class="gaxis" x="${px+3}" y="${headH-18}">${cur.getDate()}</text>`;lastLbl=px;}}
     cur.setDate(cur.getDate()+1);
