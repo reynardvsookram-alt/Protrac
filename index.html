@@ -46,13 +46,45 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .side{width:230px;flex-shrink:0;background:var(--steel-900);color:#cfd8e3;display:flex;flex-direction:column;box-shadow:var(--raise-lg)}
 .brand{padding:20px 18px 16px;border-bottom:1px solid var(--steel-700)}
 .brand .mark{display:flex;align-items:center;gap:10px}
-.brand .weldbar{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--weld),var(--weld-dim));position:relative;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 8px rgba(255,122,24,.45)}
-.brand .weldbar::after{content:"";position:absolute;inset:7px;border:2px solid #fff;border-radius:2px;opacity:.9}
+.brand .applogo{width:34px;height:34px;flex-shrink:0;border-radius:9px;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 2px 8px rgba(0,0,0,.35);display:block}
+.brand .applogo svg{width:100%;height:100%;display:block}
+.brand .applogo .lg-gear{transform-box:fill-box;transform-origin:center;transition:transform .6s cubic-bezier(.3,1.4,.5,1)}
+.brand:hover .applogo .lg-gear{transform:rotate(30deg)}
 .brand h1{font-size:15px;letter-spacing:.5px;margin:0;color:#fff;font-weight:700}
 .brand .sub{font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--weld-dim);margin-top:2px}
 .nav{padding:10px 8px;flex:1;overflow-y:auto}
 .nav button{display:flex;align-items:center;gap:11px;width:100%;background:none;border:0;color:#aebacb;padding:10px 12px;border-radius:9px;font-size:13.5px;text-align:left;margin-bottom:2px}
-.nav button .ic{width:18px;text-align:center;font-size:15px;opacity:.85}
+.nav button .ic{width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+/* nav icons: line in the label colour, accent in safety orange; hover = a small lift + each icon's own move; press = a quick pop */
+.nic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;overflow:visible;transition:transform .18s cubic-bezier(.3,1.5,.5,1)}
+.nic .ac{stroke:#E8641B}.nic .acf{fill:#E8641B;stroke:none}.nic .cut{stroke:#fff;stroke-width:1.5}
+.nic g,.nic path,.nic circle,.nic rect{transform-box:fill-box;transform-origin:center}
+.nav button{transition:background .15s,color .15s,transform .1s}
+.nav button:hover .nic{transform:translateY(-1.5px)}
+.nav button:active{transform:scale(.97)}.nav button:active .nic{transform:scale(.86)}
+.nav button.pop .nic{animation:nicPop .42s cubic-bezier(.3,1.6,.5,1)}
+@keyframes nicPop{0%{transform:scale(.8)}55%{transform:scale(1.18)}100%{transform:scale(1)}}
+.nic .nx-trend{stroke-dasharray:24;stroke-dashoffset:0}
+.nav button:hover .nic .nx-trend{animation:nicDraw .55s ease-out}
+@keyframes nicDraw{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+.nic .nx-back{transition:transform .22s ease}.nav button:hover .nic .nx-back{transform:translate(1px,-1.5px)}
+.nav button:hover .nic .nx-cart{animation:nicRoll .5s ease}
+@keyframes nicRoll{0%,100%{transform:translateX(0)}40%{transform:translateX(2px)}70%{transform:translateX(-.6px)}}
+.nav button:hover .nic .nx-coin{animation:nicFlip .6s ease}
+@keyframes nicFlip{0%{transform:scaleX(1)}50%{transform:scaleX(-1)}100%{transform:scaleX(1)}}
+.nic .nx-chk{stroke-dasharray:9}.nav button:hover .nic .nx-chk{animation:nicChk .45s ease-out}
+@keyframes nicChk{from{stroke-dashoffset:9}to{stroke-dashoffset:0}}
+.nic .nx-cap{transform-origin:20% 100%;transition:transform .25s ease}.nav button:hover .nic .nx-cap{transform:rotate(-14deg)}
+/* Reminders (his request): the pin turns a full 360° about its own long axis (needle tip → head, the icon's diagonal through the centre) */
+.nav button:hover .nic-reminders{animation:nicTwirl .8s cubic-bezier(.45,0,.25,1)}
+@keyframes nicTwirl{from{transform:perspective(90px) rotate3d(1,-1,0,0deg)}to{transform:perspective(90px) rotate3d(1,-1,0,360deg)}}
+/* Settings (his request): screwdriver + spanner; on hover the spanner spins a full turn clockwise, the screwdriver a full turn anticlockwise */
+.nic .nx-sd,.nic .nx-sp{transform-box:view-box;transform-origin:12px 12px}
+.nav button:hover .nic .nx-sp{animation:nicCW .8s cubic-bezier(.45,0,.25,1)}
+.nav button:hover .nic .nx-sd{animation:nicCCW .8s cubic-bezier(.45,0,.25,1)}
+@keyframes nicCW{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes nicCCW{from{transform:rotate(0)}to{transform:rotate(-360deg)}}
+@media (prefers-reduced-motion:reduce){.nic,.nic *,.nav button,.brand .applogo .lg-gear{animation:none!important;transition:none!important}}
 .nav button:hover{background:var(--steel-700);color:#fff}
 .nav button.active{background:linear-gradient(180deg,var(--steel-700),var(--steel-800));color:#fff;box-shadow:inset 3px 0 0 var(--weld),inset 0 1px 0 rgba(255,255,255,.05)}
 .nav .cnt{margin-left:auto;font-size:11px;color:#8090a2;background:rgba(0,0,0,.3);padding:1px 7px;border-radius:10px;font-family:var(--mono)}
@@ -99,6 +131,22 @@ tbody tr:hover{background:var(--hover)}
 .joblink{font-weight:700;color:var(--ink);background:none;border:0;padding:0;cursor:pointer;text-align:left;font-size:13px}
 .joblink:hover{color:var(--weld)}
 .rowact{display:flex;gap:6px;opacity:0;transition:opacity .12s}
+th.kcol,td.kcol{width:44px;padding-left:4px;padding-right:10px;text-align:right}
+th.pcol,td.pcol{min-width:260px;width:28%}
+@media(max-width:1500px){th.pcol,td.pcol{min-width:220px}}
+td .pbar{min-width:90px}
+.kebab{width:30px;height:28px;border-radius:8px;border:1px solid transparent;background:none;color:var(--ink-soft);font-size:18px;line-height:1;letter-spacing:1px;cursor:pointer;transition:background .12s,border-color .12s,color .12s,transform .1s}
+tr:hover .kebab,.kebab.on,.kebab:focus-visible{border-color:var(--line);background:var(--card);color:var(--ink)}
+.kebab:active{transform:scale(.92)}
+.rowmenu{position:fixed;z-index:70;min-width:170px;padding:5px;display:flex;flex-direction:column;gap:1px;background:var(--card);border:1px solid var(--line);border-radius:11px;box-shadow:var(--raise-lg);opacity:0;transform:translateY(-4px) scale(.98);transform-origin:top right;pointer-events:none;transition:opacity .12s,transform .14s}
+.rowmenu.show{opacity:1;transform:none;pointer-events:auto}
+.rowmenu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:7px;padding:8px 10px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}
+.rowmenu button:hover,.rowmenu button:focus-visible{background:var(--hover)}
+.rowmenu button:focus-visible{outline:2px solid var(--weld);outline-offset:-2px}
+.kebab:focus-visible{outline:2px solid var(--weld);outline-offset:1px}
+.rowmenu button.del{color:var(--bad)}.rowmenu button.del:hover{background:var(--bad-bg)}
+.rowmenu .rmi{width:18px;text-align:center;font-size:13px}
+@media (prefers-reduced-motion:reduce){.rowmenu,.kebab{transition:none}}
 tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .icobtn{border:1px solid var(--line);background:linear-gradient(180deg,var(--card),var(--card-alt));border-radius:7px;width:28px;height:28px;font-size:13px;display:inline-flex;align-items:center;justify-content:center;padding:0;box-shadow:inset 0 1px 0 var(--emboss-hi)}
 .icobtn:hover{filter:brightness(1.04)}
@@ -574,6 +622,14 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .emailprev{background:#fff;color:#1d1d1f;border:1px solid var(--line);border-radius:10px;padding:16px 18px;font:13.5px/1.5 Arial,Helvetica,sans-serif;max-height:340px;overflow:auto}
 .emailprev table{border-collapse:collapse}
 .subjrow{display:flex;gap:8px;align-items:center}
+.rfqto{border:1px solid var(--line);border-radius:10px;background:var(--card-alt);padding:8px 12px}
+.rfqto-hd{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-soft);margin-bottom:4px}
+.rfqto-row{display:grid;grid-template-columns:minmax(120px,200px) minmax(0,1fr) auto;gap:12px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.rfqto-row:first-of-type{border-top:0}
+.rfqto-co{font-weight:700;font-size:13.5px}
+.rfqto-mail{font:600 14px var(--mono);color:var(--info);cursor:pointer;user-select:all;overflow-wrap:anywhere}
+.rfqto-mail:hover{text-decoration:underline}
+.rfqto-none{font-size:13px;color:var(--warn);font-weight:600}
 .subjrow input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--card);color:var(--ink);font:inherit}
 .mgrid{border-collapse:separate;border-spacing:0;width:100%}
 .mgrid th{position:sticky;top:0;background:var(--card-alt);z-index:1;font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:7px 6px;text-align:left;border-bottom:1px solid var(--line)}
@@ -673,8 +729,9 @@ th{font-weight:600}
 .side{transition:width .22s ease}
 .brand{display:flex;align-items:center;gap:8px;padding:18px 14px 14px 16px}
 .brand .mark{flex:1;min-width:0}
-.brand h1{font-size:17px;letter-spacing:.2px;font-weight:700;text-transform:none}
-.brand .sub{letter-spacing:.4px;text-transform:none;font-size:11px;color:#8fa0b3}
+.brand h1{font-size:17px;letter-spacing:1.4px;font-weight:700;text-transform:uppercase}
+.brand .sub{letter-spacing:0;text-transform:none;font-size:11px;color:#8fa0b3;white-space:nowrap}
+.brand .mark{gap:9px}.brand .bname{min-width:0}
 .sidetog{background:none;border:1px solid var(--steel-700);color:#aebacb;width:26px;height:26px;border-radius:7px;font-size:15px;line-height:1;cursor:pointer;flex-shrink:0;padding:0}
 .sidetog:hover{color:#fff;border-color:#8fa0b3}
 .side-foot{padding:12px 16px;font-size:11.5px;color:#8090a2}
@@ -683,7 +740,7 @@ th{font-weight:600}
 .app.collapsed .brand{flex-direction:column;padding:14px 8px}
 .app.collapsed .bname,.app.collapsed .nav .lbl,.app.collapsed .nav .cnt,.app.collapsed .side-foot .who{display:none}
 .app.collapsed .nav button{justify-content:center;padding:10px 0}
-.app.collapsed .nav .ic{margin:0;font-size:17px}
+.app.collapsed .nav .ic{margin:0}
 /* top bar tools */
 .tools{display:flex;gap:6px;align-items:center;margin-left:6px;padding-left:10px;border-left:1px solid var(--line)}
 .tool{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:6px 9px;font:inherit;font-size:12.5px;cursor:pointer}
@@ -868,9 +925,9 @@ body.kdragging,body.kdragging *{cursor:grabbing!important}
 .calev{display:flex;align-items:center;gap:5px;width:100%;min-width:0;border:0;text-align:left;font:600 10.5px var(--sans);padding:3px 6px;border-radius:6px;cursor:pointer;background:var(--info-bg);color:var(--info)}
 .calev .ct{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cdot{width:7px;height:7px;border-radius:50%;flex:0 0 7px;background:currentColor}
-.k-q{background:var(--warn-bg);color:var(--warn)} .k-dl{background:var(--info-bg);color:var(--info)} .k-fu{background:var(--hold-bg);color:var(--hold)} .k-od{background:var(--bad-bg);color:var(--bad)}
-.callegend .lg{background:none}.callegend .lg.k-q{color:var(--ink-soft)}.callegend .lg.k-dl,.callegend .lg.k-fu,.callegend .lg.k-od{color:var(--ink-soft)}
-.callegend .k-q .cdot{background:var(--warn)}.callegend .k-dl .cdot{background:var(--info)}.callegend .k-fu .cdot{background:var(--hold)}.callegend .k-od .cdot{background:var(--bad)}.callegend .lg-hol .cdot{background:var(--idle);border-radius:2px}
+.k-q{background:var(--warn-bg);color:var(--warn)} .k-dl{background:var(--info-bg);color:var(--info)} .k-fu{background:var(--hold-bg);color:var(--hold)} .k-dc{background:var(--ok-bg);color:var(--ok)} .k-od{background:var(--bad-bg);color:var(--bad)}
+.callegend .lg{background:none}.callegend .lg.k-q{color:var(--ink-soft)}.callegend .lg.k-dl,.callegend .lg.k-fu,.callegend .lg.k-dc,.callegend .lg.k-od{color:var(--ink-soft)}
+.callegend .k-q .cdot{background:var(--warn)}.callegend .k-dl .cdot{background:var(--info)}.callegend .k-fu .cdot{background:var(--hold)}.callegend .k-dc .cdot{background:var(--ok)}.callegend .k-od .cdot{background:var(--bad)}.callegend .lg-hol .cdot{background:var(--idle);border-radius:2px}
 .calev:hover{filter:brightness(.96)}
 .calagenda{display:none;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--raise)}
 .calagenda h4{margin:0 0 8px;font-size:13px}
@@ -1029,6 +1086,12 @@ svg.ic{width:18px;height:18px;flex:0 0 18px}
 .fjob{font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fmore{margin-top:8px}
 @media(max-width:1100px){.flist{grid-template-columns:1fr}}
+/* v8 flow: requirement ticks, delivery choice, materials badge */
+.reqrow{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.reqrow .optchks{flex:1 1 320px}.dvbtns{flex:0 0 auto;flex-wrap:nowrap}.dvbtns .segbtn{flex:0 0 auto;padding:8px 14px}
+.matbadge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;background:var(--info-bg);color:var(--info);white-space:nowrap}.matbadge.all{background:var(--ok-bg);color:var(--ok)}
+.kc-mat{margin:6px 0 2px}
+@media(max-width:760px){.reqrow{gap:8px}.reqrow .optchks{flex-basis:100%}.dvbtns{display:flex;flex:1 1 100%;gap:6px}.dvbtns .segbtn{flex:1;padding:7px 6px}label .lblnote{display:none}}.kc-mat .matbadge{font-size:10.5px;padding:2px 8px}
 /* phone order (≤760px): the two card grids dissolve into one column so each card can be placed */
 @media(max-width:760px){
   .dash3{display:flex;flex-direction:column;gap:12px}.dash3>*{margin:0!important}.dash3 .dg3{display:contents}
@@ -1041,8 +1104,8 @@ svg.ic{width:18px;height:18px;flex:0 0 18px}
 <body>
 <div class="app">
   <aside class="side">
-    <div class="brand"><div class="mark"><div class="weldbar"></div>
-      <div class="bname"><h1>Protrac</h1><div class="sub">FabShop Project tracker</div></div></div>
+    <div class="brand"><div class="mark"><span class="applogo" id="applogo"></span>
+      <div class="bname"><h1>PROTRAC</h1><div class="sub">FabShop Project tracker</div></div></div>
       <button class="sidetog" id="sidetog" title="Collapse menu" onclick="toggleSide()">‹</button></div>
     <nav class="nav" id="nav"></nav>
     <div class="side-foot"><span class="who" id="sidewho"></span>
@@ -1089,10 +1152,26 @@ const uid=()=>"r"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const todayISO=()=>ymd(new Date());
 const LINE_STATUS=["RFQ Sent","Quote Received","Will Not Supply","Ordered","Received"];
 /* ---- Project lifecycle (Protrac) ---- */
-const PH={RFQ:"RFQ Received",QUOTED:"Quoted – Awaiting PO",PO:"PO Received",PROC:"Procurement",PROD:"In Production",DONE:"Delivered",LOST:"Lost / Declined"};
-const PHASES=[PH.RFQ,PH.QUOTED,PH.PO,PH.PROC,PH.PROD,PH.DONE,PH.LOST];
-const PHASE_TOK={[PH.RFQ]:"warn",[PH.QUOTED]:"hold",[PH.PO]:"info",[PH.PROC]:"prog",[PH.PROD]:"prog",[PH.DONE]:"ok",[PH.LOST]:"idle"};
-const EXEC=[PH.PO,PH.PROC,PH.PROD], CLOSED=[PH.DONE,PH.LOST];
+/* v8 flow (agreed with the owner): no Procurement phase — materials are tracked alongside production.
+   "Documents & handover" comes after delivery / collection, only when the client asked for MPI, a load test or weld maps.
+   Phase names are stored on every project, so "Delivered" stays the stored name; it reads "Delivered" or "Collected" per project. */
+const PH={RFQ:"RFQ Received",QUOTED:"Quoted – Awaiting PO",PO:"PO Received",PROD:"In Production",DOCS:"Documents & handover",DONE:"Delivered",LOST:"Lost / Declined"};
+const PH_OLD_PROC="Procurement";
+const PH_OLD_DOCS="Documents & Handover";   // first spelling, renamed before release — migrateV8 updates saved projects   // removed in v8 — migrateV8 moves projects out of it
+const PHASES=[PH.RFQ,PH.QUOTED,PH.PO,PH.PROD,PH.DOCS,PH.DONE,PH.LOST];
+const PHASE_TOK={[PH.RFQ]:"warn",[PH.QUOTED]:"hold",[PH.PO]:"info",[PH.PROD]:"prog",[PH.DOCS]:"warn",[PH.DONE]:"ok",[PH.LOST]:"idle"};
+const EXEC=[PH.PO,PH.PROD], CLOSED=[PH.DONE,PH.LOST];
+/* client requirements (ticked per project) and who moves the finished units */
+const REQ_LABEL={reqMPI:"MPI on welds",reqLoad:"Load test (pad eyes)",reqWeldMap:"Weld maps"};
+function docsRequired(j){return !!(j&&(j.reqMPI||j.reqLoad||j.reqWeldMap));}
+function doneWord(j){return j&&j.delivery==="client"?"Collected":"Delivered";}
+function phaseName(j){return j.phase===PH.DONE?doneWord(j):j.phase;}
+/* the phase as a list / filter / board label: the closed phase is "Complete" (delivered or collected, documents handed over if any) */
+function phaseLabel(p){return p===PH.DONE?"Complete":p;}
+function docsDays(){const m=DB.meta||{},mx=+m.docsMax>0?+m.docsMax:4,t=m.docsTarget===""||m.docsTarget==null||isNaN(+m.docsTarget)||+m.docsTarget<0?2:+m.docsTarget;return {target:Math.min(t,mx),max:mx};}
+function setDocsDays(k,v){const n=Math.max(k==="docsMax"?1:0,Math.round(+v||0));DB.meta[k]=n;const d=docsDays();
+  if(k==="docsMax"&&+DB.meta.docsTarget>n)DB.meta.docsTarget=n;if(k==="docsTarget"&&n>d.max)DB.meta.docsMax=n;
+  save();render();toast("Documents: target "+docsDays().target+" · overdue after "+docsDays().max+" working days");}
 const PROD_STAGES=["Fabrication","Sandblast","Paint","QC"];
 const SOON_WD=5;
 
@@ -1118,6 +1197,10 @@ const SCHEMA={
       {k:"optFab",l:"Fabrication / welding",t:"checkbox"},
       {k:"optCoat",l:"Blast & coating",t:"checkbox"},
       {k:"optAssembly",l:"Assembly / fit-out",t:"checkbox"},
+      {k:"reqMPI",l:"MPI on welds",t:"checkbox"},
+      {k:"reqLoad",l:"Load test (pad eyes)",t:"checkbox"},
+      {k:"reqWeldMap",l:"Weld maps",t:"checkbox"},
+      {k:"delivery",l:"Delivery",t:"select",opts:["us","client"],noFilter:1},
       {k:"rfqDate",l:"RFQ received",t:"date"},
       {k:"rfqDueDate",l:"Client's deadline",t:"date"},
       {k:"quoteSentDate",l:"Quote submitted on",t:"date"},
@@ -1128,7 +1211,8 @@ const SCHEMA={
       {k:"leadMax",l:"Lead time — max (due)",t:"number"},
       {k:"leadUnit",l:"Lead time unit",t:"select",opts:["working days","weeks"],noFilter:1},
       {k:"dueOverride",l:"Fixed delivery date (overrides lead time)",t:"date"},
-      {k:"deliveredDate",l:"Delivered on",t:"date"},
+      {k:"deliveredDate",l:"Delivered / collected on",t:"date"},
+      {k:"docsSentDate",l:"Documents handed over on",t:"date"},
       {k:"fileLocation",l:"File location (folder or link)",t:"text",full:1},
       {k:"materialListLoc",l:"Material List Location (file or link)",t:"text",full:1},
       {k:"notes",l:"Notes",t:"textarea",full:1}
@@ -1173,6 +1257,7 @@ const SCHEMA={
       {k:"unitCost",l:"Unit price — manual (overrides price book)",t:"number"},
       {k:"heatNo",l:"Heat no. / MTR ref",t:"text"},
       {k:"mtr",l:"MTR on file",t:"checkbox"},
+      {k:"inStock",l:"In stock / in-house (off-cuts, yard stock — no supplier RFQ)",t:"checkbox"},
       {k:"notes",l:"Notes",t:"textarea",full:1}
     ]},
   suppliers:{ label:"Suppliers", icon:"🏭", primary:"company", views:["grid"],
@@ -1249,6 +1334,7 @@ function migrate(){
     }
   });
   (DB.materials||[]).forEach(m=>{ if(m.height!==undefined)delete m.height; if(m.width!==undefined)delete m.width; });
+  migrateV8();      // before migrateProtrac: it re-derives any project whose phase isn't in PHASES ("Procurement" no longer is)
   migrateProtrac();
   migrateV2();
   migrateV5();
@@ -1259,6 +1345,42 @@ function migrate(){
 /* v6 (phase-1 workflow clean-up). Idempotent. Nothing is removed from project records:
    the old Stage and manual % fields stay on each project but are no longer shown (progress now comes
    from the schedule, the current step from the next open schedule step). */
+/* v8: the flow he agreed — Procurement phase retired, Documents & handover after delivery, client requirements
+   (MPI / load test / weld maps), who delivers, in-stock material lines. Idempotent; nothing typed is deleted. */
+function migrateV8(){
+  if(!DB.meta)DB.meta={};const m=DB.meta;
+  if(typeof m.docsTarget!=="number")m.docsTarget=2;
+  if(typeof m.docsMax!=="number")m.docsMax=4;
+  (DB.jobs||[]).forEach(j=>{
+    const fixDocs=v=>v===PH_OLD_DOCS?PH.DOCS:v;
+    j.phase=fixDocs(j.phase);(j.phaseLog||[]).forEach(e=>{e.phase=fixDocs(e.phase);e.from=fixDocs(e.from);});(j.phaseRedo||[]).forEach(e=>{e.phase=fixDocs(e.phase);e.from=fixDocs(e.from);});
+    const touched=j.phase===PH_OLD_PROC||(j.phaseLog||[]).some(e=>e.phase===PH_OLD_PROC||e.from===PH_OLD_PROC);
+    if(j.phase===PH_OLD_PROC){
+      // shop already working on it → In Production; otherwise still waiting to start → back at PO Received
+      const q=j.qc||{},fab=(DB.tasks||[]).some(t=>t.jobRef===j.id&&t.stepKey==="fab"&&t.status==="Done"&&!t.inferred);
+      const started=!!(j.prodStartDate||fab||["weld","blast","paint"].some(k=>q[k]&&q[k].s&&!q[k].auto));
+      j.phase=started?PH.PROD:PH.PO;
+      if(started&&!j.prodStartDate)j.prodStartDate=j.procStartDate||j.poDate||todayISO();
+      (j.updates=Array.isArray(j.updates)?j.updates:[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"Phase → "+j.phase+" — the Procurement phase was retired; materials are tracked on the Materials tab"});
+    }
+    if(touched&&Array.isArray(j.phaseLog)){
+      const out=[];j.phaseLog.forEach(e=>{if(e.phase===PH_OLD_PROC)return;const c=Object.assign({},e);if(c.from===PH_OLD_PROC)c.from=out.length?out[out.length-1].phase:PH.PO;out.push(c);});
+      const last=out[out.length-1];if(!last||last.phase!==j.phase)out.push({phase:j.phase,from:last?last.phase:"",date:j.phase===PH.PROD?(j.prodStartDate||todayISO()):(j.poDate||todayISO()),ts:Date.now(),migrated:true});
+      j.phaseLog=out;
+    }
+    if(Array.isArray(j.phaseRedo))j.phaseRedo=j.phaseRedo.filter(e=>e.phase!==PH_OLD_PROC&&e.from!==PH_OLD_PROC);
+    if(j.delivery!=="us"&&j.delivery!=="client")j.delivery="us";
+    ["reqMPI","reqLoad","reqWeldMap"].forEach(k=>{if(typeof j[k]!=="boolean")j[k]=false;});
+  });
+  (DB.materials||[]).forEach(x=>{if(typeof x.inStock!=="boolean")x.inStock=false;});
+  if(Array.isArray(m.costLines)&&m.costLines.length&&!m.costLines.some(l=>l.key==="load"))m.costLines.push({key:"load",label:"Load test",markup:0});
+  // a template he edited (stored in meta) gets the new steps once, each after its anchor step
+  if(Array.isArray(m.wfSteps)&&m.wfSteps.length&&!m.wfV8){
+    WF_V8.forEach(([k,after])=>{if(m.wfSteps.some(s=>s.key===k))return;const def=WF_DEFAULT.find(s=>s.key===k);const i=m.wfSteps.findIndex(s=>s.key===after);
+      m.wfSteps.splice(i<0?m.wfSteps.length:i+1,0,JSON.parse(JSON.stringify(def)));});
+  }
+  m.wfV8=true;
+}
 /* v7: project value & costing. Idempotent. */
 function migrateV7(){
   const m=DB.meta;
@@ -1306,7 +1428,9 @@ function save(){ pbInvalidate(); try{syncAllSchedules();}catch(e){} try{localSto
 /* ============ SEED ============ */
 const DEMO_PRICES={"items":[["RHS-01","RHS / SHS","SHS 2\" x 2\" x 5mm (≈3/16\")","2x2x5mm 2x2x3/16 2x2x1/4","6 m","MS","Length","Supplier A: Supplier A stocks 5mm wall only. RFQ-030 asked for 1/4\" wall and got this price — expect 5mm to be supplied.  |  Supplier B: quoted 2x2x1/4 @ $450 — wall thickness not confirmed in writing; check it's truly 1/4\" vs Supplier A 5mm. 1 Jun (RFQ-006) Supplier B wrote $215 for 2x2x1/4, then $450 on 6 Aug & 14 Sep — ⚠ confirm current price and wall.","square hollow tube box"],["RHS-02","RHS / SHS","RHS 4\" x 2\" x 5mm (≈3/16\")","4x2x5mm 2x4x5mm 4x2x1/4 2x4x1/4","6 m","MS","Length","Supplier A: 5mm wall. Offered against 4x2x1/4 and 3x2x1/4 requests. RFQ-008 first showed $980 — corrected by their rep to $1,400 on 8 Jul.","rectangular hollow tube box"],["RHS-03","RHS / SHS","RHS 8\" x 4\" x 1/4\"","8x4x1/4 4x8x1/4","Not stated","MS","Length","Supplier A: First quoted $1,795 in error (that is the 1/4\" plate price); corrected to $3,600. Confirm stock length.","rectangular hollow tube forklift pocket"],["RHS-04","RHS / SHS","SHS 4\" x 4\" x 1/4\"","4x4x1/4","Not stated (assume 20')","MS","Length","Supplier A: Confirm stock length.  |  Supplier B: 4x4x1/4 offered GALVANISED (zinc) only @ $1,600 — not a like-for-like with Supplier A black steel. Black 1/4 not stocked (offered 4x4x1/8 instead).","square hollow tube"],["RHS-05","RHS / SHS","SHS 3\" x 3\" x 1/4\"","3x3x1/4","Not stated","MS","Length","Supplier A: ⚠ VERIFY: priced higher than 4x4x1/4 ($1,950). Likely typo.","square hollow tube"],["RHS-06","RHS / SHS","SHS 6\" x 6\" x 1/4\"","6x6x1/4","20'","ASTM A36 (as requested)","Length","⚠ Supplier B: handwritten $1,800 vs Supplier A $3,800 — confirm with Supplier B (possible misread / wrong wall).","square hollow tube"],["RHS-07","RHS / SHS","SHS 6\" x 6\" x 3/8\"","6x6x3/8","-","-","Length","Supplier A: Not stocked. Import + lead time requested 7 Aug — no reply on file.","square hollow tube"],["RHS-08","RHS / SHS","RHS 6\" x 4\" x 3/8\"","6x4x3/8","Not stated","MS","Length","","rectangular hollow tube"],["RHS-09","RHS / SHS","RHS 6\" x 4\" x 1/4\"","6x4x1/4","-","-","Length","Supplier A: Left unpriced on RFQ-030 reply.  |  Supplier B: offered as alternative to 4x2x1/4 / 8x4x1/4.","rectangular hollow tube"],["RHS-10","RHS / SHS","RHS 12\" x 4\" x 3/8\"","12x4x3/8","-","-","Length","Supplier A: Not stocked. Import + lead time requested 7 Aug — no reply on file.","rectangular hollow tube"],["RHS-11","RHS / SHS","RHS 3\" x 2\" x 1/4\"","3x2x1/4","-","-","Length","Supplier A: Not stocked — Supplier A offered 4x2x5mm RHS (RHS-02) instead.","rectangular hollow tube"],["RHS-12","RHS / SHS","SHS 8\" x 8\" x 1/4\"","8x8x1/4","Not stated","Not stated","Length","Supplier B: offered as alternative when 8x4x1/4 was not stocked.","square hollow tube"],["RHS-13","RHS / SHS","SHS 4\" x 4\" x 1/8\"","4x4x1/8","Not stated","Not stated","Length","","square hollow tube"],["RHS-14","RHS / SHS","SHS 4\" x 4\" x 3/8\"","4x4x3/8 hss","Not stated","Not stated","Length","Supplier B: also offered @ $2,500 as the 3/8\" alternative for a 4x4x1/4 forklift pocket (26 May).","square hollow tube hss"],["RHS-16","RHS / SHS","RHS 8\" x 4\" x 3/8\" HSS","8x4x3/8 hss","-","A500 Gr C (requested)","Length","","rectangular hollow tube hss skid"],["RHS-17","RHS / SHS","SHS 8\" x 8\" x 1/2\"","8x8x1/2 hss","Not stated","Not stated","Length","Supplier B: offered when 8x4x3/8 and 10x6x3/8 HSS were not stocked. Heavier/larger — check it suits the design.","square hollow tube hss"],["RHS-18","RHS / SHS","RHS 10\" x 6\" x 3/8\" HSS","10x6x3/8 hss","-","A500 Gr C (requested)","Length","","rectangular hollow tube hss skid"],["RHS-19","RHS / SHS","RHS 6\" x 3\"","6x3 rhs","-","-","Length","","rectangular hollow tube"],["FB-01","Flat Bar","Flat 1\" x 1/4\"","1x1/4","Not stated (assume 20')","MS","Length","Supplier B: $60 (1 Jun).","flats flat bar"],["FB-02","Flat Bar","Flat 2\" x 1/4\"","2x1/4","20'","MS","Length","","flats flat bar"],["FB-03","Flat Bar","Flat 3\" x 1/4\"","3x1/4","20'","MS","Length","","flats flat bar"],["FB-04","Flat Bar","Flat 3\" x 3/8\"","3x3/8","Not stated (assume 20')","MS / A36","Length","","flats flat bar"],["FB-05","Flat Bar","Flat 3\" x 1/2\"","3x1/2","Not stated (assume 20')","MS / A36","Length","","flats flat bar"],["FB-06","Flat Bar","Flat 4\" x 1/4\"","4x1/4","20'","MS","Length","Supplier A: ⚠ 6 Aug: $365 on RFQ-013 but $545 on RFQ-030. PO SESL26-260 placed at $365.","flats flat bar"],["FB-07","Flat Bar","Flat 4\" x 1\"","4x1","20'","MS","Length","","flats flat bar"],["FB-08","Flat Bar","Flat 4\" x 1/8\" or 3/16\"","4x1/8 4x3/16","-","-","Length","Supplier A: Not stocked — 4\" x 1/4\" (FB-06) offered @ $365.","flats flat bar"],["FB-09","Flat Bar","Flat 2\" x 3/8\"","2x3/8","Not stated","A36","Length","","flats flat bar"],["PL-01","Plate","Plate 1/4\" thk","1/4 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-02","Plate","Plate 3/8\" thk","3/8 plate","4' x 8'","A36","Sheet","Supplier B: RFQ-007 asked A572 Gr50 — Supplier B wrote 'A36' against it.","plate sheet 4x8"],["PL-03","Plate","Plate 1/2\" thk","1/2 plate","4' x 8'","A36","Sheet","Supplier B: RFQ SHC-002 asked A572 Gr50 1/2\" — Supplier B wrote '4x8 @ $2,600' (same as A36 price); confirm grade.","plate sheet 4x8"],["PL-04","Plate","Plate 5/8\" thk","5/8 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-05","Plate","Plate 3/4\" thk","3/4 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-06","Plate","Plate 1\" thk","1 plate 1in","4' x 8'","A36","Sheet","","plate sheet 4x8"],["PL-07","Plate","Plate 1/4\" thk — large sheet","1/4 plate 8x20","8' x 20'","A36 — Supplier A note: \"BQ only\"","Sheet","Supplier A: their rep wrote \"BQ only\" — confirm grade/quality before using on structural or certified work.  |  Supplier B: also wrote 'BQ' @ $12,400.","plate sheet 8x20 bq"],["PL-08","Plate","Plate 1\" thk — Gr 50","1 plate gr50","Not stated","Gr 50","Sheet","Supplier A: Sheet size not stated — confirm before ordering.  |  Supplier B: wrote '4x8' @ $7,500 (same as their 1\" A36) — confirm Gr 50 on MTR.","plate sheet grade 50 a572"],["PL-09","Plate","Plate 3/16\" thk","3/16 plate","4' x 8'","A36","Sheet","","plate sheet 4x8"],["SH-01","Sheet","Sheet 1/8\" thk","1/8 sheet","4' x 8'","A36","Sheet","","sheet plate 4x8 checker"],["SH-02","Sheet","Galvanised sheet 14 ga","14ga galv","4' x 8'","A653 G90","Sheet","Supplier A: Not stocked.","sheet galvanized galvanised"],["SH-03","Sheet","Expanded metal 25mm diamond 3/16\"","expanded metal 3/16","-","A36","Sheet","","expanded metal mesh"],["SH-04","Sheet","Diamond (checker) plate 3/16\"","3/16 diamond checker","4' x 8'","Not stated","Sheet","Supplier B: 4x8 @ $1,125.","sheet plate diamond checker floor deck"],["SH-05","Sheet","Corrugated sheet 18 ga","18ga corrugated","-","-","Sheet","","sheet corrugated roofing"],["AN-01","Angle","Angle 1\" x 1\" x 1/8\"","1x1x1/8","Not stated (assume 20')","MS","Length","","angle iron"],["AN-02","Angle","Angle 1-1/2\" x 1-1/2\" x 3/16\"","1.5x1.5x3/16 1-1/2x1-1/2x3/16","20'","MS","Length","","angle iron"],["AN-03","Angle","Angle 2\" x 2\" x 3/16\"","2x2x3/16","Not stated (assume 20')","MS / A36","Length","","angle iron"],["AN-04","Angle","Angle 2\" x 2\" x 1/4\"","2x2x1/4","Not stated (assume 20')","MS","Length","","angle iron"],["AN-05","Angle","Angle 3\" x 3\" x 1/4\"","3x3x1/4","20'","A36","Length","","angle iron"],["CH-01","Channel","Channel 4\" x 2\" x 7.25 lb/ft (C4x7.25)","4x2 2x4 c4x7.25 4x2x3/16","20'","MS / A36","Length","Supplier A: Quoted as \"2x4x7.25# x 20'\" against a 2x4x3/16 request.  |  Supplier B: 2x4x3/16 channel @ $600 — section/weight not confirmed.","channel c-channel"],["CH-02","Channel","Channel 3\" x 2\" x 1/4\" (as requested)","3x2x1/4 c3","Not stated","MS","Length","Supplier A: Section weight not confirmed by Supplier A — verify.","channel c-channel"],["CH-03","Channel","Channel 6\" x 2\" x 12 lb/ft","6x2x12 6x3x1/4 upn160 c6","20'","MS","Length","Supplier A: Offered for UPN160 request (13 Aug) and for 6x3x1/4 request (17 Sep) at same price. Confirm actual flange width.","channel c-channel upn"],["CH-04","Channel","Channel 6\" x 10 lb/ft (written \"6x3 x 10#\") x 20'","6x3 c6x10 3x6","20'","Not stated","Length","⚠ Supplier B: handwriting unclear ('6x3 +10# x 20' 1000.00', with an over-written figure) — confirm section and price.","channel c-channel"],["CH-05","Channel","Channel 2\" x 6\" (as requested)","2x6 channel","-","-","Length","","channel c-channel"],["CH-06","Channel","Channel 10\" x 2-3/4\" x 21 lb/ft (≈C10x20)","10x2-3/4x21 c10","20'","Not stated","Length","Supplier B: offered for 4\"x10\" forklift-pocket channel request. Confirm exact section.","channel c-channel forklift"],["CH-07","Channel","Channel 8\" x 17 lb/ft (written \"8x3 x 17#\")","8x3x17 c8","20'","Not stated","Length","⚠ Supplier B: handwriting reads '8x3+17# x 20'' — confirm section (C8x18.75 is the nearest standard).","channel c-channel forklift"],["BM-01","Beam","Wide flange W6 x 20","w6x20 6x20","20'","A36","Length","Supplier B: RFQ-007 asked A572 Gr50 at $1,940 — grade not confirmed.","beam wide flange w-beam i-beam"],["BM-02","Beam","Beam 4\" x 4\" x 13 lb/ft","4x4x13 w4x13","-","-","Length","Supplier A: Not stocked.","beam wide flange w-beam"],["BM-03","Beam","Beam 8\" x 6\" x 24 lb/ft (likely W8x24)","8x6x24 w8x24","20'","Not stated","Length","Supplier A: Offered as substitute for 6x6x24lb beam. Confirm exact section before design use.","beam wide flange w-beam"],["BM-04","Beam","Beam 6\" x 6\" x 24/25 lb/ft","6x6x24 w6x25","-","-","Length","Supplier A: Not stocked in 24/25 lb. Offered 8x6x24# (BM-03) on 4 Aug and 6x6x20# x 30' (BM-05) on 16 Sep.  |  ⚠ Supplier B: 6x6x24lb @ $1,940 — identical to their W6x20 price; likely W6x20 supplied. Confirm section.","beam wide flange w-beam"],["BM-05","Beam","Beam 6\" x 6\" x 20 lb/ft (W6x20) — 30' length","6x6x20 w6x20 30ft 30'","30'","A36 (as requested)","Length","Supplier A: ⚠ Offered against a 6x6x25lb request — 20 lb/ft is LIGHTER. Check section properties against design before accepting. Same section as BM-01 (20' @ $2,000 = $100/ft); this 30' length works out to $95/ft.","beam wide flange w-beam i-beam"],["BM-06","Beam","Beam 6\" x 6\" x 25 lb/ft (W6x25) — 30' length","6x6x25 w6x25 30ft","30'","A36 (as requested)","Length","Supplier B: 30' length = $118.75/ft.","beam wide flange w-beam i-beam"],["PP-01","Pipe","Pipe 1-1/2\" Sch 40 ERW","1-1/2 sch40 1.5 sch 40","20'","Not stated (ERW)","Length","Supplier A: $440 once (RFQ-013, 6 Aug); $470 on every other quote and PO.  |  Supplier B: $280 for '1-1/2\" steel pipe 20'' — schedule not stated; confirm Sch 40. RFQ-005 states 6 m stock length.","pipe tube erw"],["PP-02","Pipe","Pipe 2\" Sch 40 ERW","2 sch40","Not stated","Not stated (ERW)","Length","Supplier A: $510 on 6 Aug, $570 on 13 Aug.","pipe tube erw"],["PP-03","Pipe","Pipe 4\" Sch 40 ERW","4 sch40","19'","ASTM A53 Gr B","Length","","pipe tube erw a53"],["PP-04","Pipe","Pipe 6\" Sch 40 ERW","6 sch40","20'","ASTM A53 Gr B","Length","","pipe tube erw a53"],["PP-05","Pipe","Pipe 1\" Sch 80","1 sch80","-","-","Length","Supplier A: Not stocked.","pipe heavy wall"],["PP-06","Pipe","Pipe 4\" Sch 80","4 sch80","-","-","Length","Supplier A: Not stocked.","pipe heavy wall"],["PP-07","Pipe","Pipe 8\" Sch 80","8 sch80","-","-","Length","Supplier A: Not stocked.","pipe heavy wall"],["PP-08","Pipe","Pipe 3\" Sch 40","3 sch40","-","CS","Length","","pipe"],["PP-09","Pipe","Pipe 20\" NPS STD wall (0.375\")","20 std pipe","-","ASTM A53 Gr B","Each","","pipe large bore"],["PP-10","Pipe","Pipe 3/4\" Sch 40","3/4 sch40","Not stated","Not stated","Length","⚠ Supplier B: $375 is more than their 2\" Sch 40 ($330) — confirm.","pipe"],["FT-01","Pipe Fittings","Elbow 4\" 90° Sch 40","4 elbow 90","-","CS","Each","Supplier A: Material confirmed as CS 6 Aug; formal quote requested 10 Aug — no price on file.","fitting elbow"],["FT-02","Pipe Fittings","Elbow 3\" 90° Sch 40","3 elbow 90","-","CS","Each","Supplier A: As FT-01 — no price on file.","fitting elbow"],["FT-03","Pipe Fittings","Slip-on flange 4\" Class 150","4 flange so 150","-","-","Each","Supplier A: Not stocked.","flange slip on"],["FT-04","Pipe Fittings","Elbow 1-1/2\" 90° Short Radius","1-1/2 elbow sr","-","-","Each","Supplier A: Not stocked.","fitting elbow"],["FT-05","Pipe Fittings","Elbow 1-1/2\" 90° Long Radius","1-1/2 elbow lr","-","-","Each","Supplier A: Not stocked.","fitting elbow"],["FT-06","Pipe Fittings","Nipple 1\" Sch 80 x 6\" long","1 nipple sch80","-","-","Each","Supplier A: Not stocked.","fitting nipple"],["FT-07","Pipe Fittings","Elbow 3\" 45° Sch 40","3 elbow 45","-","CS","Each","","fitting elbow"],["FT-08","Pipe Fittings","Flange 5\" Class 150 RF (B16.5)","5 flange rf 150","-","CS","Each","","flange raised face"],["FT-09","Pipe Fittings","Pneumatic valve 3\" PTFE/Viton (HCl service)","pneumatic valve","-","-","Each","","valve"],["FT-10","Pipe Fittings","Elbow 2\" 90° Short Radius","2 elbow sr","-","-","Each","","fitting elbow"],["FT-11","Pipe Fittings","Elbow 2\" 90° Long Radius","2 elbow lr","-","-","Each","","fitting elbow"],["RB-01","Round Bar","Round bar 1/4\" MS","1/4 rod","Not stated","MS","Length","","rod smooth bar round"],["RB-02","Round Bar","Round bar 3/8\" MS","3/8 rod","Not stated","MS","Length","","rod smooth bar round"],["RB-03","Round Bar","Round bar 3/8\" HT","3/8 rod ht","Not stated","HT (high tensile)","Length","","rod round bar rebar ht"],["RB-04","Round Bar","Round bar 5/8\" MS","5/8 rod","Not stated","MS","Length","","rod smooth bar round"],["RB-05","Round Bar","Round bar 3/4\" MS","3/4 rod","Not stated","MS","Length","Supplier A: ⚠ 13 Aug: MS $114 / HT $96. Later quotes + PO show \"3/4 MS\" at $96 — confirm MS vs HT on delivery/MTR.","rod smooth bar round"],["RB-06","Round Bar","Round bar 3/4\" HT","3/4 rod ht","Not stated","HT (high tensile)","Length","","rod round bar ht"],["RB-07","Round Bar","Round bar 1\" MS","1 rod 1in","Not stated","MS (quoted)","Length","Supplier A: A572 Gr.50 was requested; Supplier A quoted \"MS rods\". Check grade on MTR.","rod round bar"],["RB-08","Round Bar","Round bar 1-1/8\" MS","1-1/8 rod","Not stated","MS","Length","Supplier A: ⚠ VERIFY: looks high vs 1\" ($210) and 1-1/2\" ($1,295).","rod round bar"],["RB-09","Round Bar","Round bar 1-1/2\"","1-1/2 rod 1.5","Not stated","MS / A36","Length","","rod round bar"],["RB-10","Round Bar","Round bar 2\" A36","2 rod","-","A36","Length","","rod round bar"],["RB-11","Round Bar","Round bar 3/4\" SS316","3/4 ss316 rod","-","SS316","Length","","rod round bar stainless"],["GR-01","Grating","Galvanised grating 1\" thk, 3' x 6'","1 grating 3x6","3' x 6'","Galvanised","Sheet","","grating galvanized"],["GR-02","Grating","Grating 1\" thk, 3' x 6 m (as requested)","1 grating 3ft x 6m","3' x 6 m (as requested)","Not stated","Length","Supplier A: Possibly same panel as GR-01 (6' vs 6 m typo?) — verify size.","grating"],["FS-01","Fasteners","A325 bolt 5/8\" x 2-1/2\" c/w nut & washer","5/8 x 2-1/2 a325 bolt nut washer","-","ASTM A325","Set","Supplier A: their rep wrote \"5/8x2-1/2 A325 B/N/W\" — $10.50 appears to be per bolt/nut/washer set. Confirm.","bolt nut washer"],["FS-02","Fasteners","A325 bolt / all-thread 5/8\" x 2\"","5/8 x 2 a325","-","ASTM A325","Each","Supplier A: Requested 7 Aug (RFQ-013 Sect. 4) — no reply on file.","bolt all thread"],["FS-03","Fasteners","U-bolt 1/2\" x 6\" c/w nut & washer","u-bolt 6 1/2","-","-","Each","Supplier A: Not stocked.","u bolt"],["FS-04","Fasteners","U-bolt 1/2\" x 4\" c/w nut & washer","u-bolt 4 1/2","-","-","Each","Supplier A: Not stocked.","u bolt"],["FS-05","Fasteners","Nyloc nut M8 SS316","m8 nyloc","-","SS316","Each","Supplier A: Not stocked.","nut stainless"],["FS-06","Fasteners","Plain washer M8 SS316","m8 washer","-","SS316","Each","Supplier A: Not stocked.","washer stainless"],["FS-07","Fasteners","Hex head bolt M8 x 35 SS316","m8x35 bolt","-","SS316","Each","Supplier A: No price given.","bolt stainless"],["FS-08","Fasteners","Plain washer M10 SS316","m10 washer","-","SS316","Each","Supplier A: Not stocked.","washer stainless"],["FS-09","Fasteners","Shoulder screw Ø10 (M8) x 50 SS316","m8 shoulder screw","-","SS316","Each","Supplier A: Not stocked.","screw stainless"],["FS-10","Fasteners","Hex bolt 7/8\" x 3-1/2\" (SS316 / HDG)","7/8 bolt","-","SS316 or HDG","Each","","bolt"],["FS-11","Fasteners","Hex bolt 3/4\"-10 UNC x 3\" (SS316 / HDG)","3/4 bolt","-","SS316 or HDG","Each","","bolt"],["FS-12","Fasteners","Heavy hex nut 7/8\" & 3/4\"","heavy hex nut","-","SS316 or HDG","Each","","nut"],["FS-13","Fasteners","Flat washer 7/8\" & 3/4\"","washer","-","SS316 or HDG","Each","","washer"],["FS-14","Fasteners","Countersunk screw M6 SS316","m6 csk screw","-","SS316","Each","","screw stainless"],["FS-15","Fasteners","R-clip + lanyard SS316","r-clip lanyard","-","SS316","Each","","clip"],["OT-01","Plastics / Other","UHMW-PE sheet 1/2\" UV stabilised","uhmw 1/2","-","UHMW-PE","Each","","plastic uhmw wear pad"],["OT-02","Plastics / Other","UHMW-PE sheet 1/4\" UV stabilised","uhmw 1/4","-","UHMW-PE","Each","","plastic uhmw wear pad"]],"quotes":[["RHS-16",1,"2026-05-26",null,"No stock",""],["RHS-18",1,"2026-05-26",null,"Substitute offered",""],["RHS-17",1,"2026-05-26",9500.0,"Substitute offered",""],["RHS-04",1,"2026-05-26",null,"Substitute offered",""],["RHS-14",1,"2026-05-26",2500.0,"Substitute offered","A500 Gr C requested — grade not confirmed."],["CH-04",1,"2026-06-01",1000.0,"Substitute offered","⚠ Handwriting unclear."],["AN-04",1,"2026-06-01",215.0,"Quoted",""],["CH-05",1,"2026-06-01",null,"No price given",""],["PL-01",1,"2026-06-01",1450.0,"Quoted",""],["PL-06",1,"2026-06-01",7500.0,"Quoted",""],["SH-04",1,"2026-06-01",1125.0,"Quoted",""],["SH-05",1,"2026-06-01",null,"No stock",""],["PP-01",1,"2026-06-01",280.0,"Quoted","6 m stock length."],["RHS-19",1,"2026-06-01",null,"No price given",""],["PL-03",1,"2026-06-01",2600.0,"Quoted",""],["PL-09",1,"2026-06-01",985.0,"Quoted",""],["SH-01",1,"2026-06-01",700.0,"Quoted",""],["RHS-01",1,"2026-06-01",215.0,"Quoted","⚠ Later quoted $450."],["FB-01",1,"2026-06-01",60.0,"Quoted",""],["CH-06",1,"2026-06-01",2350.0,"Substitute offered",""],["CH-07",1,"2026-06-01",1900.0,"Substitute offered",""],["RHS-14",1,"2026-06-02",2500.0,"Quoted",""],["PL-02",1,"2026-06-02",1950.0,"Quoted",""],["PP-08",1,"2026-06-02",null,"No stock",""],["FT-07",1,"2026-06-02",null,"No stock",""],["FT-02",1,"2026-06-02",null,"No stock",""],["FT-09",1,"2026-06-02",null,"No stock",""],["FT-08",1,"2026-06-02",null,"No stock",""],["RHS-05",1,"2026-06-02",800.0,"Quoted",""],["PL-03",1,"2026-06-10",2600.0,"Substitute offered","Full 4x8 sheet offered; grade not confirmed."],["PL-09",1,"2026-06-10",985.0,"Quoted",""],["RHS-05",1,"2026-06-10",800.0,"Quoted",""],["SH-03",1,"2026-06-10",null,"No stock",""],["PL-05",1,"2026-06-15",4000.0,"Quoted",""],["PL-09",1,"2026-06-15",985.0,"Quoted",""],["PP-09",1,"2026-06-15",null,"No stock",""],["FB-09",1,"2026-06-15",205.0,"Quoted",""],["RB-10",1,"2026-06-15",null,"No stock",""],["RB-11",1,"2026-06-15",null,"No stock",""],["OT-01",1,"2026-06-15",null,"No stock",""],["OT-02",1,"2026-06-15",null,"No stock",""],["FS-10",1,"2026-06-15",null,"No stock",""],["FS-11",1,"2026-06-15",null,"No stock",""],["FS-12",1,"2026-06-15",null,"No stock",""],["FS-13",1,"2026-06-15",null,"No stock",""],["FS-14",1,"2026-06-15",null,"No stock",""],["FS-15",1,"2026-06-15",null,"No stock",""],["BM-01",1,"2026-06-22",1940.0,"Quoted","Gr 50 requested — grade not confirmed."],["PL-02",1,"2026-06-22",1950.0,"Substitute offered","A36 offered instead of Gr 50."],["PL-05",1,"2026-06-22",4000.0,"Quoted","Grade not confirmed."],["RHS-02",1,"2026-07-03",null,"No stock",""],["RHS-03",1,"2026-07-03",null,"No stock",""],["RHS-11",1,"2026-07-03",null,"No stock",""],["RHS-12",1,"2026-07-03",5000.0,"Substitute offered",""],["RHS-09",1,"2026-07-03",2000.0,"Substitute offered",""],["PL-01",1,"2026-07-08",1450.0,"Quoted",""],["PL-03",1,"2026-07-08",2600.0,"Quoted",""],["PL-06",1,"2026-07-08",7500.0,"Quoted",""],["RHS-02",0,"2026-07-08",1400.0,"Substitute offered","Initial $980 superseded by clarification."],["RHS-11",0,"2026-07-08",null,"Substitute offered","Substitute = RHS-02."],["RHS-03",0,"2026-07-08",3600.0,"Quoted",""],["PL-01",0,"2026-07-08",1795.0,"Quoted",""],["PL-03",0,"2026-07-08",3195.0,"Quoted",""],["PL-06",0,"2026-07-08",6400.0,"Quoted",""],["RHS-03",0,"2026-07-15",3600.0,"Purchased","PO total $8,100.00 incl. VAT."],["BM-01",1,"2026-07-16",1940.0,"Quoted",""],["PL-03",1,"2026-07-16",2600.0,"Quoted",""],["AN-05",1,"2026-07-16",360.0,"Quoted",""],["FB-03",1,"2026-07-16",215.0,"Quoted",""],["FB-07",1,"2026-07-16",null,"No stock",""],["FB-03",0,"2026-07-16",295.0,"Quoted",""],["FB-07",0,"2026-07-16",2050.0,"Quoted",""],["BM-01",0,"2026-07-16",2000.0,"Quoted",""],["PL-03",0,"2026-07-16",3195.0,"Quoted",""],["AN-05",0,"2026-07-16",490.0,"Quoted",""],["PP-03",1,"2026-07-21",900.0,"Quoted","Length not stated."],["PP-04",1,"2026-07-21",2100.0,"Quoted","Length not stated."],["RB-07",1,"2026-07-21",null,"No stock",""],["PP-03",0,"2026-07-23",1895.0,"Quoted",""],["PP-04",0,"2026-07-23",3200.0,"Quoted",""],["RB-07",0,"2026-07-23",null,"No reply",""],["RHS-06",1,"2026-07-27",1800.0,"Quoted","⚠ Verify — less than half Supplier A price."],["PL-03",1,"2026-07-27",2600.0,"Quoted","Priced in Cat. 2 and Cat. 3."],["AN-05",1,"2026-07-27",360.0,"Quoted",""],["PL-05",1,"2026-07-27",4000.0,"Quoted",""],["PP-01",1,"2026-07-27",280.0,"Quoted","Schedule not stated."],["SH-01",1,"2026-07-27",700.0,"Quoted",""],["PL-01",1,"2026-07-27",1450.0,"Quoted",""],["BM-02",1,"2026-07-27",null,"No stock",""],["RHS-06",0,"2026-07-27",3800.0,"Quoted",""],["PL-03",0,"2026-07-27",3195.0,"Quoted",""],["AN-05",0,"2026-07-27",490.0,"Quoted",""],["PL-05",0,"2026-07-27",4700.0,"Quoted",""],["PP-01",0,"2026-07-27",470.0,"Quoted",""],["AN-01",1,"2026-07-28",null,"No stock",""],["AN-02",1,"2026-07-28",125.0,"Quoted",""],["SH-01",1,"2026-07-28",700.0,"Quoted",""],["SH-02",1,"2026-07-28",null,"No stock",""],["PL-01",1,"2026-07-28",1450.0,"Quoted",""],["SH-01",0,"2026-07-28",895.0,"Quoted",""],["PL-03",0,"2026-07-28",3195.0,"Quoted",""],["PL-01",0,"2026-07-28",1795.0,"Quoted",""],["BM-02",0,"2026-07-28",null,"No stock",""],["AN-01",0,"2026-07-28",100.0,"Quoted",""],["AN-02",0,"2026-07-28",200.0,"Quoted",""],["SH-01",0,"2026-07-28",895.0,"Quoted",""],["SH-02",0,"2026-07-28",null,"No stock",""],["PL-01",0,"2026-07-28",1795.0,"Quoted",""],["RHS-07",1,"2026-08-03",3500.0,"Quoted",""],["RHS-04",1,"2026-08-03",null,"Substitute offered","See RHS-13 (1/8 wall)."],["RHS-13",1,"2026-08-03",500.0,"Substitute offered",""],["RHS-08",1,"2026-08-03",null,"No stock",""],["PL-07",1,"2026-08-03",12400.0,"Quoted",""],["PL-08",1,"2026-08-03",7500.0,"Quoted",""],["RHS-10",1,"2026-08-03",null,"No stock",""],["BM-04",1,"2026-08-03",1940.0,"Quoted","⚠ Same price as their W6x20 — confirm section."],["AN-05",1,"2026-08-03",360.0,"Quoted",""],["RHS-07",0,"2026-08-04",null,"No stock",""],["RHS-04",0,"2026-08-04",1950.0,"Quoted",""],["RHS-08",0,"2026-08-04",4900.0,"Quoted",""],["PL-07",0,"2026-08-04",10500.0,"Quoted",""],["PL-08",0,"2026-08-04",9100.0,"Quoted",""],["RHS-10",0,"2026-08-04",null,"No stock",""],["BM-04",0,"2026-08-04",null,"Substitute offered",""],["BM-03",0,"2026-08-04",2328.0,"Substitute offered",""],["AN-05",0,"2026-08-04",490.0,"Quoted",""],["FB-06",1,"2026-08-06",308.0,"Quoted",""],["RHS-04",1,"2026-08-06",1600.0,"Substitute offered","Galvanised only."],["RHS-05",1,"2026-08-06",800.0,"Quoted",""],["RHS-01",1,"2026-08-06",450.0,"Quoted",""],["RHS-09",1,"2026-08-06",2000.0,"Quoted",""],["RHS-02",1,"2026-08-06",null,"No stock",""],["FT-01",1,"2026-08-06",null,"No stock",""],["FT-03",1,"2026-08-06",null,"No stock",""],["PP-03",1,"2026-08-06",900.0,"Quoted",""],["FT-02",1,"2026-08-06",null,"No stock",""],["RHS-06",0,"2026-08-06",3800.0,"Quoted",""],["PP-02",0,"2026-08-06",510.0,"Quoted",""],["PL-02",0,"2026-08-06",2390.0,"Quoted","Quoted in Sect. 1 and Sect. 3."],["GR-02",0,"2026-08-06",1095.0,"Quoted",""],["PP-01",0,"2026-08-06",440.0,"Quoted",""],["FB-06",0,"2026-08-06",365.0,"Quoted",""],["SH-01",0,"2026-08-06",895.0,"Quoted",""],["FS-01",0,"2026-08-06",10.5,"Quoted",""],["FB-06",0,"2026-08-06",545.0,"Quoted","Conflicts with $365 same day."],["RHS-04",0,"2026-08-06",1950.0,"Quoted",""],["RHS-05",0,"2026-08-06",2800.0,"Quoted",""],["RHS-01",0,"2026-08-06",980.0,"Quoted","Likely 5mm wall supplied."],["RHS-09",0,"2026-08-06",null,"No price given",""],["RHS-02",0,"2026-08-06",1400.0,"Quoted","Likely 5mm wall supplied."],["FT-01",0,"2026-08-06",null,"No price given",""],["FT-03",0,"2026-08-06",null,"No stock",""],["PP-03",0,"2026-08-06",null,"No price given",""],["FT-02",0,"2026-08-06",null,"No price given",""],["FS-02",0,"2026-08-07",null,"No reply",""],["PL-01",1,"2026-08-12",1450.0,"Quoted",""],["PL-02",1,"2026-08-12",1950.0,"Quoted",""],["PL-03",1,"2026-08-12",2600.0,"Quoted",""],["PL-04",1,"2026-08-12",3100.0,"Quoted",""],["PL-05",1,"2026-08-12",4000.0,"Quoted",""],["PL-06",1,"2026-08-12",7500.0,"Quoted",""],["PP-05",1,"2026-08-12",null,"No stock",""],["PP-02",1,"2026-08-12",330.0,"Quoted",""],["PP-06",1,"2026-08-12",null,"No stock",""],["PP-04",1,"2026-08-12",2100.0,"Quoted",""],["PP-07",1,"2026-08-12",null,"No stock",""],["CH-03",1,"2026-08-12",null,"No stock",""],["RB-01",1,"2026-08-12",null,"No stock",""],["RB-02",1,"2026-08-12",null,"No stock",""],["RB-05",1,"2026-08-12",null,"No stock",""],["RB-08",1,"2026-08-12",null,"No stock",""],["PL-01",0,"2026-08-13",1795.0,"Quoted","Grade A36 confirmed."],["PL-02",0,"2026-08-13",2390.0,"Quoted",""],["PL-03",0,"2026-08-13",3195.0,"Quoted",""],["PL-04",0,"2026-08-13",3600.0,"Quoted",""],["PL-05",0,"2026-08-13",4700.0,"Quoted",""],["PL-06",0,"2026-08-13",6400.0,"Quoted",""],["PP-05",0,"2026-08-13",null,"No stock",""],["PP-02",0,"2026-08-13",570.0,"Quoted",""],["PP-06",0,"2026-08-13",null,"No stock",""],["PP-04",0,"2026-08-13",3200.0,"Quoted",""],["PP-07",0,"2026-08-13",null,"No stock",""],["CH-03",0,"2026-08-13",1680.0,"Substitute offered",""],["RB-01",0,"2026-08-13",12.25,"Substitute offered",""],["RB-02",0,"2026-08-13",27.5,"Substitute offered",""],["RB-03",0,"2026-08-13",25.5,"Substitute offered",""],["RB-05",0,"2026-08-13",114.0,"Substitute offered",""],["RB-06",0,"2026-08-13",96.0,"Substitute offered",""],["RB-08",0,"2026-08-13",995.0,"Substitute offered",""],["PP-01",0,"2026-08-17",470.0,"Quoted",""],["FB-02",0,"2026-08-17",188.0,"Quoted",""],["PP-02",1,"2026-08-24",330.0,"Quoted",""],["FT-10",1,"2026-08-24",null,"No stock",""],["FT-11",1,"2026-08-24",null,"No stock",""],["FB-08",1,"2026-08-24",null,"Substitute offered",""],["FB-06",1,"2026-08-24",308.0,"Substitute offered",""],["PL-02",1,"2026-08-24",1950.0,"Quoted",""],["RB-02",1,"2026-08-24",null,"No stock",""],["PP-10",1,"2026-08-24",375.0,"Quoted","⚠ Verify vs 2\" @ $330."],["RB-05",1,"2026-08-24",110.0,"Quoted",""],["RHS-01",0,"2026-08-24",980.0,"Quoted",""],["PP-01",0,"2026-08-24",470.0,"Quoted",""],["FT-04",0,"2026-08-24",null,"No stock",""],["FT-05",0,"2026-08-24",null,"No stock",""],["FB-08",0,"2026-08-24",null,"Substitute offered",""],["FB-06",0,"2026-08-24",365.0,"Substitute offered",""],["PL-02",0,"2026-08-24",2390.0,"Quoted",""],["RB-02",0,"2026-08-24",27.5,"Quoted",""],["FT-06",0,"2026-08-24",null,"No stock",""],["RB-05",0,"2026-08-24",96.0,"Quoted","Price matches 3/4 HT from 13 Aug."],["FS-05",0,"2026-08-24",null,"No stock",""],["FS-06",0,"2026-08-24",null,"No stock",""],["FS-07",0,"2026-08-24",null,"No price given",""],["FS-08",0,"2026-08-24",null,"No stock",""],["FS-09",0,"2026-08-24",null,"No stock",""],["RHS-01",0,"2026-08-27",980.0,"Purchased","PO total $4,914.56 incl. VAT."],["PP-01",0,"2026-08-27",470.0,"Purchased",""],["FB-06",0,"2026-08-27",365.0,"Purchased",""],["RB-05",0,"2026-08-27",96.0,"Purchased",""],["RB-02",0,"2026-08-27",27.5,"Purchased",""],["AN-05",1,"2026-09-01",360.0,"Quoted",""],["RB-07",0,"2026-09-08",210.0,"Purchased","Collected 10 Sep, cut in 4 for transport."],["SH-01",1,"2026-09-11",700.0,"Quoted",""],["CH-01",1,"2026-09-11",600.0,"Quoted",""],["RB-09",1,"2026-09-11",null,"No stock",""],["RB-04",1,"2026-09-11",73.0,"Quoted",""],["AN-03",1,"2026-09-11",170.0,"Quoted",""],["FB-04",1,"2026-09-11",318.0,"Quoted",""],["FB-05",1,"2026-09-11",null,"No stock",""],["SH-01",0,"2026-09-11",895.0,"Quoted",""],["CH-01",0,"2026-09-11",700.0,"Substitute offered",""],["RB-09",0,"2026-09-11",1295.0,"Quoted",""],["RB-04",0,"2026-09-11",76.0,"Quoted",""],["AN-03",0,"2026-09-11",235.0,"Quoted",""],["FB-04",0,"2026-09-11",495.0,"Quoted",""],["FB-05",0,"2026-09-11",660.0,"Quoted",""],["RHS-03",1,"2026-09-14",null,"No stock",""],["RHS-01",1,"2026-09-14",450.0,"Quoted",""],["PL-01",1,"2026-09-14",1450.0,"Quoted",""],["RHS-09",1,"2026-09-14",2000.0,"Substitute offered",""],["RHS-12",1,"2026-09-14",5000.0,"Substitute offered",""],["RHS-03",0,"2026-09-14",3600.0,"Quoted",""],["RHS-01",0,"2026-09-14",980.0,"Substitute offered","1/4\" requested — 5mm offered again."],["PL-01",0,"2026-09-14",1795.0,"Quoted",""],["AN-05",1,"2026-09-16",360.0,"Quoted",""],["BM-06",1,"2026-09-16",3562.5,"Quoted",""],["AN-05",0,"2026-09-16",490.0,"Quoted",""],["BM-04",0,"2026-09-16",null,"Substitute offered",""],["BM-05",0,"2026-09-16",2850.0,"Substitute offered",""],["FS-03",0,"2026-09-17",null,"No stock",""],["FS-04",0,"2026-09-17",null,"No stock",""],["AN-04",0,"2026-09-17",285.0,"Quoted","Quoted in Cat. 1 and Cat. 2."],["CH-02",0,"2026-09-17",515.0,"Quoted",""],["CH-03",0,"2026-09-17",1680.0,"Quoted","Same price as 6x2x12# channel."],["GR-01",0,"2026-09-17",1195.0,"Quoted",""],["FB-02",0,"2026-09-17",188.0,"Quoted",""],["FB-01",0,"2026-09-17",110.0,"Quoted",""],["AN-05",0,"2026-09-17",490.0,"Quoted","Blank in Cat. 1, priced in Cat. 2."],["SH-01",0,"2026-09-17",895.0,"Quoted",""]]};
 /* ---- demo price-book revisions (his preview comments). DEMO_REV bumps re-apply them to saved DEMO data only ---- */
-const DEMO_REV=8;
+const DEMO_REV=10;
+// v8 flow: what each demo client asked for, and who moves the units (004's pad eyes show the full MPI → load test → MPI order)
+const DEMO_REQ={"004":{reqMPI:true,reqLoad:true,reqWeldMap:true,delivery:"client"},"005":{reqMPI:true,reqLoad:true,reqWeldMap:true},"006":{delivery:"client"},"007":{delivery:"client"}};
 const EST_NOTE="Drafted estimate for the demo — not a supplier quote";
 // TTD excl. VAT, [code, Supplier B, Supplier A, note]. Pipe per 20' length, scaled by weight from the real Sch 40 quotes; fittings at typical local stockist rates.
 const DEMO_EST=[["PP-05",300,480],["PP-06",1260,2650],["PP-07",4800,7300],["PP-08",620,1250],["PP-09",8700,13000],
@@ -1349,6 +1473,14 @@ function migrateDemo(){
     if(/abrasive|blast hose|masking/i.test(s.notes||""))s.notes="Degreaser, reflective tape, lifting & rigging. Delivery Tue/Thu only.";if(/Clemco/.test(s.brands||""))s.brands=(s.brands||"").replace(/,?\s*Clemco/,"");});
   (DB.jobs||[]).forEach(j=>(j.updates||[]).forEach(u=>{u.text=(u.text||"").replace("Abrasive & masking RFQ out.","Degreaser & reflective tape RFQ out.").replace("Coatings Distributor quoted abrasive.","Coatings Distributor quoted the degreaser.");}));
   demoValues();
+  if((m.demoRev||0)<9){   // v8 flow on a saved demo: MPI by project type, the DEMO_REQ requirements, docs handed over on the delivered demo project
+    (DB.jobs||[]).forEach(j=>{if(!/^0(0[1-9]|1[01])$/.test(j.jobId||""))return;
+      if(JOB_TYPES[j.jobType]&&j.jobId!=="002")j.reqMPI=!!JOB_TYPES[j.jobType].reqMPI;
+      if(j.jobId==="002"){j.reqMPI=true;if(j.phase===PH.DONE&&j.deliveredDate&&!j.docsSentDate)j.docsSentDate=addWorkingDays(j.deliveredDate,1);
+        j.qc=j.qc||{};if(!(j.qc.mpi&&j.qc.mpi.s)||j.qc.mpi.auto)j.qc.mpi={s:"Pass",date:(j.qc.weld&&j.qc.weld.date)||j.deliveredDate||todayISO(),by:"R. Sookram",note:""};}
+      Object.assign(j,DEMO_REQ[j.jobId]||{});});
+  }
+  if((m.demoRev||0)<10)(DB.jobs||[]).forEach(j=>{if(/^0(0[1-9]|1[01])$/.test(j.jobId||""))j.deliverySet=true;});   // demo projects had their delivery chosen
   m.demoRev=DEMO_REV;
 }
 /* invented demo costings and quotes (never real figures). Fills only projects that have none yet. */
@@ -1418,18 +1550,19 @@ function seed(){
     J(Object.assign({},T1,{jobName:"DNV pump skids × 2 — design & fabrication",jobId:"005",client:B,priority:"High",jobType:"Design & build",phase:PH.QUOTED,rfqDate:W(-24),rfqDueDate:W(-12),quoteSentDate:W(-13),followUpDate:W(-1),notes:"DNV 2.7-3 lifting skid design + fabrication for two pump units. Quote submitted to manager; client follow-up pending."})),
     J(Object.assign({},T3,{jobName:"Dual batch mixer — blast, prime & paint",jobId:"006",client:B,priority:"High",jobType:"Repair / blast & paint",phase:PH.PROD,rfqDate:W(-22),rfqDueDate:W(-16),quoteSentDate:W(-17),poDate:W(-9),poNumber:"PO 45008812",leadMin:10,leadMax:13,procStartDate:W(-9),prodStartDate:W(-6),
        notes:"External only, client colours; Asset ID, weights & reflective tape on RHS corners.\nMASK: hydraulic tank, SS junction boxes, gas cylinder/regulator, SS pipe runs, DNV data plate.\nSS tanks: light sweep blast only. Replace ~50 corroded 1/4\" x 2\" bolts.",qc:{weld:qc("N/A",-6,"No welding in scope"),blast:qc("Pass",-2)}})),
-    J(Object.assign({},T3,{jobName:"Nitrogen pumping unit NU#4 — spot blast & paint",jobId:"007",client:B,jobType:"Repair / blast & paint",phase:PH.PROC,rfqDate:W(-12),quoteSentDate:W(-8),rfqDueDate:W(-7),poDate:W(-2),poNumber:"PO 45008901",leadMin:2,leadMax:3,leadUnit:"weeks",procStartDate:W(-2),
+    J(Object.assign({},T3,{jobName:"Nitrogen pumping unit NU#4 — spot blast & paint",jobId:"007",client:B,jobType:"Repair / blast & paint",phase:PH.PO,rfqDate:W(-12),quoteSentDate:W(-8),rfqDueDate:W(-7),poDate:W(-2),poNumber:"PO 45008901",leadMin:2,leadMax:3,leadUnit:"weeks",
        notes:"Degrease, spot blast corroded areas, paint back to existing colours (yellow/white/red). Client supplies paint & reflective stickers. SS left unpainted — Rust Treat clean."})),
     J(Object.assign({},T3,{optFab:true,jobName:"Sand storage baskets B001 / B002 — refurbishment",jobId:"004",client:B,priority:"Urgent",jobType:"Repair / blast & paint",phase:PH.PROD,rfqDate:W(-28),rfqDueDate:W(-22),quoteSentDate:W(-23),poDate:W(-14),poNumber:"PO 45008650",leadMin:15,leadMax:20,procStartDate:W(-14),prodStartDate:W(-8),
        notes:"Blast & paint both baskets; replace SS mesh, SS bolts and gasket; fit level indicator.",qc:{weld:qc("Fail",-1,"Undercut on lifting lug welds (B002) — grind & re-weld, repeat MPI")}})),
     J(Object.assign({},T1,{jobName:"CCU storage racks (4 units) + blast & paint",jobId:"001",client:A,priority:"High",jobType:"Design & build",phase:PH.PROD,rfqDate:W(-40),rfqDueDate:W(-32),quoteSentDate:W(-33),poDate:W(-20),poNumber:"PO 7700213",leadMin:20,leadMax:24,procStartDate:W(-20),prodStartDate:W(-15),
        notes:"4-level racks with drawers/cabinets inside 4 CCUs, 300–500 kg per level. Marine coating system (primer / intermediate / topcoat), client red.",qc:{weld:qc("Pass",-7),blast:qc("Pass",-4)}})),
-    J(Object.assign({},T2,{optAssembly:false,jobName:"Container box repairs & coating — batch of 6",jobId:"002",client:C,jobType:"Repair / blast & paint",optSite:false,optFab:true,phase:PH.DONE,rfqDate:W(-38),rfqDueDate:W(-34),quoteSentDate:W(-35),poDate:W(-28),poNumber:"PO 3315",leadMin:10,leadMax:12,procStartDate:W(-28),prodStartDate:W(-26),deliveredDate:W(-17),
-       notes:"8' x 10' x 4' boxes: weld repairs (cleats, drain holes, D-rings, forklift pockets), blast, Carboline primer + topcoat.",qc:{weld:qc("Pass",-21),blast:qc("Pass",-20),paint:qc("Pass",-18),final:qc("Pass",-17)}})),
+    J(Object.assign({},T2,{optAssembly:false,jobName:"Container box repairs & coating — batch of 6",jobId:"002",client:C,jobType:"Repair / blast & paint",optSite:false,optFab:true,phase:PH.DONE,rfqDate:W(-38),rfqDueDate:W(-34),quoteSentDate:W(-35),poDate:W(-28),poNumber:"PO 3315",leadMin:10,leadMax:12,procStartDate:W(-28),prodStartDate:W(-26),deliveredDate:W(-17),docsSentDate:W(-16),
+       notes:"8' x 10' x 4' boxes: weld repairs (cleats, drain holes, D-rings, forklift pockets), blast, Carboline primer + topcoat.",qc:{weld:qc("Pass",-21),mpi:qc("Pass",-21),blast:qc("Pass",-20),paint:qc("Pass",-18),final:qc("Pass",-17)}})),
     J(Object.assign({},T2,{jobName:"Cubic bins 3 & 6 yd³ × 12",jobId:"003",client:D,jobType:"Build to client drawing",phase:PH.LOST,rfqDate:W(-30),rfqDueDate:W(-25),quoteSentDate:W(-26),lostDate:W(-14),notes:"Steel bins with and without HDPE lids."}))
   ];
   const [tank,hatch,vac,spools,skids,mixer,nu4,baskets,ccu,boxes,bins]=jobs;
-  jobs.forEach(j=>{const log=[[PH.RFQ,j.rfqDate],[PH.QUOTED,j.quoteSentDate],[PH.PO,j.poDate],[PH.PROC,j.procStartDate],[PH.PROD,j.prodStartDate],[PH.DONE,j.deliveredDate],[PH.LOST,j.lostDate]].filter(x=>x[1]);
+  jobs.forEach(j=>{Object.assign(j,{delivery:"us",deliverySet:true,reqLoad:false,reqWeldMap:false},DEMO_REQ[j.jobId]||{});if(typeof j.reqMPI!=="boolean")j.reqMPI=false;});
+  jobs.forEach(j=>{const dq=docsRequired(j);const log=[[PH.RFQ,j.rfqDate],[PH.QUOTED,j.quoteSentDate],[PH.PO,j.poDate],[PH.PROD,j.prodStartDate],[PH.DOCS,dq?j.deliveredDate:""],[PH.DONE,dq?j.docsSentDate:j.deliveredDate],[PH.LOST,j.lostDate]].filter(x=>x[1]);
     const upto=PHASES.indexOf(j.phase);j.phaseLog=log.filter(([p])=>PHASES.indexOf(p)<=upto||p===j.phase).map(([p,d])=>({phase:p,from:"",date:d,ts:Date.now()}));});
   spools.holds.push({id:uid(),start:W(-3),end:"",reason:"Awaiting client's technical details after the valve change",group:"rfq"});
   ccu.holds.push({id:uid(),start:W(-12),end:W(-9),reason:"Client approval of rack drawer layout",group:"exec"});
@@ -1591,7 +1724,7 @@ function ttHolidays(y){
    On hold    → clock paused (never overdue while held); every working day held pushes the due date out. */
 function managerLabel(){return (DB.meta&&DB.meta.managerLabel)||"Manager";}
 function followUpDays(){return (DB.meta&&+DB.meta.followUpDays)||5;}
-function phaseGroup(p){return p===PH.RFQ?"rfq":EXEC.includes(p)?"exec":p===PH.QUOTED?"quote":"closed";}
+function phaseGroup(p){return p===PH.RFQ?"rfq":EXEC.includes(p)?"exec":p===PH.QUOTED?"quote":p===PH.DOCS?"docs":"closed";}
 function isClosed(j){return CLOSED.includes(j.phase);}
 function openHold(j){return (j.holds||[]).find(h=>!h.end);}
 function isOnHold(j){return !!openHold(j);}
@@ -1609,6 +1742,8 @@ function jobDue(j){
     const target=(!j.dueOverride&&j.poDate&&leadWD(j,"leadMin")&&leadWD(j,"leadMax"))?addWorkingDays(j.poDate,leadWD(j,"leadMin")+ext):"";
     return{kind:"delivery",label:"Delivery due",due:base?addWorkingDays(base,ext):"",base,ext,target,paused};
   }
+  if(g==="docs"){const dd=docsDays(),ext=holdExt(j,"docs"),dv=j.deliveredDate||"";
+    return{kind:"docs",label:"Documents due",due:dv?addWorkingDays(dv,dd.max+ext):"",base:dv?addWorkingDays(dv,dd.max):"",ext,target:dv?addWorkingDays(dv,dd.target+ext):"",paused};}
   if(g==="quote"){const fu=j.followUpDate||(j.quoteSentDate?addWorkingDays(j.quoteSentDate,followUpDays()):"");return{kind:"followup",label:"Follow up client",due:"",followUp:fu,paused};}
   return{kind:"closed",label:"",due:"",paused:false};
 }
@@ -1621,11 +1756,11 @@ function jobState(j){
 }
 function jobDueMeta(j){
   const s=jobState(j),t=todayISO();
-  if(s.kind==="closed")return{txt:j.phase===PH.DONE?("Delivered"+(j.deliveredDate?" "+fmtShort(j.deliveredDate):"")):"Lost / declined",cls:"",s};
+  if(s.kind==="closed")return{txt:j.phase===PH.DONE?(doneWord(j)+(j.deliveredDate?" "+fmtShort(j.deliveredDate):"")+(j.docsSentDate?" · docs "+fmtShort(j.docsSentDate):"")):"Lost / declined",cls:"",s};
   if(s.paused)return{txt:"⏸ On hold"+(s.due?" · due now "+fmtShort(s.due):""),cls:"onhold",s};
   if(s.kind==="followup")return s.followUp?{txt:s.chase?"Chase client for PO":"Follow up "+fmtShort(s.followUp),cls:s.chase?"duesoon":"",s}:{txt:"Awaiting PO",cls:"",s};
   if(!s.due)return{txt:s.kind==="quote"?"Set quote deadline":"Set lead time",cls:"nodue",s};
-  const pre=s.kind==="quote"?"Quote ":"";
+  const pre=s.kind==="quote"?"Quote ":s.kind==="docs"?"Documents ":"";
   if(s.overdue)return{txt:pre+"overdue "+Math.max(1,workDaysBetween(s.due,t))+" wd",cls:"overdue",s};
   if(s.due===t)return{txt:pre+"due today",cls:"duesoon",s};
   if(s.soon)return{txt:pre+"due in "+s.left+" wd",cls:"duesoon",s};
@@ -1633,8 +1768,8 @@ function jobDueMeta(j){
 }
 function prevOpenPhase(j){const l=(j.phaseLog||[]).slice().reverse().find(x=>!CLOSED.includes(x.phase));return l?l.phase:PH.RFQ;}
 /* has the project reached this phase? (dates typed for a later phase stay on the project after an undo, but only count once it's reached again) */
-const PH_ORDER=[PH.RFQ,PH.QUOTED,PH.PO,PH.PROC,PH.PROD,PH.DONE];
-const PH_DATE={quoteSentDate:PH.QUOTED,poDate:PH.PO,procStartDate:PH.PROC,prodStartDate:PH.PROD,deliveredDate:PH.DONE};
+const PH_ORDER=[PH.RFQ,PH.QUOTED,PH.PO,PH.PROD,PH.DOCS,PH.DONE];
+const PH_DATE={quoteSentDate:PH.QUOTED,poDate:PH.PO,prodStartDate:PH.PROD,deliveredDate:PH.DOCS,docsSentDate:PH.DONE};
 function reached(j,ph){if(j.phase===PH.LOST)return true;return PH_ORDER.indexOf(j.phase)>=PH_ORDER.indexOf(ph);}
 function jd(j,k){const v=j[k]||"";return v&&PH_DATE[k]&&!reached(j,PH_DATE[k])?"":v;}
 function setPhase(j,ph,opts){
@@ -1646,11 +1781,11 @@ function setPhase(j,ph,opts){
   if(ph===PH.RFQ&&!j.rfqDate)j.rfqDate=date;
   if(ph===PH.QUOTED&&!j.quoteSentDate)j.quoteSentDate=date;
   if(ph===PH.PO&&!j.poDate)j.poDate=date;
-  if(ph===PH.PROC&&!j.procStartDate)j.procStartDate=date;
   if(ph===PH.PROD&&!j.prodStartDate)j.prodStartDate=date;
-  if(ph===PH.DONE){j.deliveredDate=date;j.percent=100;}
+  if(ph===PH.DOCS&&from!==PH.DONE)j.deliveredDate=date;          // delivered / collected; the documents clock starts
+  if(ph===PH.DONE){if(from===PH.DOCS)j.docsSentDate=date;else j.deliveredDate=date;j.percent=100;}
   if(ph===PH.LOST)j.lostDate=date;
-  if(!opts.silent)(j.updates=j.updates||[]).push({id:uid(),date,ts:Date.now(),text:"Phase → "+ph+(opts.note?" — "+opts.note:"")});
+  if(!opts.silent)(j.updates=j.updates||[]).push({id:uid(),date,ts:Date.now(),text:"Phase → "+(ph===PH.DONE?doneWord(j):ph)+(opts.note?" — "+opts.note:"")});
 }
 /* ---- Undo / redo phase changes (stored on the project, so it survives closing the app) ---- */
 function lastPhaseEntry(j){const l=j.phaseLog||[],e=l[l.length-1];if(!e||e.phase!==j.phase||e.migrated)return null;const from=e.from||(l.length>1?l[l.length-2].phase:"");return from&&from!==e.phase?Object.assign({},e,{from}):null;}
@@ -1677,22 +1812,26 @@ function undoRedoBtns(j){
 }
 /* re-plan a project's schedule when its dates change (keeps ticked steps and hand-edited dates) */
 function replan(j){if((DB.tasks||[]).some(t=>t.jobRef===j.id&&t.stepKey))buildSchedule(j,true);}
-/* every material line fully received → production starts by itself (Undo on the toast or the project page) */
+/* v8: production starts when HE presses "Start production" (the shop often starts on off-cuts before anything arrives).
+   When the last material line comes in on a project still at "PO Received", the app only offers it. */
 function autoProd(jobIds){
-  const moved=[];
-  Array.from(new Set(jobIds)).forEach(id=>{const j=(DB.jobs||[]).find(x=>x.id===id);if(!j||(j.phase!==PH.PO&&j.phase!==PH.PROC))return;
-    const ms=jobMats(j.id);if(!ms.length||!ms.every(m=>matStage(m)==="received"))return;
-    const last=ms.map(m=>m.receivedDate).filter(Boolean).sort().pop()||todayISO();
-    setPhase(j,PH.PROD,{date:last,note:"all materials received — moved automatically"});j.prodStartDate=last;replan(j);moved.push(j);});
-  return moved;
+  return Array.from(new Set(jobIds)).map(id=>(DB.jobs||[]).find(x=>x.id===id)).filter(j=>{if(!j)return false;
+    const ms=jobMats(j.id),all=j.phase===PH.PO&&ms.length&&ms.every(m=>matStage(m)==="received");
+    if(!all){if(j.prodOffered)delete j.prodOffered;return false;}   // a line went back out: offer again next time they're all in
+    if(j.prodOffered)return false;j.prodOffered=true;return true;});   // callers save() right after
 }
-function autoProdToast(moved,pre){
-  if(!moved.length)return false;const j=moved[0];
-  toast((pre?pre+" — ":"")+(moved.length>1?moved.length+" projects":jobLabel(j))+" moved to In Production",moved.length===1?{label:"Undo",fn:()=>undoPhase(j.id)}:null);return true;
+function autoProdToast(ready,pre){
+  if(!ready.length)return false;const j=ready[0];
+  toast((pre?pre+" — ":"")+"all materials in for "+(ready.length>1?ready.length+" projects":jobLabel(j))+". Start production?",ready.length===1?{label:"Start production",fn:()=>openPhaseAction(j.id,"prod")}:null);return true;
 }
-const PHASE_ACTION={[PH.QUOTED]:"quoted",[PH.PO]:"po",[PH.PROC]:"proc",[PH.PROD]:"prod",[PH.DONE]:"done",[PH.LOST]:"lost"};
+/* "Materials 3 of 5 in" — in-stock lines count as in; nothing shown when the project has no material list */
+function matProgress(j){const ms=jobMats(j.id);if(!ms.length)return null;const n=ms.filter(m=>matStage(m)==="received").length;return {n,total:ms.length,all:n===ms.length};}
+function matBadge(j){if(!(EXEC.includes(j.phase)))return "";const p=matProgress(j);if(!p)return "";
+  return `<span class="matbadge ${p.all?"all":""}" title="Material lines received or in stock">${p.all?"✓ Materials all in":"Materials "+p.n+" of "+p.total+" in"}</span>`;}
+const PHASE_ACTION={[PH.QUOTED]:"quoted",[PH.PO]:"po",[PH.PROD]:"prod",[PH.DOCS]:"done",[PH.DONE]:"done",[PH.LOST]:"lost"};
 function changePhase(j,val){
   if(!val||val===j.phase){rerender();return;}
+  if(val===PH.DONE&&j.phase===PH.DOCS){rerender();openPhaseAction(j.id,"docs");return;}
   if(PHASE_ACTION[val]){rerender();openPhaseAction(j.id,PHASE_ACTION[val]);return;}
   setPhase(j,val);save();rerender();toast("Phase → "+val);
 }
@@ -1711,29 +1850,33 @@ function phaseActions(j){
   switch(j.phase){
     case PH.RFQ: return b("quoted","✓ Quote submitted to "+esc(managerLabel()),"primary")+b("lost","Lost / declined");
     case PH.QUOTED: return b("po","📄 PO received","primary")+b("lost","Lost / declined");
-    case PH.PO: return b("proc","📦 Start procurement","primary")+b("prod","Materials in stock → production");
-    case PH.PROC: return b("prod","✓ All materials received","primary");
-    case PH.PROD: return b("done","🚚 Delivered","primary");
+    case PH.PO: return b("prod","▶ Start production","primary");
+    case PH.PROD: return b("done",j.delivery==="client"?"📦 Collected by client":"🚚 Delivered","primary");
+    case PH.DOCS: return b("docs","📄 Documents handed over","primary");
     default: return b("reopen","↺ Reopen");
   }
 }
 function phaseStepper(j){
-  const steps=[[PH.RFQ,"RFQ",j.rfqDate],[PH.QUOTED,"Quoted",j.quoteSentDate],[PH.PO,"PO",j.poDate],[PH.PROC,"Procurement",j.procStartDate],[PH.PROD,"Production",j.prodStartDate],[PH.DONE,"Delivered",j.deliveredDate]];
+  // same order as the board: … Production → Documents (dated by the delivery / collection) → Complete; no documents → … Production → Delivered / Collected
+  const docs=docsRequired(j)||j.phase===PH.DOCS||!!j.docsSentDate;
+  const steps=[[PH.RFQ,"RFQ",j.rfqDate],[PH.QUOTED,"Quoted",j.quoteSentDate],[PH.PO,"PO",j.poDate],[PH.PROD,"Production",j.prodStartDate]]
+    .concat(docs?[[PH.DOCS,"Documents",j.deliveredDate,doneWord(j)+" "],[PH.DONE,"Complete",j.docsSentDate]]:[[PH.DONE,doneWord(j),j.deliveredDate]]);
   const idx=steps.findIndex(s=>s[0]===j.phase);
   const tip=(s,i)=>i===idx?"Current phase":j.phase===PH.LOST?"Reopen the project at "+s[0]:idx>=0&&i<idx?"Move back to "+s[0]:"Move to "+s[0];
-  return `<div class="stepper ${j.phase===PH.LOST?"lost":""}">`+steps.map((s,i)=>`<button type="button" class="step ${idx>=0&&i<idx?"done":i===idx?"cur":""}" title="${esc(tip(s,i))}" data-ph="${esc(s[0])}" onclick="stepClick('${j.id}',this.dataset.ph)"><span class="sdot">${idx>=0&&i<idx?"✓":i+1}</span><span class="slbl">${s[1]}</span><span class="sdate">${s[2]&&(idx<0||i<=idx)?esc(fmtShort(s[2])):""}</span></button>`).join("")+`</div>`;
+  return `<div class="stepper ${j.phase===PH.LOST?"lost":""}">`+steps.map((s,i)=>`<button type="button" class="step ${idx>=0&&i<idx?"done":i===idx?"cur":""}" title="${esc(tip(s,i))}" data-ph="${esc(s[0])}" onclick="stepClick('${j.id}',this.dataset.ph)"><span class="sdot">${idx>=0&&i<idx?"✓":i+1}</span><span class="slbl">${s[1]}</span><span class="sdate">${s[2]&&(idx<0||i<=idx)?esc((s[3]||"")+fmtShort(s[2])):""}</span></button>`).join("")+`</div>`;
 }
 /* tap a step on the stepper: forward opens that phase's dialog (dates / PO / lead time); back asks first (↩ Undo still works) */
 function stepClick(id,ph){
   const j=(DB.jobs||[]).find(x=>x.id===id);if(!j||!ph)return;
   if(ph===j.phase){toast("This is the current phase");return;}
+  if(ph===PH.DONE&&j.phase===PH.DOCS)return openPhaseAction(id,"docs");
   if(j.phase===PH.LOST){openPhaseAction(id,"reopen");const s=document.querySelector('#mbody [data-k="phase"]');if(s&&ph!==PH.DONE)s.value=ph;return;}
   const from=PH_ORDER.indexOf(j.phase),to=PH_ORDER.indexOf(ph);
   if(to>from){
     if(ph===PH.QUOTED)return openPhaseAction(id,"quoted");
-    if(ph===PH.DONE)return openPhaseAction(id,"done");
+    if(ph===PH.DONE||ph===PH.DOCS)return openPhaseAction(id,"done");
     if(!reached(j,PH.PO)||ph===PH.PO)return openPhaseAction(id,"po",{target:ph});
-    return openPhaseAction(id,ph===PH.PROC?"proc":"prod");
+    return openPhaseAction(id,"prod");
   }
   uiConfirm(`Move ${jobLabel(j)} back to “${ph}”? Dates, PO number and lead time stay on the project, and ↩ Undo puts it forward again.`,()=>{
     setPhase(j,ph,{note:"moved back from the stepper"});replan(j);save();rerender();toast("Phase → "+ph,{label:"Undo",fn:()=>undoPhase(j.id)});
@@ -1749,13 +1892,16 @@ function openPhaseAction(jobId,action,opts){
   {const sb=document.getElementById("mainsave");if(sb)sb.textContent="Save";}
   const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;
   formMode="phase";phaseCtx={jobId,action,target:opts.target||""};
-  const title={quoted:"Quote submitted to "+managerLabel(),po:"Purchase order received",proc:"Start procurement",prod:"Start production",done:"Mark delivered",lost:"Mark lost / declined",reopen:"Reopen project"}[action]+(opts.target&&opts.target!==PH.PO?" → "+opts.target:"");
-  const dl={quoted:"Submitted on",po:"PO received on",proc:"Procurement started on",prod:"Production started on",done:"Delivered on",lost:"Date",reopen:"Date"}[action];
-  const had={quoted:j.quoteSentDate,po:j.poDate,proc:j.procStartDate,prod:j.prodStartDate}[action]||"";
+  const dw=doneWord(j);
+  const title={quoted:"Quote submitted to "+managerLabel(),po:"Purchase order received",prod:"Start production",done:"Mark "+dw.toLowerCase(),docs:"Documents handed over",lost:"Mark lost / declined",reopen:"Reopen project"}[action]+(opts.target&&opts.target!==PH.PO?" → "+opts.target:"");
+  const dl={quoted:"Submitted on",po:"PO received on",prod:"Production started on",done:dw+" on",docs:"Documents sent on",lost:"Date",reopen:"Date"}[action];
+  const had={quoted:j.quoteSentDate,po:j.poDate,prod:jd(j,"prodStartDate")}[action]||"";
   let body=`<div class="field"><label>${dl}</label><input type="date" data-k="date" value="${esc(had||todayISO())}"></div>`;
   if(action==="quoted"){const sug=quoteValue(j)??(nz(j.costSell)?+j.costSell:(jobCosting(j).has?Math.round(jobCosting(j).sell*100)/100:""));
     body+=`<div class="field"><label>Quoted value (excl. VAT)</label><input type="number" step="any" data-k="qvalue" value="${esc(sug)}" placeholder="total on the quotation">${jobCosting(j).has?`<div class="lblnote">from the costing — change it if the quote differs</div>`:""}</div>
       <div class="field"><label>Quotation no. (optional)</label><input data-k="qref" value="${esc(((j.quotes||[])[0]||{}).ref||"")}"></div>`;}
+  if(action==="quoted"){const w=costWarnings(j);if(w.length)body+=`<div class="hint full" style="color:var(--warn);font-weight:700">⚠ ${w.map(esc).join("<br>⚠ ")}<br><span style="font-weight:500">You can still submit — <a class="linkbtn" onclick="closeForm();openCosting('${j.id}')">open the costing</a> to add them.</span></div>`;}
+  if(action==="quoted"&&!j.deliverySet)body+=`<div class="field full"><label>Who moves the units? <span class="lblnote">— not set on this project yet; if you deliver, cost the transport</span></label><input type="hidden" data-k="delivery" value=""><div class="segbtns dvbtns">${[["us","🚚 We deliver"],["client","📦 Client collects"]].map(([v,l])=>`<button type="button" class="segbtn" data-dv="${v}" onclick="pickDelivery(this.dataset.dv)">${l}</button>`).join("")}</div></div>`;
   if(action==="quoted")body+=`<div class="field"><label>Follow up client on</label><input type="date" data-k="followUpDate" value="${esc(j.followUpDate||"")}"></div><div class="hint">Leave blank to follow up ${followUpDays()} working days after submission. While awaiting the PO the project is never "overdue" — it flags "chase client" instead.</div>
       <div class="fhead full">Lead time you're quoting <span style="font-weight:500;text-transform:none;letter-spacing:0">(optional — fills in the PO step for you)</span></div>${leadFields(j,"Lead time")}`;
   if(action==="po"){
@@ -1765,9 +1911,14 @@ function openPhaseAction(jobId,action,opts){
       <div class="field"><label>Quoted lead time — max (due)</label><input type="number" min="0" step="any" data-k="leadMax" value="${j.leadMax??""}"></div>
       <div class="field"><label>Unit</label><select data-k="leadUnit">${["working days","weeks"].map(o=>`<option ${(j.leadUnit||"working days")===o?"selected":""}>${o}</option>`).join("")}</select></div>
       <div class="field"><label>…or fixed delivery date</label><input type="date" data-k="dueOverride" value="${esc(j.dueOverride||"")}"></div>
+      ${reqHTML(j,"Confirm client requirements")}
       <div class="hint">Due = PO date + <b>max</b> lead time in working days (weekends and the holidays in Settings are skipped; 1 week = 5 working days). The <b>min</b> is shown as the target. A fixed date overrides the lead time.</div>`;
   }
-  if(action==="done"){const f=((j.qc||{}).final||{}).s;if(f!=="Pass"&&f!=="N/A")body+=`<div class="hint" style="color:var(--warn);font-weight:700">⚠ Final inspection isn't signed off yet${f==="Fail"?" — it's marked FAIL":""}. You can still mark it delivered.</div>`;}
+  if(action==="done"){const f=((j.qc||{}).final||{}).s;if(f!=="Pass"&&f!=="N/A")body+=`<div class="hint" style="color:var(--warn);font-weight:700">⚠ Final inspection isn't signed off yet${f==="Fail"?" — it's marked FAIL":""}. You can still mark it ${dw.toLowerCase()}.</div>`;
+    const open=inspOpen(j);if(open.length)body+=`<div class="hint" style="color:var(--warn);font-weight:700">⚠ Not passed yet: ${esc(open.join(", "))}.</div>`;
+    if(docsRequired(j))body+=`<div class="hint">The client asked for ${esc(reqList(j))}, so the project moves to <b>Documents &amp; handover</b>: send the package within ${docsDays().target}–${docsDays().max} working days. The delivery clock stops today.</div>`;}
+  if(action==="docs")body+=`<div class="hint">${esc(doneWord(j))} on ${esc(fmtShort(j.deliveredDate))}. Package for ${esc(reqList(j)||"this project")} — inspection reports, certificates and weld maps sent to the client. This closes the project.</div>`;
+  if(action==="prod"){const p=matProgress(j);body+=`<div class="hint">${p?(p.all?"All "+p.total+" material lines are in.":"Materials: "+p.n+" of "+p.total+" lines in (in-stock lines count). Production can start on what's here; the rest stays tracked on the Materials tab."):"No material list on this project — start on stock / off-cuts."}</div>`;}
   if(action==="reopen")body+=`<div class="field"><label>Reopen to phase</label><select data-k="phase">${PHASES.filter(p=>!CLOSED.includes(p)).map(p=>`<option ${prevOpenPhase(j)===p?"selected":""}>${esc(p)}</option>`).join("")}</select></div>`;
   body+=`<div class="field full"><label>${action==="lost"?"Reason":"Note (optional)"}</label><textarea data-k="note"></textarea></div>`;
   document.getElementById("mtitle").textContent=title+" — "+jobLabel(j);
@@ -1782,20 +1933,20 @@ function savePhase(){
   if(a==="po"){
     if(!d.leadMax&&!d.leadMin&&!d.dueOverride){toast("Enter the quoted lead time or a fixed delivery date");return;}
     const num=v=>(v===""||v==null)?"":Number(v);
+    Object.keys(REQ_LABEL).forEach(k=>{const el=document.querySelector(`#mbody [data-k="${k}"]`);if(el)j[k]=el.checked;});if(d.delivery){j.delivery=d.delivery;j.deliverySet=true;}
     j.poNumber=d.poNumber||"";if(d.poValue!==""&&d.poValue!=null)j.poValue=Math.round(+d.poValue*100)/100;j.leadMin=num(d.leadMin);j.leadMax=num(d.leadMax);j.leadUnit=d.leadUnit||"working days";j.dueOverride=d.dueOverride||"";j.poDate=date;
   }
+  if(a==="quoted"&&(d.delivery==="us"||d.delivery==="client")){j.delivery=d.delivery;j.deliverySet=true;}
   if(a==="quoted"){j.quoteSentDate=date;j.followUpDate=d.followUpDate||"";
     if(nz(d.qvalue)&&+d.qvalue>0){const v=Math.round(+d.qvalue*100)/100;j.quotes=j.quotes||[];if(!j.quotes.length)j.quotes.push({rev:0,date,value:v,ref:(d.qref||"").trim(),note:""});else{const l=j.quotes[j.quotes.length-1];l.value=v;if(d.qref)l.ref=d.qref.trim();}}
     const num=v=>(v===""||v==null)?"":Number(v);if(d.leadMin!==""||d.leadMax!==""){j.leadMin=num(d.leadMin);j.leadMax=num(d.leadMax);j.leadUnit=d.leadUnit||"working days";}}
-  if(a==="proc")j.procStartDate=date;
   if(a==="prod")j.prodStartDate=date;
-  const target=phaseCtx.target||{quoted:PH.QUOTED,po:PH.PO,proc:PH.PROC,prod:PH.PROD,done:PH.DONE,lost:PH.LOST,reopen:d.phase}[a];
+  const target=phaseCtx.target||{quoted:PH.QUOTED,po:PH.PO,prod:PH.PROD,done:docsRequired(j)?PH.DOCS:PH.DONE,docs:PH.DONE,lost:PH.LOST,reopen:d.phase}[a];
   if(!target){closeForm();return;}
-  if(target===PH.PROC&&!j.procStartDate)j.procStartDate=date;
-  if(target===PH.PROD&&!j.prodStartDate)j.prodStartDate=date;
+  if(target===PH.PROD&&!jd(j,"prodStartDate"))j.prodStartDate=date;
   const extra=a==="quoted"?"submitted to "+managerLabel():a==="po"&&j.poNumber?"PO "+j.poNumber:"";
   setPhase(j,target,{date,note:[extra,note].filter(Boolean).join(" · ")});
-  replan(j);save();closeForm();rerender();toast("Phase → "+target,canUndoPhase(j)?{label:"Undo",fn:()=>undoPhase(j.id)}:null);
+  replan(j);save();closeForm();rerender();toast("Phase → "+phaseName(j),canUndoPhase(j)?{label:"Undo",fn:()=>undoPhase(j.id)}:null);
 }
 function jobTimeline(j){
   const R=[],row=(l,v,n)=>`<div class="tlrow"><span class="tll">${l}</span><span class="tlv">${v}</span>${n?`<span class="tln">${n}</span>`:""}</div>`;
@@ -1815,7 +1966,7 @@ function jobTimeline(j){
       R.push(row("PO → delivered",workDaysBetween(j.poDate,j.deliveredDate)+" wd",n));
     }
   }
-  (j.holds||[]).forEach(hd=>R.push(row("⏸ Hold ("+({rfq:"quote clock",exec:"delivery clock",quote:"awaiting PO"}[hd.group]||hd.group)+")",fmtShort(hd.start)+" → "+(hd.end?fmtShort(hd.end):"ongoing")+" · "+holdDays(hd)+" wd",esc(hd.reason||""))));
+  (j.holds||[]).forEach(hd=>R.push(row("⏸ Hold ("+({rfq:"quote clock",exec:"delivery clock",quote:"awaiting PO",docs:"documents clock"}[hd.group]||hd.group)+")",fmtShort(hd.start)+" → "+(hd.end?fmtShort(hd.end):"ongoing")+" · "+holdDays(hd)+" wd",esc(hd.reason||""))));
   return `<div class="dsection"><h3><span class="ic">⏱️</span> Timeline &amp; turnaround</h3>${R.length?R.join(""):`<div class="minimsg">Dates fill in as the project moves through each phase.</div>`}<div style="margin-top:8px;font-size:11.5px;color:var(--ink-soft)">wd = working days (weekends and Settings holidays excluded).</div></div>`;
 }
 
@@ -1847,12 +1998,24 @@ function vatRate(){const v=DB.meta&&DB.meta.vatRate;return typeof v==="number"?v
 function money(n){if(n==null||n===""||isNaN(+n))return"—";return "$"+(+n).toLocaleString(undefined,{minimumFractionDigits:0,maximumFractionDigits:2});}
 
 /* ============ v2: MIGRATION ============ */
-const QC_STAGES=[["weld","Welding / Fabrication"],["blast","Sandblasting"],["paint","Painting"],["final","Final Inspection"]];
+const QC_STAGES=[["weld","Welding / Fabrication"],["mpi","MPI — welds"],["load","Load test — pad eyes"],["mpi2","MPI — pad eyes after load test"],["blast","Sandblasting"],["paint","Painting"],["final","Final Inspection"]];
+/* inspections the client can ask for, in the shop's order: fabricate → MPI → load test → MPI on the pad eye welds → blast & coat */
+const INSP_STAGES=["mpi","load","mpi2"];
+const QC_SHORT={weld:"Weld / fab",mpi:"MPI",load:"Load test",mpi2:"MPI after LT",blast:"Blast",paint:"Paint",final:"Final"};
+function inspRequired(j,k){return k==="mpi"?!!j.reqMPI:(k==="load"||k==="mpi2")?!!j.reqLoad:true;}
+function qcLabel(k){return (QC_STAGES.find(x=>x[0]===k)||[])[1]||k;}
+function inspOpen(j){const q=j.qc||{};return INSP_STAGES.filter(k=>inspRequired(j,k)&&!["Pass","N/A"].includes((q[k]||{}).s)).map(qcLabel);}
+function reqList(j){return Object.keys(REQ_LABEL).filter(k=>j[k]).map(k=>REQ_LABEL[k].replace(" (pad eyes)","")).join(", ");}
+/* what must have passed before a stage can pass: load test after MPI, the second MPI after the load test, blasting after every inspection */
+function qcBefore(j,stage){const order=INSP_STAGES.concat(["blast"]);const i=order.indexOf(stage);if(i<1)return[];return order.slice(0,i).filter(k=>INSP_STAGES.includes(k)&&inspRequired(j,k));}
 const QC_TPL_DEFAULT={
   weld:["Drawing & revision confirmed","Material grade & thickness verified (MTRs on file)","Fit-up & alignment to drawing","Weld visual — size, profile, undercut, porosity","Dimensions within tolerance","NDT / MPI as required"],
   blast:["Surface pre-clean (oil/grease removed)","Masking of SS / components / data plate","Blast standard achieved (SA 2.5)","Profile / anchor pattern recorded","Ambient temp, RH & dew point recorded","Dust & contamination check"],
   paint:["Coating system & batch numbers recorded","Ambient / dew point within limits","DFT per coat measured","Final DFT vs specification","Holiday / pinhole check","Cure & finish inspection"],
-  final:["Final dimensions vs drawing","All QC records & MTRs complete","Lifting points / pad eyes inspected (load test cert if required)","Asset ID, weights & markings applied","Cleanliness, photos & packaging for dispatch"]
+  final:["Final dimensions vs drawing","All QC records & MTRs complete","Lifting points / pad eyes inspected (load test cert if required)","Asset ID, weights & markings applied","Cleanliness, photos & packaging for dispatch"],
+  mpi:["Weld maps / weld IDs available to the inspector","Surface clean, bare steel (before blast & coat)","All specified welds examined","Indications recorded & dispositioned","MPI report signed"],
+  load:["Test load / proof load per spec agreed","Rigging & test set-up checked","Load held for the specified time","No permanent deformation","Load test certificate issued"],
+  mpi2:["Pad eye welds examined after the proof load","No indications / repairs re-tested","MPI report signed"]
 };
 function qcStageOfType(t){t=(t||"").toLowerCase();if(/weld|fabric|mpi|pre-fab|fit/.test(t))return"weld";if(/blast/.test(t))return"blast";if(/paint|coat/.test(t))return"paint";return"final";}
 function migrateV2(){
@@ -2126,16 +2289,18 @@ function savePriceForms(){
 }
 
 /* ============ v2: MATERIALS ============ */
-function matStatus(m){const st=matStage(m),q=+m.qtyReq||0,r=+m.qtyReceived||0;
+function matStatus(m){if(m.inStock)return"In stock";const st=matStage(m),q=+m.qtyReq||0,r=+m.qtyReceived||0;
   if(st==="received")return"Received";if(st==="ordered")return r>0?"Part received":"Ordered";
   if(st==="waiting")return matQuotes(m).length?"Quoted":"RFQ sent";return"To order";}
-const MSTAT_TOK={"To order":"warn","RFQ sent":"hold",Quoted:"hold",Ordered:"info","Part received":"prog",Received:"ok"};
+const MSTAT_TOK={"In stock":"ok","To order":"warn","RFQ sent":"hold",Quoted:"hold",Ordered:"info","Part received":"prog",Received:"ok"};
 function matChip(m){const s=matStatus(m);return `<button class="mchip" style="${tokStyle(MSTAT_TOK[s])}" title="Tap for the next step" onclick="event.stopPropagation();matAction('${m.id}')">${s}</button>`;}
 function jobMats(jobId){return (DB.materials||[]).filter(m=>m.jobRef===jobId);}
-function matTotals(list){let cost=0,unpriced=0,rec=0;list.forEach(m=>{const p=matPrice(m);if(p&&p.price!=null)cost+=p.price*(+m.qtyReq||0);else unpriced++;if(matStatus(m)==="Received")rec++;});return{cost,unpriced,rec,n:list.length};}
+function matTotals(list){let cost=0,unpriced=0,rec=0;list.forEach(m=>{const p=matPrice(m);if(p&&p.price!=null)cost+=p.price*(+m.qtyReq||0);else unpriced++;if(matStage(m)==="received")rec++;});return{cost,unpriced,rec,n:list.length};}
+function stockValue(list){return list.filter(m=>m.inStock).reduce((a,m)=>{const p=matPrice(m);return a+(p&&p.price!=null?p.price*(+m.qtyReq||0):0);},0);}
+function toggleInStock(id){const m=(DB.materials||[]).find(x=>x.id===id);if(!m)return;m.inStock=!m.inStock;const ready=autoProd([m.jobRef]);save();rerender();const msg=m.inStock?"In stock — left out of supplier RFQs; still costed at the supplier price":"Back on the list to order";if(!autoProdToast(ready,m.inStock?"In stock":""))toast(msg);}
 function procReadyNudge(j){
   const ms=jobMats(j.id);
-  if((j.phase===PH.PROC||j.phase===PH.PO)&&ms.length&&ms.every(m=>matStatus(m)==="Received"))return `<div class="nudge">✅ All ${ms.length} material lines are received. <button class="btn sm primary" onclick="openPhaseAction('${j.id}','prod')">Move to production</button></div>`;
+  if(j.phase===PH.PO&&ms.length&&ms.every(m=>matStage(m)==="received"))return `<div class="nudge">✅ All ${ms.length} material lines are in. <button class="btn sm primary" onclick="openPhaseAction('${j.id}','prod')">▶ Start production</button></div>`;
   return "";
 }
 function renderJobMaterials(j){
@@ -2156,16 +2321,16 @@ function renderJobMaterials(j){
       <td style="white-space:nowrap"><b>${esc(m.qtyReq??"")}</b> ${esc(m.unit||"")}${(+m.qtyReceived>0&&matStatus(m)!=="Received")?`<div class="sub">${m.qtyReceived} rec'd</div>`:""}</td>
       <td>${priceCell(m)}</td>
       <td>${matChip(m)}</td>
-      <td><button class="mchip" style="${tokStyle(m.mtr?"ok":"idle")}" onclick="toggleMTR('${m.id}')" title="MTR on file?">${m.mtr?"MTR ✓":"MTR"}</button></td>
+      <td style="white-space:nowrap"><button class="mchip" style="${tokStyle(m.inStock?"ok":"idle")}" onclick="toggleInStock('${m.id}')" title="From our own stock / off-cuts — no supplier RFQ needed">${m.inStock?"In stock ✓":"In stock?"}</button> <button class="mchip" style="${tokStyle(m.mtr?"ok":"idle")}" onclick="toggleMTR('${m.id}')" title="MTR on file?">${m.mtr?"MTR ✓":"MTR"}</button></td>
       <td><div class="rowact" style="opacity:1"><button class="icobtn" onclick='openForm("${m.id}","materials")'>✏️</button></div></td></tr>`;
   const body=Object.keys(groups).map(g=>(Object.keys(groups).length>1?`<tr><td colspan="8" style="background:var(--card-alt);font-weight:800;font-size:12px">${esc(g||"(no sheet)")}</td></tr>`:"")+groups[g].map(row).join("")).join("");
   const sel=ms.filter(m=>matSel.has(m.id));
   const bulk=sel.length?`<div class="bulkbar"><b>${sel.length} selected</b><span class="grow" style="flex:1"></span>
     <button class="btn primary" onclick="openRfqFromMaterials('${j.id}')">✉️ Send supplier RFQ</button>
-    <button class="btn" onclick="purSel=new Set(matSel);openOrderModal()">Ordered direct</button><button class="btn" onclick="receiveMats(Array.from(matSel));matSel=new Set();">Mark received</button><button class="btn" onclick="bulkMat('delete')">🗑 Delete</button>
+    <button class="btn" onclick="setInStock(Array.from(matSel),true)">In stock</button><button class="btn" onclick="purSel=new Set(matSel);openOrderModal()">Ordered direct</button><button class="btn" onclick="receiveMats(Array.from(matSel));matSel=new Set();">Mark received</button><button class="btn" onclick="bulkMat('delete')">🗑 Delete</button>
     <button class="btn" onclick="matSel=new Set();renderDetail()">✕</button></div>`:"";
   return `<div class="dsection"><h3><span class="ic">🔩</span> Material list</h3>${tb}
-    <div class="msum"><div class="m"><b>${t.n}</b>lines</div><div class="m"><b>${money(t.cost)}</b>est. material cost excl. VAT${t.unpriced?` · ${t.unpriced} unpriced`:""}</div><div class="m"><b>${t.rec}/${t.n}</b>received</div><div class="m"><b>${ms.filter(m=>m.mtr).length}/${t.n}</b>MTRs on file</div></div>
+    <div class="msum"><div class="m"><b>${t.n}</b>lines</div><div class="m"><b>${money(t.cost)}</b>est. material cost excl. VAT${t.unpriced?` · ${t.unpriced} unpriced`:""}</div><div class="m"><b>${t.rec}/${t.n}</b>in (received or in stock)${ms.some(m=>m.inStock)?` · ${money(stockValue(ms))} from our stock`:""}</div><div class="m"><b>${ms.filter(m=>m.mtr).length}/${t.n}</b>MTRs on file</div></div>
     ${procReadyNudge(j)}
     <div class="tablewrap"><table class="mtab"><thead><tr><th><input type="checkbox" class="cbx" ${allSel?"checked":""} onchange="selAllMats('${j.id}',this.checked)"></th><th>#</th><th>Description</th><th>Qty</th><th>Price (best)</th><th>Status</th><th>MTR</th><th></th></tr></thead><tbody>${body}</tbody></table></div>
     <div class="impnote" style="margin-top:8px">Tick lines to send a supplier RFQ. Tap a status for its next step. Line totals assume qty is in the supplier's unit (sheet / length / each). The <b>Purchasing</b> page shows every project's lines by stage.</div>
@@ -2185,8 +2350,12 @@ function priceAll(jobId){const r=autoPriceMaterials(jobMats(jobId));save();reren
 
 /* ============ v2: SUPPLIER RFQ FROM MATERIALS ============ */
 function nextRfqNo(){let n=0;(DB.procurement||[]).forEach(p=>{const m=/(\d+)\s*$/.exec(p.rfqNumber||"");if(m)n=Math.max(n,+m[1]);});return "S-RFQ-"+String(n+1).padStart(3,"0");}
+function setInStock(ids,on){const jobs=new Set();ids.forEach(id=>{const m=(DB.materials||[]).find(x=>x.id===id);if(m){m.inStock=!!on;jobs.add(m.jobRef);}});const ready=autoProd(Array.from(jobs));matSel=new Set();save();rerender();const msg=ids.length+" line"+(ids.length>1?"s":"")+" marked in stock";if(!autoProdToast(ready,msg))toast(msg);}
 function openRfqFromMaterials(jobId){
-  const sel=(DB.materials||[]).filter(m=>matSel.has(m.id));if(!sel.length)return;
+  const all=(DB.materials||[]).filter(m=>matSel.has(m.id)),sel=all.filter(m=>!m.inStock);
+  if(all.length&&!sel.length){toast("Those lines are in stock — nothing to send to suppliers");return;}
+  if(sel.length<all.length){matSel=new Set(sel.map(m=>m.id));toast((all.length-sel.length)+" in-stock line"+(all.length-sel.length>1?"s":"")+" left out of the RFQ");}
+  if(!sel.length)return;
   const jset=new Set(sel.map(m=>m.jobRef));if(jset.size>1)jobId="";
   formMode="rfqmake";impCtx={jobId,ids:sel.map(m=>m.id)};
   const sups=(DB.suppliers||[]).slice().sort((a,b)=>a.company.localeCompare(b.company));
@@ -2204,7 +2373,6 @@ function saveRfqFromMaterials(){
     suppliers:supIds.map(s=>({id:uid(),supplierRef:s,status:"RFQ Sent",dateSent:todayISO(),eta:"",awarded:false,notes:""}))};
   DB.procurement.push(rfq);mats.forEach(m=>{m.rfqRef=rfq.id;});
   const j=DB.jobs.find(x=>x.id===impCtx.jobId);
-  if(j&&j.phase===PH.PO)setPhase(j,PH.PROC,{note:"supplier RFQ "+rfq.rfqNumber+" sent"});
   matSel=new Set();purSel=new Set();if(current==="purchasing"&&!detailJob)purStage="waiting";save();closeForm();rerender();
   showRfqText(rfq.id);toast("RFQ "+rfq.rfqNumber+" created — copy the text into your email");
 }
@@ -2219,6 +2387,12 @@ function qcSet(jobId,stage,val){
   if(cur.s===val){j.qc[stage]={s:"",date:"",by:"",note:""};save();rerender();toast(label+" cleared");return;}
   const apply=note=>{j.qc[stage]={s:val,date:todayISO(),by:inspector(),note:note||""};(j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"QC · "+label+": "+val+(note?" — "+note:"")});save();rerender();toast(label+": "+val);};
   if(val==="Fail")uiAsk({title:label+" — FAIL",msg:"What failed? This note stays on the project until the stage is re-inspected.",input:true,placeholder:"e.g. undercut on lifting lug welds — grind & re-weld, MPI",ok:"Record fail",danger:true,onOk:v=>apply((v||"").trim())});
+  else if(val==="Pass"&&qcBefore(j,stage).length){
+    const pre=qcBefore(j,stage),q=j.qc,failed=pre.filter(k=>(q[k]||{}).s==="Fail"),open=pre.filter(k=>!["Pass","N/A","Fail"].includes((q[k]||{}).s));
+    if(failed.length){uiAsk({title:"Can't pass "+label+" yet",msg:failed.map(qcLabel).join(", ")+(failed.length>1?" have":" has")+" failed. Re-inspect and pass "+(failed.length>1?"them":"it")+" first — the order is MPI → load test → MPI on the pad eyes → blast & coat.",ok:"OK",cancel:"Close"});return;}
+    if(open.length){uiConfirm(open.map(qcLabel).join(", ")+" "+(open.length>1?"aren't":"isn't")+" recorded yet. The order is MPI → load test → MPI on the pad eyes → blast & coat. Record "+label+" as passed anyway?",()=>apply(""),{ok:"Record pass",danger:false});return;}
+    apply("");
+  }
   else apply("");
 }
 function qcItems(jobId,stage){return (DB.checklists||[]).filter(c=>c.jobRef===jobId&&c.stage===stage);}
@@ -2232,7 +2406,9 @@ function qcAddStd(jobId,stage){
 function qcPassAll(jobId,stage){qcItems(jobId,stage).forEach(c=>{if(c.status==="Pending"){c.status="Pass";c.date=todayISO();c.signedBy=inspector();}});save();renderDetail();}
 function renderJobQC(j){
   const q=j.qc||{};
-  const rows=QC_STAGES.map(([k,label])=>{
+  // inspections the client didn't ask for stay out of the way (tick them in Workflow options to add them)
+  const shown=QC_STAGES.filter(([k])=>!(INSP_STAGES.includes(k)&&!inspRequired(j,k)&&(!(q[k]||{}).s||(q[k]||{}).auto)));
+  const rows=shown.map(([k,label])=>{
     const r=q[k]||{},s=r.s||"",cls=s==="N/A"?"NA":s;
     const items=qcItems(j.id,k),ip=items.filter(c=>c.status!=="Pending").length;
     const btn=(v,l)=>`<button class="qcb ${v==="N/A"?"NA":v} ${s===v?"on":""}" onclick="qcSet('${j.id}','${k}','${v}')">${l}</button>`;
@@ -2241,13 +2417,15 @@ function renderJobQC(j){
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${items.length?`<button class="btn xs" onclick="qcPassAll('${j.id}','${k}')">✓ Pass all remaining</button>`:""}<button class="btn xs" onclick="qcAddStd('${j.id}','${k}')">+ Add standard checks</button></div></div></details>`;
     return `<div class="qcrow s-${cls}"><div><div class="qcname">${esc(label)}</div><div class="qcmeta">${meta}</div></div><div class="qcbtns">${btn("Pass","Pass")}${btn("Fail","Fail")}${btn("N/A","N/A")}</div>${det}</div>`;
   }).join("");
-  const sm=qcSummary(j),fin=((j.qc||{}).final||{}).s;
-  const deliver=!isClosed(j)&&EXEC.includes(j.phase)&&(fin==="Pass"||fin==="N/A")?`<div class="nudge">✅ Final inspection ${fin==="Pass"?"passed":"marked N/A"}. <button class="btn sm primary" onclick="openPhaseAction('${j.id}','done')">🚚 Mark delivered</button></div>`:"";
-  return deliver+`<div class="dsection"><h3><span class="ic">✅</span> QC <span class="chkprog">${sm.done}/4 recorded</span>${sm.fail?`<span class="chkprog" style="background:var(--bad-bg);color:var(--bad)">${sm.fail} fail</span>`:""}</h3>
-    <div class="impnote" style="margin-bottom:12px">One tap per stage — date and sign-off (${esc(inspector())}) are stamped automatically. Tap again to undo. Item-by-item checks are optional.</div>${rows}</div>`;
+  const sm=qcSummary(j),fin=((j.qc||{}).final||{}).s,rec=shown.filter(([k])=>(q[k]||{}).s).length;
+  const deliver=!isClosed(j)&&EXEC.includes(j.phase)&&(fin==="Pass"||fin==="N/A")?`<div class="nudge">✅ Final inspection ${fin==="Pass"?"passed":"marked N/A"}. <button class="btn sm primary" onclick="openPhaseAction('${j.id}','done')">${j.delivery==="client"?"📦 Mark collected":"🚚 Mark delivered"}</button></div>`
+    :j.phase===PH.DOCS?`<div class="nudge">📄 ${esc(doneWord(j))} ${esc(fmtShort(j.deliveredDate))} — documents to hand over: ${esc(reqList(j))}. <button class="btn sm primary" onclick="openPhaseAction('${j.id}','docs')">Documents handed over</button></div>`:"";
+  const notReq=INSP_STAGES.filter(k=>!inspRequired(j,k)).length?`<div class="impnote" style="margin:-6px 0 10px">Not required on this project: ${esc(["mpi","load"].filter(k=>!inspRequired(j,k)).map(qcLabel).join(", "))} — tick them in <a class="linkbtn" onclick="openWfOpts('${j.id}')">Workflow options</a> if the client asks.</div>`:"";
+  return deliver+`<div class="dsection"><h3><span class="ic">✅</span> QC <span class="chkprog">${rec}/${shown.length} recorded</span>${sm.fail?`<span class="chkprog" style="background:var(--bad-bg);color:var(--bad)">${sm.fail} fail</span>`:""}</h3>
+    <div class="impnote" style="margin-bottom:12px">One tap per stage — date and sign-off (${esc(inspector())}) are stamped automatically. Tap again to undo. Item-by-item checks are optional.</div>${notReq}${rows}</div>`;
 }
 function renderQC(c){
-  const list=(DB.jobs||[]).filter(j=>j.phase!==PH.LOST&&(EXEC.includes(j.phase)||j.phase===PH.DONE||qcSummary(j).done));
+  const list=(DB.jobs||[]).filter(j=>j.phase!==PH.LOST&&(EXEC.includes(j.phase)||j.phase===PH.DOCS||j.phase===PH.DONE||QC_STAGES.some(([k])=>((j.qc||{})[k]||{}).s&&!((j.qc||{})[k]||{}).auto)));
   const filt={"":()=>true,fail:j=>qcSummary(j).fail>0,final:j=>!isClosed(j)&&!["Pass","N/A"].includes(((j.qc||{}).final||{}).s),done:j=>((j.qc||{}).final||{}).s==="Pass"}[qcFilter]||(()=>true);
   const qq=listQ.trim().toLowerCase();
   const rows=jobQ(list.filter(filt),listQ,j=>[j.jobName,j.jobId,j.client,j.poNumber].join(" "));
@@ -2259,7 +2437,7 @@ function renderQC(c){
       <div class="statcard clickable c-ok" onclick="qcFilter='done';render()"><div class="n">${list.filter(j=>((j.qc||{}).final||{}).s==="Pass").length}</div><div class="l">Final inspection passed</div></div></div>
     ${fails.length?`<div class="panel" style="margin-bottom:14px"><h3>Open fails</h3>${fails.map(f=>`<div class="tlrow" style="cursor:pointer" onclick="openJob('${f.j.id}','checklist')"><span class="tll"><b>${esc(jobLabel(f.j))}</b></span><span class="qcchip qc-Fail">${esc(f.l)}</span><span class="tln">${esc(fmtShort(f.r.date))} — ${esc(f.r.note||"no note")}</span></div>`).join("")}</div>`:""}
     <div class="pchips">${[["","All"],["fail","Open fails"],["final","Awaiting final"],["done","Final passed"]].map(([k,l])=>`<button class="pchip ${qcFilter===k?'on':''}" onclick="qcFilter='${k}';render()">${l}</button>`).join("")}</div>${listSearch("Search by project name, project ID or client…")}
-    ${rows.length?`<div class="tablewrap"><table><thead><tr><th>Project</th><th>Phase</th>${QC_STAGES.map(([,l])=>`<th style="text-align:center">${esc(l.replace(" / ","/"))}</th>`).join("")}</tr></thead><tbody>${rows.map(j=>`<tr><td><button class="joblink" onclick="openJob('${j.id}','checklist')">${esc(jobLabel(j))}</button><div class="resp">${esc(j.client||"")}</div></td><td><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span></td>${QC_STAGES.map(([k])=>`<td style="text-align:center">${chip(j,k)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">No projects here.</div>`}
+    ${rows.length?`<div class="tablewrap"><table><thead><tr><th style="min-width:220px">Project</th><th>Phase</th>${QC_STAGES.map(([k,l])=>`<th style="text-align:center" title="${esc(l)}">${esc(QC_SHORT[k]||l)}</th>`).join("")}</tr></thead><tbody>${rows.map(j=>`<tr><td><button class="joblink" onclick="openJob('${j.id}','checklist')">${esc(jobLabel(j))}</button><div class="resp">${esc(j.client||"")}</div></td><td><span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase)}</span></td>${QC_STAGES.map(([k])=>`<td style="text-align:center">${chip(j,k)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:`<div class="empty">No projects here.</div>`}
     <div class="impnote" style="margin-top:8px">Projects appear here once a PO is received. Tap any cell to open that project's QC.</div>`;
 }
 
@@ -2511,6 +2689,7 @@ function formPriceHint(){
 }
 function matRfq(m){return m.rfqRef?(DB.procurement||[]).find(p=>p.id===m.rfqRef):null;}
 function matStage(m){
+  if(m.inStock)return"received";   // from our own stock / off-cuts: nothing to order, available now
   const q=+m.qtyReq||0,o=+m.qtyOrdered||0,r=+m.qtyReceived||0;
   if(r>0&&(!q||r>=q))return"received";
   if(o>0||r>0)return"ordered";
@@ -2617,6 +2796,7 @@ function matAction(id){
   if(st==="toorder"){matSel=new Set([m.id]);purSel=new Set([m.id]);openOrderModal();}
   else if(st==="waiting"){const r=matRfq(m);if(r&&(r.suppliers||[]).some(s=>s.prices))openCompare(r.id);else{purStage="waiting";go("purchasing");}}
   else if(st==="ordered")receiveMats([m.id]);
+  else if(m.inStock)toast("From our stock — tap “In stock ✓” to put it back on the order list");
   else toast("Already received — tap ✏️ to change quantities");
 }
 function supplierOptions(sel){return `<option value="">— choose —</option>`+(DB.suppliers||[]).slice().sort((a,b)=>a.company.localeCompare(b.company)).map(s=>`<option value="${s.id}" ${s.id===sel?"selected":""}>${esc(s.company)}</option>`).join("");}
@@ -2737,7 +2917,7 @@ function saveCompare(){
   const used=new Set();
   picks.forEach(({m,s})=>{m.supplierRef=s.supplierRef;m.quotedPrice=+s.prices[m.id].price;m.qtyOrdered=+m.qtyReq||1;m.orderedDate=todayISO();if(d.eta)m.eta=d.eta;if(d.poRef)m.poRef=d.poRef;used.add(s);});
   used.forEach(s=>{s.status="Ordered";s.awarded=true;});
-  const jobs=new Set(picks.map(p=>p.m.jobRef));jobs.forEach(id=>{const j=DB.jobs.find(x=>x.id===id);if(j&&j.phase===PH.PO)setPhase(j,PH.PROC,{note:"materials ordered"});});
+
   save();closeForm();purStage=current==="purchasing"?"ordered":purStage;rerender();toast(picks.length+" line"+(picks.length>1?"s":"")+" ordered from "+Array.from(used).map(s=>refName("suppliers",s.supplierRef)).join(" & "));
 }
 
@@ -2851,11 +3031,17 @@ function rfqMailto(rfq){
 function showRfqText(id){
   const r=(DB.procurement||[]).find(x=>x.id===id);if(!r)return;formMode="view";
   const {subject}=rfqParts(r);
-  const emails=(r.suppliers||[]).map(s=>{const sp=(DB.suppliers||[]).find(x=>x.id===s.supplierRef)||{};return sp.company?(sp.company+(sp.email?" <"+sp.email+">":" (no email on file)")):"";}).filter(Boolean);
+  // his request: each supplier's email on its own line, easy to read and copy (Copy per supplier + Copy all for the To box)
+  const sups=(r.suppliers||[]).map(s=>(DB.suppliers||[]).find(x=>x.id===s.supplierRef)).filter(sp=>sp&&sp.company);
+  const withMail=sups.filter(sp=>(sp.email||"").trim());
+  const toRows=sups.map(sp=>`<div class="rfqto-row"><span class="rfqto-co">${esc(sp.company)}</span>${(sp.email||"").trim()
+      ?`<span class="rfqto-mail" title="Click to copy" onclick="copyText(this.textContent,'${esc(sp.company).replace(/'/g,"\\'")} email copied')">${esc(sp.email.trim())}</span><button class="btn sm" onclick="copyText(${esc(JSON.stringify(sp.email.trim()))},'Email copied')">Copy</button>`
+      :`<span class="rfqto-none">No email on file</span><button class="btn sm" onclick="closeForm();openForm('${sp.id}','suppliers')">Add email</button>`}</div>`).join("");
   openModal("RFQ "+(r.rfqNumber||"")+" — ready to send",`<div class="imp">
     <div class="impnote"><b>Best way:</b> tap <b>Copy email with table</b>, then paste into the body of your email. The table keeps its columns in Gmail and Outlook, and the two yellow columns are left blank for the supplier to fill in.</div>
-    <div><div class="impnote" style="margin-bottom:4px"><b>To:</b> ${emails.length?esc(emails.join(", ")):"add suppliers to this RFQ"}</div>
-      <div class="subjrow"><input id="rfqsubj" readonly value="${esc(subject)}"><button class="btn sm" onclick="copyText(document.getElementById('rfqsubj').value,'Subject copied')">Copy subject</button></div></div>
+    <div class="rfqto"><div class="rfqto-hd"><b>Send to</b>${withMail.length>1?`<button class="btn sm" onclick="copyText(${esc(JSON.stringify(withMail.map(sp=>sp.email.trim()).join("; ")))},'${withMail.length} emails copied — paste into the To box')">Copy all ${withMail.length} emails</button>`:""}</div>
+      ${toRows||`<div class="rfqto-none">No suppliers on this RFQ yet.</div>`}</div>
+    <div><div class="subjrow"><input id="rfqsubj" readonly value="${esc(subject)}"><button class="btn sm" onclick="copyText(document.getElementById('rfqsubj').value,'Subject copied')">Copy subject</button></div></div>
     <div class="emailprev" id="rfqprev">${rfqEmailHTML(r)}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn primary" onclick="copyRich(rfqEmailHTML(DB.procurement.find(x=>x.id==='${id}')),rfqEmailText(DB.procurement.find(x=>x.id==='${id}')),'Email copied — paste it into the body of your email')">📋 Copy email with table</button>
@@ -2952,9 +3138,9 @@ function gridSave(){
 /* ============ v5: JOB TEMPLATES & WORKFLOW SCHEDULE ============ */
 let _taskWas={};
 const JOB_TYPES={
-  "Design & build":{optSite:false,optConcept:true,optFab:true,optCoat:true,optAssembly:true},
-  "Build to client drawing":{optSite:false,optConcept:false,optFab:true,optCoat:true,optAssembly:true},
-  "Repair / blast & paint":{optSite:true,optConcept:false,optFab:false,optCoat:true,optAssembly:false}
+  "Design & build":{optSite:false,optConcept:true,optFab:true,optCoat:true,optAssembly:true,reqMPI:true},
+  "Build to client drawing":{optSite:false,optConcept:false,optFab:true,optCoat:true,optAssembly:true,reqMPI:true},
+  "Repair / blast & paint":{optSite:true,optConcept:false,optFab:false,optCoat:true,optAssembly:false,reqMPI:false}
 };
 const WF_SECTIONS=[["quote","Enquiry & quotation"],["order","PO & materials"],["prod","Production"],["close","QC & delivery"]];
 const WF_DEFAULT=[
@@ -2972,18 +3158,26 @@ const WF_DEFAULT=[
   {key:"order",name:"Materials ordered",sec:"order",days:1,auto:"order"},
   {key:"received",name:"Materials received",sec:"order",days:3,auto:"received"},
   {key:"fab",name:"Fabrication — cut, fit, weld, grind",sec:"prod",days:5,when:"optFab",auto:"fab"},
+  {key:"weldmaps",name:"Weld maps from the drawings",sec:"prod",days:0,when:"reqWeldMap"},
   {key:"qcweld",name:"Fabrication QC",sec:"prod",days:0,when:"optFab",auto:"qcweld"},
+  {key:"mpi",name:"MPI — welds",sec:"prod",days:1,when:"reqMPI",auto:"mpi"},
+  {key:"loadtest",name:"Load test — pad eyes",sec:"prod",days:1,when:"reqLoad",auto:"loadtest"},
+  {key:"mpi2",name:"MPI — pad eye welds after the load test",sec:"prod",days:1,when:"reqLoad",auto:"mpi2"},
   {key:"blast",name:"Surface prep & blast",sec:"prod",days:2,when:"optCoat",auto:"blast"},
   {key:"coat",name:"Coating — primer, intermediate, topcoat",sec:"prod",days:3,when:"optCoat",auto:"coat"},
   {key:"qcpaint",name:"Coating QC (DFT)",sec:"prod",days:0,when:"optCoat",auto:"qcpaint"},
   {key:"assembly",name:"Assembly & fit-out",sec:"prod",days:2,when:"optAssembly"},
   {key:"final",name:"Final inspection",sec:"close",days:0,auto:"final"},
-  {key:"delivered",name:"Delivery / client collection",sec:"close",days:0,auto:"delivered"}
+  {key:"delivered",name:"Delivery / client collection",sec:"close",days:0,auto:"delivered"},
+  {key:"docs",name:"Documents & handover — reports, certificates, weld maps to the client",sec:"close",days:2,when:"reqDocs",auto:"docs"}
 ];
-const AUTO_HINT={rfq:"ticks itself: RFQ date",suprfq:"ticks itself when a supplier RFQ is sent",quoted:"ticks itself when the quote is submitted",po:"ticks itself when the PO is recorded",order:"ticks itself when every material line is ordered",received:"ticks itself when every material line is received",fab:"ticks itself when fabrication QC is recorded",qcweld:"ticks itself from the QC tab",blast:"ticks itself when blast QC is recorded",coat:"ticks itself when coating QC is recorded",qcpaint:"ticks itself from the QC tab",final:"ticks itself when final inspection passes",delivered:"ticks itself when the project is delivered"};
+/* v8 steps, with the step each one goes after — added to a template he has already edited (migrateV8) */
+const WF_V8=[["weldmaps","fab"],["mpi","qcweld"],["loadtest","mpi"],["mpi2","loadtest"],["docs","delivered"]];
+const AUTO_HINT={rfq:"ticks itself: RFQ date",suprfq:"ticks itself when a supplier RFQ is sent",quoted:"ticks itself when the quote is submitted",po:"ticks itself when the PO is recorded",order:"ticks itself when every material line is ordered",received:"ticks itself when every material line is received",fab:"ticks itself when fabrication QC is recorded",qcweld:"ticks itself from the QC tab",blast:"ticks itself when blast QC is recorded",coat:"ticks itself when coating QC is recorded",qcpaint:"ticks itself from the QC tab",final:"ticks itself when final inspection passes",delivered:"ticks itself when the project is delivered or collected",mpi:"ticks itself when MPI (welds) passes",loadtest:"ticks itself when the load test passes",mpi2:"ticks itself when the after-load-test MPI passes",docs:"ticks itself when the documents are handed over"};
 function wfSteps(){const s=DB.meta&&DB.meta.wfSteps;return Array.isArray(s)&&s.length?s:WF_DEFAULT;}
-function wfSig(j){return [j.jobType,j.optSite,j.optConcept,j.optFab,j.optCoat,j.optAssembly].map(v=>v?String(v):"").join("|");}
-function wfStepsFor(j){return wfSteps().filter(s=>!s.when||j[s.when]);}
+function wfSig(j){return [j.jobType,j.optSite,j.optConcept,j.optFab,j.optCoat,j.optAssembly,j.reqMPI,j.reqLoad,j.reqWeldMap].map(v=>v?String(v):"").join("|");}
+function wfWhen(j,w){return w==="reqDocs"?docsRequired(j):!!j[w];}
+function wfStepsFor(j){return wfSteps().filter(s=>!s.when||wfWhen(j,s.when));}
 function nextWD(iso){let d=iso;while(!isWorkDay(d))d=isoAdd(d,1);return d;}
 function schedCount(j){return (DB.tasks||[]).filter(t=>t.jobRef===j.id&&t.parentTask).length||topTasks(j.id).length;}
 function planSteps(j,steps){
@@ -3032,7 +3226,7 @@ function buildSchedule(j,keep){
 function stepEvent(j,key){
   const q=j.qc||{},mats=jobMats(j.id);
   const qd=k=>(q[k]&&q[k].s)?q[k].date:"";const qp=k=>(q[k]&&(q[k].s==="Pass"||q[k].s==="N/A"))?q[k].date:"";
-  const late=EXEC.includes(j.phase)&&j.phase!==PH.PO||j.phase===PH.DONE;
+  const late=[PH.PROD,PH.DOCS,PH.DONE].includes(j.phase);
   const maxOf=a=>a.filter(Boolean).sort().pop()||"";
   switch(key){
     case "rfq":return j.rfqDate||"";
@@ -3047,11 +3241,15 @@ function stepEvent(j,key){
     case "coat":return qp("paint");
     case "qcpaint":return qp("paint");
     case "final":return qp("final");
-    case "delivered":return j.phase===PH.DONE?(j.deliveredDate||""):"";
+    case "mpi":return qp("mpi");
+    case "loadtest":return qp("load");
+    case "mpi2":return qp("mpi2");
+    case "delivered":return jd(j,"deliveredDate");
+    case "docs":return jd(j,"docsSentDate");
   }
   return "";
 }
-function stepFailed(j,key){const q=j.qc||{};const m={qcweld:"weld",fab:"weld",blast:"blast",coat:"paint",qcpaint:"paint",final:"final"}[key];return !!(m&&q[m]&&q[m].s==="Fail");}
+function stepFailed(j,key){const q=j.qc||{};const m={qcweld:"weld",fab:"weld",blast:"blast",coat:"paint",qcpaint:"paint",final:"final",mpi:"mpi",loadtest:"load",mpi2:"mpi2"}[key];return !!(m&&q[m]&&q[m].s==="Fail");}
 function syncSchedule(j){
   const ts=(DB.tasks||[]).filter(t=>t.jobRef===j.id&&t.stepKey&&t.parentTask).sort((a,b)=>(a.order||0)-(b.order||0));
   if(!ts.length)return;
@@ -3242,9 +3440,29 @@ function toggleTheme(){ const cur=document.documentElement.getAttribute("data-th
 function updThemeBtn(t){ const sw=document.getElementById("tswitch"); if(sw){sw.setAttribute("aria-checked",t==="dark"?"true":"false");sw.title=t==="dark"?"Switch to light mode":"Switch to dark mode";} const lb=document.getElementById("themelbl"); if(lb)lb.textContent=t==="dark"?"Dark":"Light"; }
 
 /* ============ NAV ============ */
+/* ---- brand + nav icons (his icon sheet v1: 24 grid, 1.75 stroke, duotone line — line in the label colour + safety-orange accent) ---- */
+const NI={
+ dashboard:'<rect x="3" y="3.5" width="18" height="12.5" rx="2"/><path d="M12 16v4M8 20h8"/><path d="M8 13.5v-1.5M11.5 13.5v-2.5M15 13.5v-1"/><g class="ac nx-trend"><path d="M6.5 10.5 9.5 7.8 12.5 9.3 17.2 5.8"/><path d="M14.6 5.6h2.8v2.8"/></g>',
+ jobs:'<g class="ac nx-back"><path d="M7.5 6.5v-.5A1.5 1.5 0 0 1 9 4.5h2.6l1.5 1.5H19a1.5 1.5 0 0 1 1.5 1.5V15"/></g><path d="M3.5 10a1.5 1.5 0 0 1 1.5-1.5h3.6l1.5 1.5H17a1.5 1.5 0 0 1 1.5 1.5V18a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 18z"/>',
+ purchasing:'<g class="nx-cart"><path d="M2.8 4.5h2.4l2.1 10h10.6l2-7.8H6.1"/><circle cx="9.3" cy="18.6" r="1.6"/><circle cx="16.3" cy="18.6" r="1.6"/><rect class="ac" x="9.6" y="8.7" width="6" height="4" rx=".9"/></g>',
+ prices:'<path d="M11 6.2C8.5 4.6 5.8 4.4 3 5.4v13c2.8-1 5.5-.8 8 .8 2.5-1.6 5.2-1.8 8-.8v-3.6"/><path d="M11 6.2c2.5-1.6 5.2-1.8 8-.8v4.1"/><path d="M11 6.2v13"/><g class="nx-coin"><circle class="acf" cx="17.6" cy="16.8" r="4.6"/><path class="cut" d="M19.1 14.9h-2a1.05 1.05 0 0 0 0 2.1h1a1.05 1.05 0 0 1 0 2.1h-2.1M17.6 14v.9M17.6 19.1v.9"/></g>',
+ qc:'<circle cx="12" cy="9.5" r="6.3"/><path d="M8.6 14.9 7.5 21.2l4.5-2.4 4.5 2.4-1.1-6.3"/><path class="ac nx-chk" d="M9.4 9.6l1.9 1.9 3.5-3.7"/>',
+ suppliers:'<circle cx="12" cy="8.6" r="3.2"/><g class="ac nx-cap"><path d="M8.8 7.4a3.2 3.2 0 0 1 6.4 0z"/><path d="M15.2 7.4h2.4"/></g><path d="M4.8 20.5v-1.3A4.7 4.7 0 0 1 9.5 14.5h5a4.7 4.7 0 0 1 4.7 4.7v1.3"/><g class="ac"><rect x="9.6" y="15.7" width="4.8" height="4.8" rx=".7"/><path d="M12 15.7v1.6"/></g>',
+ reminders:'<g class="nx-pin"><path class="ac" d="M14.3 3.4 20.6 9.7l-1.9.4-3.6 3.6.4 3.2-1.5 1.5-7-7 1.5-1.5 3.2.4 3.6-3.6z"/><path d="M8.8 15.2 3.6 20.4"/></g>',
+ settings:'<g class="nx-sd"><rect class="ac" x="10.3" y="13.2" width="8.8" height="3.6" rx="1.8" transform="rotate(45 14.7 15)" style="transform-box:view-box;transform-origin:0 0"/><path d="M5.1 5.6 11.4 11.9"/><path d="M4 6.7 6.2 4.5"/></g><g class="nx-sp"><path d="M8.5 16 14.6 9.9"/><circle cx="6.8" cy="17.7" r="2.2"/><path d="M16.07 5.04A2.5 2.5 0 1 0 18.96 7.93" style="stroke-width:2.5;stroke-linecap:butt"/></g>'
+};
+const GEAR_D="M18.94 9.37L18.84 6.96L21.16 6.96L21.06 9.37L23.15 9.93L24.26 7.79L26.28 8.96L24.99 10.99L26.51 12.51L28.54 11.22L29.71 13.24L27.57 14.35L28.13 16.44L30.54 16.34L30.54 18.66L28.13 18.56L27.57 20.65L29.71 21.76L28.54 23.78L26.51 22.49L24.99 24.01L26.28 26.04L24.26 27.21L23.15 25.07L21.06 25.63L21.16 28.04L18.84 28.04L18.94 25.63L16.85 25.07L15.74 27.21L13.72 26.04L15.01 24.01L13.49 22.49L11.46 23.78L10.29 21.76L12.43 20.65L11.87 18.56L9.46 18.66L9.46 16.34L11.87 16.44L12.43 14.35L10.29 13.24L11.46 11.22L13.49 12.51L15.01 10.99L13.72 8.96L15.74 7.79L16.85 9.93Z";
+/* app icon from his logo sheet: steel-navy tile, white 12-tooth gear, orange hub, QUOTE · FAB · QC · DELIVER bars (the last one orange) */
+function appLogoSVG(){return `<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#1B2A3A"/><g class="lg-gear"><path d="${GEAR_D}" fill="#fff"/><circle cx="20" cy="17.5" r="3.9" fill="#1B2A3A"/><circle cx="20" cy="17.5" r="1.9" fill="#E8641B"/></g><rect x="10" y="32" width="4.3" height="1.7" rx=".4" fill="#fff"/><rect x="15.3" y="32" width="4.3" height="1.7" rx=".4" fill="#fff"/><rect x="20.6" y="32" width="4.3" height="1.7" rx=".4" fill="#fff"/><rect x="25.9" y="32" width="4.3" height="1.7" rx=".4" fill="#E8641B"/></svg>`;}
+function navIcon(id){return `<svg class="nic nic-${id}" viewBox="0 0 24 24" aria-hidden="true">${NI[id]||""}</svg>`;}
+let navPop=null;   // the item just pressed: its icon plays the press "pop" once after the nav is rebuilt
+function navPress(id){navPop=id;setTimeout(()=>{navPop=null;},450);go(id);}
+function initBrand(){const el=document.getElementById("applogo");if(el)el.innerHTML=appLogoSVG();
+  try{let l=document.querySelector("link[rel~=icon]");if(!l){l=document.createElement("link");l.rel="icon";document.head.appendChild(l);}
+    l.href="data:image/svg+xml,"+encodeURIComponent(appLogoSVG().replace('aria-hidden="true"','xmlns="http://www.w3.org/2000/svg"'));}catch(e){}}
 function buildNav(){
-  const nav=document.getElementById("nav");
-  const items=[["dashboard","Dashboard","🏠"],["jobs","Projects","📋"],["purchasing","Purchasing","📦"],["prices","Price Book","💲"],["qc","QC","✅"],["suppliers","Suppliers","🏭"],["reminders","Reminders","📌"],["settings","Settings","⚙️"]];
+  const nav=document.getElementById("nav");{const lg=document.getElementById("applogo");if(lg&&!lg.firstChild)initBrand();}
+  const items=[["dashboard","Dashboard"],["jobs","Projects"],["purchasing","Purchasing"],["prices","Price Book"],["qc","QC"],["suppliers","Suppliers"],["reminders","Reminders"],["settings","Settings"]];
   nav.innerHTML=items.map(([id,label,ic])=>{
     let cnt="";
     if(id==="reminders"){const oc=openReminderCount();cnt=oc?`<span class="cnt">${oc}</span>`:"";}
@@ -3253,7 +3471,7 @@ function buildNav(){
     else if(id==="purchasing"){const n=purCounts().toorder;cnt=n?`<span class="cnt">${n}</span>`:"";}
     else if(SCHEMA[id])cnt=`<span class="cnt">${(DB[id]||[]).length}</span>`;
     const active=(!detailJob&&id===current)||(detailJob&&id==="jobs");
-    return `<button class="${active?'active':''}" title="${label}" onclick="go('${id}')"><span class="ic">${ic}</span><span class="lbl">${label}</span>${cnt}</button>`;
+    return `<button class="${active?'active':''}${navPop===id?' pop':''}" title="${label}" onclick="navPress('${id}')"><span class="ic">${navIcon(id)}</span><span class="lbl">${label}</span>${cnt}</button>`;
   }).join("");
 }
 function toggleSide(){const a=document.querySelector(".app");const c=!a.classList.contains("collapsed");a.classList.toggle("collapsed",c);try{localStorage.setItem("protrac_side",c?"1":"0");}catch(e){}const b=document.getElementById("sidetog");if(b){b.textContent=c?"›":"‹";b.title=c?"Expand menu":"Collapse menu";}}
@@ -3263,7 +3481,7 @@ function dashFilter(kind){ setTimeout(pageAnim,0); detailJob=null; current="jobs
 function phaseGo(i){const p=PHASES[i];if(!p)return;go("jobs");gridFilters={phase:p};render();}
 function dashGo(page){ if(page==="procurement")purStage="waiting"; go(page); }
 function clearJobFilter(){ jobFilter=null; render(); }
-const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Projects overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active projects (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded",delivered:"Delivered this year",winloss:"Won & lost — quotes the client decided on",costed:"Costed projects behind the average margin",attention:"Needs your attention",mquoted:"Quotes sent this month",mwon:"POs won this month",mdelivered:"Delivered this month"};
+const JOBFILTER_LABEL={quoteover:"Quotes overdue",jobover:"Projects overdue (delivery)",soon:"Due within 5 working days",rfq:"RFQs to quote",awaitingpo:"Quoted — awaiting PO",chase:"Chase client for PO",active:"Active projects (PO → production)",onhold:"On hold",nodue:"Missing deadline / lead time",nochecklist:"In production, no QC recorded",delivered:"Delivered / collected this year",winloss:"Won & lost — quotes the client decided on",costed:"Costed projects behind the average margin",attention:"Needs your attention",mquoted:"Quotes sent this month",mwon:"POs won this month",mdelivered:"Delivered / collected this month",docs:"Documents to hand over",inspfail:"Failed MPI / load test"};
 function rerender(){ if(detailJob)renderDetail(); else render(); buildNav(); }
 
 /* ============ ROUTER ============ */
@@ -3288,6 +3506,44 @@ function render(){
   if(currentView==="calendar")return renderCalendar(c);
 }
 function viewLabel(v){return{grid:"Grid",kanban:"Board",calendar:"Calendar"}[v];}
+/* ---- row actions menu (⋯): one floating panel, placed next to the button, kept inside the window ---- */
+let _rmTimer=null,_rmFor=null,_rmBtn=null,_rmClicked=false;
+function rowMenuItems(id){const isJobs=current==="jobs";const it=[];
+  if(isJobs){it.push(["Open project",`openJob('${id}')`,"▸"]);it.push(["Open file",`openJobFile('${id}')`,"📁"]);}
+  it.push(["Edit",`openForm('${id}')`,"✏️"]);it.push(["Delete",`del('${id}')`,"🗑","del"]);return it;}
+function rowMenuOpen(btn,toggle,kb){
+  clearTimeout(_rmTimer);let m=document.getElementById("rowmenu");
+  // a click on a menu that hover already opened keeps it open (and pinned); a second click closes it
+  if(toggle&&m&&m.classList.contains("show")&&_rmFor===btn.dataset.id){if(_rmClicked&&!kb){rowMenuClose();return;}_rmClicked=true;if(kb)rowMenuFocus(0);return;}
+  if(!(m&&m.classList.contains("show")&&_rmFor===btn.dataset.id))_rmClicked=!!toggle;
+  if(!m){m=document.createElement("div");m.id="rowmenu";m.className="rowmenu";m.setAttribute("role","menu");
+    m.onmouseenter=()=>clearTimeout(_rmTimer);m.onmouseleave=rowMenuLeave;m.onkeydown=rowMenuKey;document.body.appendChild(m);}
+  const id=btn.dataset.id;_rmFor=id;
+  m.innerHTML=rowMenuItems(id).map(([l,fn,ic,cls])=>`<button type="button" role="menuitem" class="${cls||""}" onclick="rowMenuClose();${fn}"><span class="rmi">${ic}</span>${l}</button>`).join("");
+  document.querySelectorAll(".kebab.on").forEach(b=>b.classList.remove("on"));btn.classList.add("on");
+  document.querySelectorAll('.kebab[aria-expanded="true"]').forEach(b=>b.setAttribute("aria-expanded","false"));btn.setAttribute("aria-expanded","true");
+  m.classList.add("show");_rmBtn=btn;rowMenuPlace();
+  if(kb)rowMenuFocus(0);   // opened with Enter / Space: put the keyboard in the menu
+}
+/* keyboard: ↑ ↓ Home End move, Enter / Space choose, Escape or Tab close and go back to the ⋯ */
+function rowMenuFocus(i){const its=[...document.querySelectorAll("#rowmenu button")];if(!its.length)return;its[(i+its.length)%its.length].focus();}
+function rowMenuKey(e){const its=[...document.querySelectorAll("#rowmenu button")],i=its.indexOf(document.activeElement);
+  if(e.key==="ArrowDown"){e.preventDefault();rowMenuFocus(i+1);}
+  else if(e.key==="ArrowUp"){e.preventDefault();rowMenuFocus(i<0?-1:i-1);}
+  else if(e.key==="Home"){e.preventDefault();rowMenuFocus(0);}
+  else if(e.key==="End"){e.preventDefault();rowMenuFocus(-1);}
+  else if(e.key==="Escape"||e.key==="Tab"){e.preventDefault();e.stopPropagation();const b=_rmBtn;rowMenuClose();if(b&&b.isConnected)b.focus();}
+}
+/* keep the menu next to its ⋯ when the page or table scrolls; close it once the row scrolls out of view */
+function rowMenuPlace(){const m=document.getElementById("rowmenu"),btn=_rmBtn;if(!m||!btn||!m.classList.contains("show"))return;
+  if(!btn.isConnected){rowMenuClose();return;}
+  const r=btn.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight){rowMenuClose();return;}
+  const mw=m.offsetWidth,mh=m.offsetHeight;let left=r.right-mw,top=r.bottom+4;if(top+mh>innerHeight-8)top=r.top-mh-4;
+  m.style.left=Math.max(8,left)+"px";m.style.top=Math.max(8,top)+"px";}
+function rowMenuLeave(){if(_rmClicked)return;clearTimeout(_rmTimer);_rmTimer=setTimeout(rowMenuClose,220);}
+function rowMenuClose(){clearTimeout(_rmTimer);const m=document.getElementById("rowmenu");if(m)m.classList.remove("show");document.querySelectorAll(".kebab.on").forEach(b=>b.classList.remove("on"));document.querySelectorAll('.kebab[aria-expanded="true"]').forEach(b=>b.setAttribute("aria-expanded","false"));_rmFor=null;_rmBtn=null;_rmClicked=false;}
+if(typeof document!=="undefined"&&document.addEventListener){document.addEventListener("pointerdown",e=>{if(e.target&&e.target.closest&&!e.target.closest(".rowmenu,.kebab"))rowMenuClose();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")rowMenuClose();});document.addEventListener("scroll",()=>rowMenuPlace(),true);}
 function setView(v){currentView=v;render();pageAnim();}
 
 /* ============ FILTER ============ */
@@ -3300,7 +3556,7 @@ function filteredRows(){
   if(current==="jobs"&&jobFilter){
     const F={quoteover:j=>{const s=jobState(j);return s.kind==="quote"&&s.overdue;},jobover:j=>{const s=jobState(j);return s.kind==="delivery"&&s.overdue;},
       soon:j=>jobState(j).soon,rfq:j=>j.phase===PH.RFQ,awaitingpo:j=>j.phase===PH.QUOTED,chase:j=>jobState(j).chase,active:j=>EXEC.includes(j.phase),
-      onhold:j=>!isClosed(j)&&isOnHold(j),nodue:j=>{const s=jobState(j);return(s.kind==="quote"||s.kind==="delivery")&&!s.due;},nochecklist:jobNeedsChecklist,delivered:j=>j.phase===PH.DONE&&(j.deliveredDate||"").slice(0,4)===todayISO().slice(0,4),winloss:j=>isWon(j)||isLostQuote(j),costed:j=>(EXEC.includes(j.phase)||j.phase===PH.DONE)&&!!jobMargin(j),
+      onhold:j=>!isClosed(j)&&isOnHold(j),nodue:j=>{const s=jobState(j);return(s.kind==="quote"||s.kind==="delivery")&&!s.due;},nochecklist:jobNeedsChecklist,delivered:j=>(j.phase===PH.DONE||j.phase===PH.DOCS)&&(j.deliveredDate||"").slice(0,4)===todayISO().slice(0,4),docs:j=>j.phase===PH.DOCS,inspfail:j=>INSP_STAGES.some(k=>((j.qc||{})[k]||{}).s==="Fail")&&j.phase!==PH.LOST,winloss:j=>isWon(j)||isLostQuote(j),costed:j=>(EXEC.includes(j.phase)||j.phase===PH.DONE)&&!!jobMargin(j),
       mquoted:j=>inThisMonth(j,"quoted"),mwon:j=>inThisMonth(j,"won"),mdelivered:j=>inThisMonth(j,"delivered")}[jobFilter];
     if(jobFilter==="attention"){const ids=attentionJobIds();rows=rows.filter(j=>ids.has(j.id));}
     else if(F)rows=rows.filter(F);
@@ -3324,28 +3580,23 @@ function filteredRows(){
 /* ============ GRID ============ */
 function renderGrid(c){
   const sch=SCHEMA[current];
-  const cols=sch.gridCols?sch.gridCols.map(k=>({_due:{k:"_due",l:"Due / next action"},_price:{k:"_price",l:"Best price"},_mstatus:{k:"_mstatus",l:"Status"},_step:{k:"_step",l:"Current step"},_pct:{k:"_pct",l:"Progress"},_val:{k:"_val",l:"Value"}})[k]||sch.fields.find(f=>f.k===k)):sch.fields.filter(f=>f.t!=="textarea"&&f.t!=="heading").slice(0,9);
+  const cols=sch.gridCols?sch.gridCols.map(k=>({_due:{k:"_due",l:"Next due"},_price:{k:"_price",l:"Best price"},_mstatus:{k:"_mstatus",l:"Status"},_step:{k:"_step",l:"Current step"},_pct:{k:"_pct",l:"Progress"},_val:{k:"_val",l:"Value"}})[k]||sch.fields.find(f=>f.k===k)):sch.fields.filter(f=>f.t!=="textarea"&&f.t!=="heading").slice(0,9);
   const selFields=sch.fields.filter(f=>f.t==="select"&&!f.noFilter);
-  const fbar=selFields.length?`<div class="filters"><span class="lbl">Filter</span>`+selFields.map(f=>{const ops=optsFor(f);const cur=gridFilters[f.k]||"";return `<select data-filter="${f.k}" onchange="gridFilters['${f.k}']=this.value;render()" class="${cur?"on":""}"><option value="">${f.l}: All</option>${ops.map(o=>`<option ${cur===o?"selected":""}>${esc(o)}</option>`).join("")}</select>`;}).join("")+`</div>`:"";
+  const fbar=selFields.length?`<div class="filters"><span class="lbl">Filter</span>`+selFields.map(f=>{const ops=optsFor(f);const cur=gridFilters[f.k]||"";return `<select data-filter="${f.k}" onchange="gridFilters['${f.k}']=this.value;render()" class="${cur?"on":""}"><option value="">${f.l}: All</option>${ops.map(o=>`<option value="${esc(o)}" ${cur===o?"selected":""}>${esc(f.phase?phaseLabel(o)+(o===PH.DONE?" (delivered / collected)":""):o)}</option>`).join("")}</select>`;}).join("")+`</div>`:"";
   const rows=filteredRows();
   let body;
   if(!rows.length)body=(listQ||Object.values(gridFilters).some(Boolean)||jobFilter)?`<div class="empty"><div class="big">🔍</div>No ${sch.label.toLowerCase()} match. <button class="linkbtn" onclick="listQ='';gridFilters={};jobFilter=null;render()">Clear search &amp; filters</button></div>`:`<div class="empty"><div class="big">${sch.icon}</div>No ${sch.label.toLowerCase()} yet. Click <b>+ Add</b> to create one.</div>`;
   else{
-    const head=cols.map(f=>`<th onclick="setSort('${f.k}')">${f.l}${sortKey===f.k?`<span class="arr">${sortDir>0?'▲':'▼'}</span>`:''}</th>`).join("")+`<th></th>`;
     const isJobs=current==="jobs";
+    const head=cols.map(f=>`<th${isJobs&&f.k===sch.primary?' class="pcol"':''} onclick="setSort('${f.k}')">${f.l}${sortKey===f.k?`<span class="arr">${sortDir>0?'▲':'▼'}</span>`:''}</th>`).join("")+`<th class="kcol"></th>`;
     const trs=rows.map(r=>{
       const tds=cols.map(f=>{
-        if(isJobs&&f.k===sch.primary)return `<td><button class="joblink" onclick="openJob('${r.id}')">${jobNo(r)?`<span class="jno">${esc(jobNo(r))}</span> · `:""}${esc(r[f.k]||"(untitled)")}</button></td>`;
+        if(isJobs&&f.k===sch.primary)return `<td class="pcol"><button class="joblink" onclick="openJob('${r.id}')">${jobNo(r)?`<span class="jno">${esc(jobNo(r))}</span> · `:""}${esc(r[f.k]||"(untitled)")}</button></td>`;
         if(f.quick)return `<td>${quickCell(f,r,current)}</td>`;
         return `<td>${cellHTML(f,r)}</td>`;
       }).join("");
-      let acts="";
-      if(isJobs){
-        acts+=`<button class="icobtn open" title="Open file" onclick="openJobFile('${r.id}')">📁</button>`;
-        acts+=`<button class="icobtn open" title="Open project" onclick="openJob('${r.id}')">▸</button>`;
-      }
-      acts+=`<button class="icobtn" title="Edit" onclick="openForm('${r.id}')">✏️</button><button class="icobtn del" title="Delete" onclick="del('${r.id}')">🗑</button>`;
-      return `<tr>${tds}<td><div class="rowact">${acts}</div></td></tr>`;
+      // one ⋯ button per row; hover (or click) opens a floating menu with the row's actions (his request: the 4 icons took too much width)
+      return `<tr>${tds}<td class="kcol"><button type="button" class="kebab" title="Actions" aria-haspopup="menu" data-id="${r.id}" onmouseenter="rowMenuOpen(this)" onmouseleave="rowMenuLeave()" aria-expanded="false" onclick="event.stopPropagation();rowMenuOpen(this,true,event.detail===0)">⋯</button></td></tr>`;
     }).join("");
     body=`<div class="tablewrap"><table><thead><tr>${head}</tr></thead><tbody>${trs}</tbody></table></div>`;
   }
@@ -3361,7 +3612,7 @@ function cellHTML(f,r){
   if(f.k==="_step"){const s=currentStep(r);return s?`<span class="stepcell">${esc(s)}</span>`:"<span style='color:var(--ink-soft)'>—</span>";}
   if(f.k==="_pct"){if(r.phase===PH.LOST)return "<span style='color:var(--ink-soft)'>—</span>";const p=jobPct(r);return `<div class="pbar" title="${p}% of schedule steps done"><span class="ptrack"><span class="pf ${p>=100?'full':''}" style="width:${p}%"></span></span><em>${p}%</em></div>`;}
   let v=r[f.k];
-  if(f.phase&&v)return `<span class="badge" style="${tokStyle(PHASE_TOK[v]||"idle")}">${esc(v)}</span>`;
+  if(f.phase&&v)return `<span class="badge" style="${tokStyle(PHASE_TOK[v]||"idle")}">${esc(v===PH.DONE&&r?(docsRequired(r)||r.docsSentDate?"Complete":doneWord(r)):v)}</span>`;
   if(f.t==="link")return v?`<span class="linktag">${esc(refName(f.to,v))}</span>`:"<span style='color:var(--ink-soft)'>—</span>";
   if(f.t==="checkbox")return v?"✅":"—";
   if(f.bar){const p=Math.min(100,Math.max(0,Math.round(+v||0)));return `<div class="pbar" title="${p}% complete"><span class="ptrack"><span class="pf ${p>=100?'full':''}" style="width:${p}%"></span></span><em>${p}%</em></div>`;}
@@ -3413,7 +3664,7 @@ function renderKanban(c){
   const lanes=opts.map(st=>{
     const items=rows.filter(r=>(r[kf]||opts[0])===st);
     const add=current==="jobs"&&st===PH.RFQ?`<button class="laneadd" onclick="openForm(null,'jobs')">+ Add project</button>`:"";
-    return `<section class="lane" data-status="${esc(st)}"><header class="lanehd"><span class="dot" style="background:var(${dotVar(st)})"></span><span class="ln">${esc(st)}</span><span class="lcnt">${items.length}</span></header><div class="lanebody">${items.map(r=>kCard(r,sch)).join("")||`<div class="laneempty">No projects</div>`}</div>${add}</section>`;
+    return `<section class="lane" data-status="${esc(st)}"><header class="lanehd"><span class="dot" style="background:var(${dotVar(st)})"></span><span class="ln">${esc(current==="jobs"?phaseLabel(st):st)}</span><span class="lcnt">${items.length}</span></header><div class="lanebody">${items.map(r=>kCard(r,sch)).join("")||`<div class="laneempty">No projects</div>`}</div>${add}</section>`;
   }).join("");
   c.innerHTML=listSearch()+`<div class="board kanban" id="board"><div class="boardscroll" id="boardscroll">${lanes}</div><button class="barrow l" aria-label="Previous lane" onclick="boardStep(-1)">‹</button><button class="barrow r" aria-label="Next lane" onclick="boardStep(1)">›</button></div>`;
   initBoard();
@@ -3424,6 +3675,7 @@ function kCard(r){
     <div class="kc-top">${r.priority?`<span class="badge" style="${tokStyle(priTok(r.priority))}">${esc(r.priority)}</span>`:""}<span class="kno">${esc(jobNo(r))}</span></div>
     <div class="t">${esc(r.jobName||"(untitled)")}</div>
     ${r.client?`<div class="kc-cl">${esc(r.client)}</div>`:""}
+    ${matBadge(r)?`<div class="kc-mat">${matBadge(r)}</div>`:""}
     <div class="kc-ft"><span class="due ${m.cls}">${esc(m.txt)}</span>${r.phase===PH.LOST?"":`<span class="kpct">${p}%</span>`}</div>
     ${r.phase===PH.LOST?"":`<div class="kbar"><span style="width:${p}%"></span></div>`}</div>`;
 }
@@ -3522,8 +3774,8 @@ function renderCalendar(c){
   const monthName=calMonth.toLocaleDateString(undefined,{month:"long",year:"numeric"});
   const todayTxt=new Date(T+"T00:00:00").toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
   const hol={};((DB.meta&&DB.meta.holidays)||[]).forEach(x=>{hol[x.date]=x.name||"Holiday";});
-  const kindOf=(s)=>s.overdue?"od":s.kind==="quote"?"q":s.kind==="followup"?"fu":"dl";
-  const KIND={q:"Quote due",dl:"Delivery due",fu:"Follow up client",od:"Overdue"};
+  const kindOf=(s)=>s.overdue?"od":s.kind==="quote"?"q":s.kind==="followup"?"fu":s.kind==="docs"?"dc":"dl";
+  const KIND={q:"Quote due",dl:"Delivery due",fu:"Follow up client",dc:"Documents due",od:"Overdue"};
   const evs={},cq=listQ.trim().toLowerCase();
   jobQ(DB.jobs||[],cq,j=>[j.jobName,j.jobId,j.client,j.poNumber].join(" ")).forEach(j=>{const s=jobState(j);const d=s.due||(s.kind==="followup"&&!s.paused?s.followUp:"");if(d)(evs[d]=evs[d]||[]).push({j,s,k:kindOf(s)});});
   let cells="";
@@ -3535,7 +3787,7 @@ function renderCalendar(c){
     cells+=`<div class="calcell ${dim?"dim":""} ${isToday?"today":""} ${wk?"wkend":""} ${hol[iso]?"hol":""}" data-date="${iso}"><div class="dnrow"><span class="dn">${d.getDate()}</span>${isToday?`<span class="todaytag">Today</span>`:""}</div>${hol[iso]?`<div class="holname" title="${esc(hol[iso])}">${esc(hol[iso])}</div>`:""}<div class="calevs">${dayEvs}</div></div>`;
   }
   const dows=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map((d,i)=>`<div class="dow ${i>4?"wkend":""}">${d}</div>`).join("");
-  const legend=`<div class="callegend">${["q","dl","fu","od"].map(k=>`<span class="lg k-${k}"><span class="cdot"></span>${KIND[k]}</span>`).join("")}<span class="lg lg-hol"><span class="cdot"></span>Public holiday</span></div>`;
+  const legend=`<div class="callegend">${["q","dl","fu","dc","od"].map(k=>`<span class="lg k-${k}"><span class="cdot"></span>${KIND[k]}</span>`).join("")}<span class="lg lg-hol"><span class="cdot"></span>Public holiday</span></div>`;
   // this month's dates as a list (shown under the grid on a phone, where the cells are too narrow for names)
   const inMonth=Object.keys(evs).filter(d=>d.slice(0,7)===`${y}-${String(m+1).padStart(2,"0")}`).sort();
   const agenda=`<div class="calagenda"><h4>${esc(monthName)} — dates</h4>${inMonth.length?inMonth.map(d=>`<div class="agday ${d===T?"today":""}"><div class="agd">${esc(new Date(d+"T00:00:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"}))}${d===T?` <span class="todaytag">Today</span>`:""}${hol[d]?`<span class="resp"> · ${esc(hol[d])}</span>`:""}</div>${evs[d].map(({j,k})=>`<button type="button" class="calev k-${k}" onclick="openJob('${j.id}')"><span class="cdot"></span><span class="ct">${esc(jobLabel(j))}</span><span class="ak">${esc(KIND[k])}</span></button>`).join("")}</div>`).join(""):`<div class="minimsg">No deadlines this month.</div>`}</div>`;
@@ -3575,7 +3827,9 @@ function ganttSVG(jobFilter,opts){
   while(cur<=end){
     const px=labelW+Math.round((cur-start)/86400000)*dayW;
     const isMonth=cur.getDate()===1,isMon=((cur.getDay()+6)%7)===0;
-    if(isMonth||cur.getTime()===start.getTime()){g+=`<text class="gaxis gmonth" x="${px+3}" y="14">${cur.toLocaleDateString(undefined,{month:'short',year:cur.getMonth()===0||cur.getTime()===start.getTime()?'numeric':undefined})}</text>`;}
+    // the chart's first (part-)month gets a label only if there's room before the next month's label ("Sep 2026" ran into "Oct")
+    const roomFirst=cur.getTime()===start.getTime()&&!isMonth?(new Date(cur.getFullYear(),cur.getMonth()+1,1)-cur)/86400000*dayW>=58:false;
+    if(isMonth||roomFirst){g+=`<text class="gaxis gmonth" x="${px+3}" y="14">${cur.toLocaleDateString(undefined,{month:'short',year:cur.getMonth()===0||!g.includes("gmonth")?'numeric':undefined})}</text>`;}
     if(isMonth)g+=`<line class="g-month" x1="${px}" y1="2" x2="${px}" y2="${svgH}" stroke-width="1.2"/>`;
     if(isMon){g+=`<line class="g-week" x1="${px}" y1="${headH-14}" x2="${px}" y2="${svgH}" stroke-width="1"/>`;if(px-lastLbl>=22){g+=`<text class="gaxis" x="${px+3}" y="${headH-18}">${cur.getDate()}</text>`;lastLbl=px;}}
     cur.setDate(cur.getDate()+1);
@@ -3652,10 +3906,12 @@ function attentionItems(){
   const sup=allLines().filter(x=>x.s.status==="RFQ Sent"),supJobs=jobs.filter(j=>sup.some(x=>x.r.jobRef===j.id));
   const qo=pick(x=>x.s.kind==="quote"&&x.s.overdue),po=pick(x=>x.s.kind==="delivery"&&x.s.overdue),qf=jobs.filter(j=>qcSummary(j).fail>0&&j.phase!==PH.LOST);
   const ch=pick(x=>x.s.chase),held=pick(x=>!isClosed(x.j)&&isOnHold(x.j)),noqc=jobs.filter(jobNeedsChecklist);
+  const docs=jobs.filter(j=>j.phase===PH.DOCS),dov=pick(x=>x.s.kind==="docs"&&x.s.overdue);
   return [
     {n:qo.length,jobs:qo,l1:"Quote overdue",ln:"Quotes overdue",i:"clock",t:"t-bad",fn:"dashFilter('quoteover')"},
     {n:po.length,jobs:po,l1:"Delivery overdue",ln:"Deliveries overdue",i:"truck",t:"t-bad",fn:"dashFilter('jobover')"},
-    {n:qf.length,jobs:qf,l1:"Open QC fail",ln:"Open QC fails",i:"wrench",t:"t-warn",fn:"qcFilter='fail';go('qc')"},
+    {n:qf.length,jobs:qf,l1:"Open QC / inspection fail",ln:"Open QC / inspection fails",i:"wrench",t:"t-warn",fn:"qcFilter='fail';go('qc')"},
+    {n:docs.length,jobs:docs,l1:dov.length?"Documents to hand over ("+dov.length+" overdue)":"Documents to hand over",ln:dov.length?"Documents to hand over ("+dov.length+" overdue)":"Documents to hand over",i:"folder",t:dov.length?"t-bad":"t-orange",fn:"dashFilter('docs')"},
     {n:ch.length,jobs:ch,l1:"Client to chase for PO",ln:"Clients to chase for PO",i:"users",t:"t-orange",fn:"dashFilter('chase')"},
     {n:sup.length,jobs:supJobs,l1:"Supplier quote awaited",ln:"Supplier quotes awaited",i:"inbox",t:"t-orange",fn:"dashGo('procurement')"},
     {n:held.length,jobs:held,l1:"Project on hold",ln:"Projects on hold",i:"pause",t:"t-slate",fn:"dashFilter('onhold')"},
@@ -3665,6 +3921,7 @@ function attentionJobIds(){const s=new Set();attentionItems().forEach(a=>a.jobs.
 /* This month: did the project reach a phase this calendar month? (phase log first; the phase's own date as a fallback for older data) */
 const MONTH_EVT={quoted:[PH.QUOTED,"quoteSentDate"],won:[PH.PO,"poDate"],delivered:[PH.DONE,"deliveredDate"]};
 function inThisMonth(j,kind){const [ph,f]=MONTH_EVT[kind],M=todayISO().slice(0,7),hit=d=>(d||"").slice(0,7)===M;
+  if(kind==="delivered")return hit(jd(j,"deliveredDate"));
   return (j.phaseLog||[]).some(e=>e.phase===ph&&hit(e.date))||hit(jd(j,f));}
 let dashFeedN=12;
 /* what kind of change an update is, for its icon in Recent activity */
@@ -3688,7 +3945,7 @@ function renderDashboard(c){
     <div class="attgrid">${att.length?att.map(a=>`<button type="button" class="attcard ${a.t}" onclick="${a.fn}"><span class="atic">${ic(a.i)}</span><span class="atn">${a.n}</span><span class="atl">${a.n===1?a.l1:a.ln}</span><span class="atgo">›</span></button>`).join(""):`<div class="allclear">${ic("ok")} All clear — nothing needs you right now.</div>`}</div></section>`;
   // ---- financial overview (project value by stage, excl. VAT); stages with no value are left out ----
   const val=j=>{const v=jobValue(j);if(v!=null)return v;const k=jobCosting(j);return k.has?k.sell:0;};
-  const st=[["RFQ (costed)","var(--warn)",jobs.filter(j=>j.phase===PH.RFQ),"rfq"],["Awaiting PO","var(--hold)",jobs.filter(j=>j.phase===PH.QUOTED),"awaitingpo"],["In hand","var(--info)",jobs.filter(j=>EXEC.includes(j.phase)),"active"],["Delivered "+T.slice(0,4),"var(--ok)",jobs.filter(j=>j.phase===PH.DONE&&(j.deliveredDate||"").slice(0,4)===T.slice(0,4)),"delivered"]]
+  const st=[["RFQ (costed)","var(--warn)",jobs.filter(j=>j.phase===PH.RFQ),"rfq"],["Awaiting PO","var(--hold)",jobs.filter(j=>j.phase===PH.QUOTED),"awaitingpo"],["In hand","var(--info)",jobs.filter(j=>EXEC.includes(j.phase)),"active"],["Delivered "+T.slice(0,4),"var(--ok)",jobs.filter(j=>(j.phase===PH.DONE||j.phase===PH.DOCS)&&(j.deliveredDate||"").slice(0,4)===T.slice(0,4)),"delivered"]]
     .map(([l,col,list,f])=>({l,col,f,n:list.length,v:list.reduce((a,j)=>a+val(j),0)})).filter(x=>x.v>0);
   const tot=st.reduce((a,x)=>a+x.v,0);
   let acc=0;const R=15.915,segs=st.map(x=>{const p=x.v/tot*100,g=st.length>1?0.8:0,s=`<circle class="dseg" r="${R}" cx="21" cy="21" fill="none" stroke="${x.col}" stroke-width="5.2" stroke-dasharray="${Math.max(0,p-g)} ${100-Math.max(0,p-g)}" stroke-dashoffset="${25-acc}"/>`;acc+=p;return s;}).join("");
@@ -3699,22 +3956,22 @@ function renderDashboard(c){
     <div class="finmini">${st.map(x=>`<button type="button" class="fmini" style="--c:${x.col}" onclick="dashFilter('${x.f}')"><b>${ttd(x.v)}</b><span>${esc(x.l)} · ${x.n}</span></button>`).join("")}</div>`
     :`<div class="minimsg">No project values yet. Add a quote or PO value (or a costing) to a project to see where the money is.</div>`}</section>`;
   // ---- project pipeline ----
-  const pIc={[PH.RFQ]:"quote",[PH.QUOTED]:"doc",[PH.PO]:"inbox",[PH.PROC]:"box",[PH.PROD]:"gear",[PH.DONE]:"ok",[PH.LOST]:"pause"};
+  const pIc={[PH.RFQ]:"quote",[PH.QUOTED]:"doc",[PH.PO]:"inbox",[PH.PROD]:"gear",[PH.DOCS]:"folder",[PH.DONE]:"ok",[PH.LOST]:"pause"};
   const pmax=Math.max(1,...PHASES.map(p=>jobs.filter(j=>j.phase===p).length));
   const pipe=`<section class="dcard o-pipe"><header><span class="dhic t-info">${ic("flow")}</span><div><h3>Project pipeline</h3><p>Projects by current phase</p></div></header>
-    <div class="plist">${PHASES.map((p,i)=>{const n=jobs.filter(j=>j.phase===p).length;return `<button type="button" class="prow" onclick="phaseGo(${i})" title="Show ${esc(p)} projects"><span class="pic" style="color:var(${dotVar(p)})">${ic(pIc[p])}</span><span class="pnm">${esc(p)}</span><b>${n}</b><span class="pgbar"><span style="width:${n/pmax*100}%;background:var(${dotVar(p)})"></span></span></button>`;}).join("")}</div></section>`;
+    <div class="plist">${PHASES.map((p,i)=>{const n=jobs.filter(j=>j.phase===p).length;return `<button type="button" class="prow" onclick="phaseGo(${i})" title="Show ${esc(p)} projects"><span class="pic" style="color:var(${dotVar(p)})">${ic(pIc[p])}</span><span class="pnm">${esc(phaseLabel(p))}</span><b>${n}</b><span class="pgbar"><span style="width:${n/pmax*100}%;background:var(${dotVar(p)})"></span></span></button>`;}).join("")}</div></section>`;
   // ---- upcoming deadlines (overdue + next 14 days) ----
   const lim=isoAdd(T,14);
   const up=S.filter(x=>!isClosed(x.j)&&!x.s.paused&&(x.s.due||x.s.followUp)).map(x=>({j:x.j,s:x.s,d:x.s.due||x.s.followUp})).filter(u=>u.d<=lim).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0);
-  const what={quote:"Submit quote",followup:"Follow up client for PO",delivery:"Deliver"};
+  const what={quote:"Submit quote",followup:"Follow up client for PO",delivery:"Deliver",docs:"Hand over documents"};
   const chip=u=>{const dd=daysBetween(T,u.d);return u.s.overdue?["c-bad","Overdue"]:dd<0?["c-warn","Chase now"]:dd===0?["c-warn","Today"]:dd===1?["c-warn","Tomorrow"]:["c-mute",dd+" days"];};
   const dl=`<section class="dcard o-dl"><header><span class="dhic t-info">${ic("cal")}</span><div><h3>Upcoming deadlines</h3><p>Overdue and the next 14 days</p></div><button type="button" class="dlink" onclick="go('jobs');setView('calendar')">Calendar ${ic("arrow")}</button></header>
-    <div class="dlist">${up.length?up.slice(0,6).map(u=>{const d=new Date(u.d+"T00:00:00"),[cc,ct]=chip(u);return `<button type="button" class="drow ${u.s.overdue?"od":""}" onclick="openJob('${u.j.id}')"><span class="dtile"><b>${d.getDate()}</b><span>${esc(d.toLocaleDateString(undefined,{month:"short"}))}</span></span><span class="dtx"><b>${what[u.s.kind]}</b><span>${esc(jobLabel(u.j))}</span></span><span class="dchip ${cc}">${ct}</span></button>`;}).join("")+(up.length>6?`<button type="button" class="dmore" onclick="go('jobs');sortKey='_due';sortDir=1;render()">+${up.length-6} more</button>`:""):`<div class="minimsg">Nothing due in the next two weeks.</div>`}</div></section>`;
+    <div class="dlist">${up.length?up.slice(0,6).map(u=>{const d=new Date(u.d+"T00:00:00"),[cc,ct]=chip(u);return `<button type="button" class="drow ${u.s.overdue?"od":""}" onclick="openJob('${u.j.id}')"><span class="dtile"><b>${d.getDate()}</b><span>${esc(d.toLocaleDateString(undefined,{month:"short"}))}</span></span><span class="dtx"><b>${u.s.kind==="delivery"&&u.j.delivery==="client"?"Client collects":what[u.s.kind]}</b><span>${esc(jobLabel(u.j))}</span></span><span class="dchip ${cc}">${ct}</span></button>`;}).join("")+(up.length>6?`<button type="button" class="dmore" onclick="go('jobs');sortKey='_due';sortDir=1;render()">+${up.length-6} more</button>`:""):`<div class="minimsg">Nothing due in the next two weeks.</div>`}</div></section>`;
   // ---- at risk: about to slip (overdue projects are already in Attention + Deadlines, so they're left out here) ----
   const rank={bad:0,warn:1,mute:2},risk=[];
   S.forEach(({j,s})=>{if(isClosed(j)||s.overdue)return;let r=null,cl="bad";
     if(qcSummary(j).fail>0)r=["QC fail","needs re-inspection"];
-    else if(s.soon){r=[s.kind==="quote"?"Quote due soon":"Due soon",s.due===T?"today":"in "+s.left+" wd"];cl="warn";}
+    else if(s.soon){r=[s.kind==="quote"?"Quote due soon":s.kind==="docs"?"Documents due soon":"Due soon",s.due===T?"today":"in "+s.left+" wd"];cl="warn";}
     else if(s.chase){r=["Chase client","for the PO"];cl="warn";}
     else if(isOnHold(j)){r=["On hold","clock paused"];cl="mute";}
     if(r)risk.push({j,r,cl});});
@@ -3815,7 +4072,7 @@ function renderSettings(c){
   c.innerHTML=`<div class="setwrap">${nav}</div>`;c.querySelector(".setwrap").appendChild(wrap);
 }
 function templatesPanel(){
-  const st=wfSteps(),cond=[["","Always"],["optSite","Site visit"],["optConcept","Concept design"],["optFab","Fabrication"],["optCoat","Blast & coating"],["optAssembly","Assembly"]];
+  const st=wfSteps(),cond=[["","Always"],["optSite","Site visit"],["optConcept","Concept design"],["optFab","Fabrication"],["optCoat","Blast & coating"],["optAssembly","Assembly"],["reqMPI","MPI required"],["reqLoad","Load test required"],["reqWeldMap","Weld maps required"],["reqDocs","Any documents required"]];
   const secs=WF_SECTIONS;
   const rows=st.map((s,i)=>`<div class="tplrow"><span class="rn">${i+1}</span>
       <input value="${esc(s.name)}" onchange="wfEdit(${i},'name',this.value)">
@@ -3824,7 +4081,7 @@ function templatesPanel(){
       <select onchange="wfEdit(${i},'when',this.value)">${cond.map(([k,l])=>`<option value="${k}" ${(s.when||"")===k?"selected":""}>${l}</option>`).join("")}</select>
       <span class="autocell">${s.auto?`<span class="autotag" title="${esc(AUTO_HINT[s.auto]||"")}">auto</span>`:""}</span>
       <span class="tplbtns"><button class="icobtn" title="Move up" onclick="wfMove(${i},-1)">↑</button><button class="icobtn" title="Move down" onclick="wfMove(${i},1)">↓</button><button class="icobtn del" title="Remove" onclick="wfDel(${i})">🗑</button></span></div>`).join("");
-  const types=Object.keys(JOB_TYPES).map(t=>`<div class="setrow"><b style="min-width:180px">${esc(t)}</b><span class="resp">${wfStepsFor(Object.assign({},JOB_TYPES[t])).length} steps · ${Object.entries(JOB_TYPES[t]).filter(([,v])=>v).map(([k])=>cond.find(c=>c[0]===k)[1].toLowerCase()).join(", ")}</span></div>`).join("");
+  const types=Object.keys(JOB_TYPES).map(t=>`<div class="setrow"><b style="min-width:180px">${esc(t)}</b><span class="resp">${wfStepsFor(Object.assign({},JOB_TYPES[t])).length} steps · ${Object.entries(JOB_TYPES[t]).filter(([,v])=>v).map(([k])=>(cond.find(c=>c[0]===k)||[0,k])[1].toLowerCase()).join(", ")}</span></div>`).join("");
   return `<div class="panel"><h3>🧩 Project workflow template</h3>
     <div class="setnote">Every new project's schedule is built from these steps. <b>Days</b> are working days (0 = a milestone on one day). <b>Included when</b> decides which projects get the step — tick the options on the project (site visit, concept, fabrication, coating, assembly). Steps marked <span class="autotag">auto</span> tick themselves from the app. Changes apply to new schedules and to “Rebuild from template”.</div>
     <div class="tplhead2"><span>#</span><span>Step</span><span>Section</span><span>Days</span><span>Included when</span><span></span><span></span></div>
@@ -3845,7 +4102,8 @@ function renderSettingsRaw(c){
   const colSel=id=>`<select id="${id}" class="colsel">${COLOR_TOKENS.map(([t,l])=>`<option value="${t}">${l}</option>`).join("")}</select>`;
   const theme=(document.documentElement.getAttribute("data-theme")||"light");
   c.innerHTML=`<div class="setgrid">
-    <div class="panel"><h3>⏱️ Workflow &amp; deadlines</h3><div class="setnote">Every project runs through <b>RFQ → Quoted → PO → Procurement → Production → Delivered</b>. The <b>RFQ</b> clock runs to the client's response deadline and stops when the quote is submitted. <b>Quoted</b> projects are never overdue — they flag "chase client" instead. From the <b>PO</b>, the due date is PO date + the max quoted lead time in working days. Holds pause the clock and push the due date out.</div>
+    <div class="panel"><h3>⏱️ Workflow &amp; deadlines</h3><div class="setnote">Every project runs through <b>RFQ → Quoted → PO → Production → Delivered / Collected</b>; when the client asked for MPI, a load test or weld maps, delivery moves it to <b>Documents &amp; handover</b>, and handing the documents over makes it <b>Complete</b>. Materials are tracked alongside production, and production starts when you press <b>Start production</b>. The <b>RFQ</b> clock runs to the client's response deadline and stops when the quote is submitted. <b>Quoted</b> projects are never overdue — they flag "chase client" instead. From the <b>PO</b>, the due date is PO date + the max quoted lead time in working days; it stops at delivery / collection. The documents are then due a few working days later. Holds pause the clock and push the due date out.</div>
+      <div class="setrow"><span>Documents handed over — target / overdue after (working days after delivery)</span><span class="spacer"></span><input id="dt-in" type="number" min="0" style="width:64px" value="${docsDays().target}" onchange="setDocsDays('docsTarget',this.value)"> <input id="dm-in" type="number" min="1" style="width:64px;margin-left:6px" value="${docsDays().max}" onchange="setDocsDays('docsMax',this.value)"></div>
       <div class="setrow"><span>Quotes are submitted to</span><span class="spacer"></span><input id="mgr-in" style="max-width:190px" value="${esc(managerLabel())}" onchange="setManagerLabel(this.value)"></div>
       <div class="setrow"><span>Chase client for PO after (working days)</span><span class="spacer"></span><input id="fu-in" type="number" min="1" style="width:80px" value="${followUpDays()}" onchange="setFollowUpDays(this.value)"></div>
       <div class="setrow"><span>Default client deadline for a new RFQ (working days)</span><span class="spacer"></span><input id="qd-in" type="number" min="1" style="width:80px" value="${quoteDays()}" onchange="DB.meta.quoteDays=Math.max(1,Math.round(+this.value||5));save();toast('New RFQs default to '+DB.meta.quoteDays+' working days')"></div>
@@ -3906,7 +4164,7 @@ function jobNeedsChecklist(j){const q=j.qc||{};return !isClosed(j)&&j.phase===PH
 /* QC stages the project's workflow leaves out are set to N/A once (tap again to clear; it won't come back) */
 function qcAutoNA(j){
   if(!j.jobType)return;j.qc=j.qc||{};if(!j.qcAuto||typeof j.qcAuto!=="object")j.qcAuto={};
-  const out={weld:!j.optFab,blast:!j.optCoat,paint:!j.optCoat};
+  const out={weld:!j.optFab,blast:!j.optCoat,paint:!j.optCoat,mpi:!j.reqMPI,load:!j.reqLoad,mpi2:!j.reqLoad};
   Object.keys(out).forEach(k=>{const r=j.qc[k];
     if(out[k]){if(!j.qcAuto[k]){if(!(r&&r.s))j.qc[k]={s:"N/A",date:j.rfqDate||todayISO(),by:"auto",note:"Not in this project's scope",auto:true};j.qcAuto[k]=true;}}
     else{if(r&&r.auto)j.qc[k]={s:"",date:"",by:"",note:""};if(j.qcAuto[k])delete j.qcAuto[k];}
@@ -3958,7 +4216,13 @@ const COST_LINES_DEFAULT=[
   {key:"paintTop",label:"Paint — top coat",markup:10},{key:"paintPrimer",label:"Paint — primer",markup:10},
   {key:"labFab",label:"Labour — fabrication",markup:35,labour:"fab"},{key:"labPaint",label:"Labour — blast & paint",markup:35,labour:"paint"},
   {key:"equip",label:"Equipment",markup:10},{key:"consum",label:"Consumables",markup:10},{key:"mat",label:"Materials",markup:20,auto:"materials"},
-  {key:"machine",label:"Machine shop",markup:10},{key:"transport",label:"Transport",markup:0},{key:"mpi",label:"MPI / NDT",markup:0}];
+  {key:"machine",label:"Machine shop",markup:10},{key:"transport",label:"Transport",markup:0},{key:"mpi",label:"MPI / NDT",markup:0},{key:"load",label:"Load test",markup:0}];
+/* requirements that cost money but have no line on the costing yet (warned at "Quote submitted") */
+function costWarnings(j){const S=((j.costing||{}).lines)||{},has=k=>{const s=S[k]||{};return (nz(s.cost)&&+s.cost>0)||(nz(s.days)&&+s.days>0);},w=[];
+  if(j.reqMPI&&!has("mpi"))w.push("MPI is required but not costed (MPI / NDT line is blank).");
+  if(j.reqLoad&&!has("load"))w.push("Load test is required but not costed (Load test line is blank).");
+  if(j.deliverySet&&j.delivery!=="client"&&!has("transport"))w.push("You're delivering, but Transport isn't costed.");
+  return w;}
 function setCostMarkup(i,v){const a=JSON.parse(JSON.stringify(costLines()));if(!a[i])return;a[i].markup=Math.max(0,+v||0);DB.meta.costLines=a;save();toast("Default markup saved");}
 function costLines(){const c=DB.meta&&DB.meta.costLines;return Array.isArray(c)&&c.length?c:COST_LINES_DEFAULT;}
 function dayRate(k){const r=(DB.meta&&DB.meta.dayRates)||{};return +r[k]||0;}
@@ -3992,10 +4256,15 @@ function valueCard(j){
   const cell=(l,v,s,fn,tip)=>`<button type="button" class="vcell" onclick="${fn}" title="${esc(tip)}"><label>${l}</label><b>${v}</b>${s?`<span class="resp">${s}</span>`:""}<span class="vgo">${esc(tip)} ›</span></button>`;
   return `<div class="dsection valcard"><h3><span class="ic">💲</span> Value &amp; costing <span class="resp" style="font-weight:500;text-transform:none;letter-spacing:0">excl. VAT</span>
       <span class="hbtns">${j.phase===PH.QUOTED&&q!=null?`<button class="btn sm" onclick="openRequote('${j.id}')">Re-quote</button>`:""}<button class="btn sm primary" onclick="openCosting('${j.id}')">${c.has?"Costing":"+ Costing"}</button></span></h3>
-    <div class="vgrid">${cell("Quoted"+(q!=null&&quoteRev(j)?" · Rev "+quoteRev(j):""),q!=null?mv(q):"—",(j.quotes||[]).length>1?"was "+mv(+(j.quotes[0].value)):"",`openQuotesEdit('${j.id}')`,q!=null?"Revisions":"Add the quote")}
+    <div class="vgrid">${q==null&&nz(j.costSell)&&+j.costSell>0&&!reached(j,PH.QUOTED)
+        ?cell("Quoted · draft",mv(+j.costSell),"from the costing — recorded when you submit the quote",`openPhaseAction('${j.id}','quoted')`,"Submit quote")
+        :cell("Quoted"+(q!=null&&quoteRev(j)?" · Rev "+quoteRev(j):""),q!=null?mv(q):"—",(j.quotes||[]).length>1?"was "+mv(+(j.quotes[0].value)):"",`openQuotesEdit('${j.id}')`,q!=null?"Revisions":"Add the quote")}
       ${cell("PO value",po!=null?mv(po):"—",po!=null&&q!=null&&Math.abs(po-q)>0.5?(po<q?"below":"above")+" quote":"",`openPoEdit('${j.id}')`,reached(j,PH.PO)?"Edit PO":"Record PO")}
-      ${cell("Cost",c.has?mv(c.cost):"—",c.has?"materials "+mv(c.lines.find(l=>l.key==="mat").cost):"add a costing",`openCosting('${j.id}')`,c.has?"Costing":"Add costing")}
-      ${cell("Margin",m?`<span class="${low?"late":"ontime"}">${mv(m.amt)}</span>`:"—",m?pct(m.pct)+(low?" — below "+minMargin()+"%":""):"",`openMarginInfo('${j.id}')`,"Breakdown")}</div>
+      ${(()=>{const mc=(c.lines.find(l=>l.key==="mat")||{}).cost||0;   // priced material list counts even before the rest of the costing is in
+        return c.has?cell("Cost",mv(c.cost),"materials "+mv(mc),`openCosting('${j.id}')`,"Costing")
+          :mc>0?cell("Cost",mv(mc),"materials only — add labour, coatings &amp; the rest",`openCosting('${j.id}')`,"Add costing")
+          :cell("Cost","—","add a costing",`openCosting('${j.id}')`,"Add costing");})()}
+      ${cell("Margin",m?`<span class="${low?"late":"ontime"}">${mv(m.amt)}</span>`:"—",m?pct(m.pct)+(low?" — below "+minMargin()+"%":""):!c.has&&(c.lines.find(l=>l.key==="mat")||{}).cost>0?"needs the full costing":"",`openMarginInfo('${j.id}')`,"Breakdown")}</div>
     ${(j.quotes||[]).length>1?`<div class="revlist">${j.quotes.map(x=>`<button type="button" class="chip chipbtn" onclick="openQuotesEdit('${j.id}')">Rev ${x.rev} · ${esc(fmtShort(x.date))} · ${mv(x.value)}${x.note?" · "+esc(x.note):""}</button>`).join("")}</div>`:""}
   </div>`;
 }
@@ -4016,7 +4285,7 @@ function openCosting(jobId){
     <div class="full tablewrap"><table class="costtab"><thead><tr><th>Line</th><th>Cost</th><th>Markup</th><th>Sell</th></tr></thead><tbody id="costrows">${C.lines.map(row).join("")}</tbody></table></div>
     <div class="full"><button type="button" class="btn sm" onclick="costAddLine()">+ Line</button></div>
     <div class="full" id="costtot"></div>
-    ${j.phase===PH.RFQ||!(j.quotes||[]).length?`<label class="full optchk" style="width:max-content"><input type="checkbox" id="costuseq" checked><span>Use the sell total as the quoted value</span></label>`:""}`,{wide:true,ok:"Save costing"});
+    ${j.phase===PH.RFQ||!(j.quotes||[]).length?`<label class="full optchk" style="width:max-content"><input type="checkbox" id="costuseq" checked><span>Use the sell total as the quoted value${(j.quotes||[]).length?"":" (a draft until you press “Quote submitted”)"}</span></label>`:""}`,{wide:true,ok:"Save costing"});
   costCalc();
 }
 function costRead(){
@@ -4036,7 +4305,7 @@ function costCalc(){
 function costAddLine(){const tb=document.getElementById("costrows");if(!tb)return;const id="x"+uid();tb.insertAdjacentHTML("beforeend",`<tr><td class="cl"></td><td class="cc"><input data-xl="${id}" class="xlabel" placeholder="Line name"><input type="number" step="any" data-xc="${id}" placeholder="0" oninput="costCalc()"></td><td class="cm"><input type="number" step="any" data-xm="${id}" value="10" oninput="costCalc()"><span>%</span></td><td class="cs" data-cs="${id}"></td></tr>`);}
 function costPasteOpen(){const p=document.getElementById("costpaste");if(p){p.hidden=!p.hidden;if(!p.hidden)document.getElementById("costpastein").focus();}}
 /* paste rows from a costing sheet: name … qty, unit price / extended … markup % — matched to the standard lines by name */
-const COST_MATCH=[["paintTop",/top\s*coat|topcoat|finish coat/i],["paintPrimer",/primer/i],["labFab",/labou?r.*fab|fab.*labou?r/i],["labPaint",/labou?r.*(blast|paint|coat)|(blast|paint).*labou?r/i],["equip",/equip/i],["consum",/consum/i],["mat",/material/i],["machine",/machin/i],["transport",/transport|deliver|truck/i],["mpi",/\bmpi\b|\bndt\b|inspection/i]];
+const COST_MATCH=[["paintTop",/top\s*coat|topcoat|finish coat/i],["paintPrimer",/primer/i],["labFab",/labou?r.*fab|fab.*labou?r/i],["labPaint",/labou?r.*(blast|paint|coat)|(blast|paint).*labou?r/i],["equip",/equip/i],["consum",/consum/i],["mat",/material/i],["machine",/machin/i],["transport",/transport|deliver|truck/i],["load",/load\s*test|proof\s*load/i],["mpi",/\bmpi\b|\bndt\b|inspection/i]];
 function costPaste(){const t=(document.getElementById("costpastein")||{}).value||"";costFromRows(parseDelim(t,t.includes("\t")?"\t":","),"pasted");}
 function costImport(){pickXl(async f=>{try{const sh=await fileToSheets(f);
   const score=s=>(s.rows||[]).slice(0,40).some(r=>(r||[]).some(c=>/mark\s*-?up/i.test(c||"")))?2:(s.rows||[]).some(r=>(r||[]).some(c=>COST_MATCH.some(([,re])=>re.test(c||""))))?1:0;
@@ -4073,7 +4342,9 @@ function costFromRows(rows,how){
 function saveCosting(){
   const j=(DB.jobs||[]).find(x=>x.id===editingId);if(!j){closeForm();return;}
   j.costing=costRead();const C=jobCosting(j);const useq=document.getElementById("costuseq");
-  if(useq&&useq.checked&&C.has){j.costSell=Math.round(C.sell*100)/100;}
+  if(useq&&useq.checked&&C.has){j.costSell=Math.round(C.sell*100)/100;
+    // quote not sent yet: the latest revision follows the costing too (a sent quote is only changed by a re-quote)
+    if(j.phase===PH.RFQ&&(j.quotes||[]).length)j.quotes[j.quotes.length-1].value=j.costSell;}
   (j.updates=j.updates||[]).push({id:uid(),date:todayISO(),ts:Date.now(),text:"Costing updated — cost "+money(Math.round(C.cost*100)/100)+", sell "+money(Math.round(C.sell*100)/100)+" (excl. VAT)"});
   save();closeForm();rerender();toast("Costing saved");
 }
@@ -4119,6 +4390,7 @@ function openMarginInfo(jobId){
   openModal("Margin — "+jobLabel(j),`<div class="full tablewrap"><table class="mtab2"><thead><tr><th>Line</th><th class="num">Cost</th><th class="num">Markup</th><th class="num">Sell</th><th class="num">Mark-up $</th></tr></thead><tbody>${rows}</tbody>
       <tfoot><tr><th>Costing total</th><th class="num">${mv(C.cost)}</th><th></th><th class="num">${mv(C.sell)}</th><th class="num">${mv(C.sell-C.cost)}</th></tr></tfoot></table></div>
     <div class="full msum"><div class="m"><b>${v!=null?mv(v):"—"}</b>${reached(j,PH.PO)&&poValue(j)!=null?"PO value":"quoted value"+(quoteRev(j)?" (Rev "+quoteRev(j)+")":"")}</div><div class="m"><b>${mv(C.cost)}</b>cost</div><div class="m"><b class="${low?"late":"ontime"}">${m!=null?mv(m)+" · "+pct(mp):"—"}</b>margin${low?" — below your "+minMargin()+"% minimum":""}</div></div>
+    ${stockValue(jobMats(j.id))>0?`<div class="full impnote">Materials include ${mv(stockValue(jobMats(j.id)))} of in-house stock (off-cuts / yard stock), costed at the supplier price — no purchase needed for those lines.</div>`:""}
     ${v!=null&&Math.abs(v-C.sell)>1?`<div class="full impnote">The ${reached(j,PH.PO)&&poValue(j)!=null?"PO":"quote"} is ${mv(Math.abs(v-C.sell))} ${v<C.sell?"below":"above"} the costing's sell total (${mv(C.sell)})${quoteRev(j)?" — after "+quoteRev(j)+" re-quote"+(quoteRev(j)>1?"s":""):""}.</div>`:""}
     <div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="closeForm();openCosting('${j.id}')">Edit costing</button><button class="btn" onclick="closeForm();openQuotesEdit('${j.id}')">Quote &amp; revisions</button><button class="btn" onclick="closeForm()">Done</button></div>`,{wide:true,noFooter:true});
 }
@@ -4165,7 +4437,8 @@ function renderDetail(){
   document.getElementById("csvbtn").style.display="none";
   document.getElementById("searchwrap").style.display="none";
   const m=jobDueMeta(j),oh=openHold(j),step=currentStep(j),pct=jobPct(j);
-  const meta=`<span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(j.phase||"—")}</span>
+  const meta=`<span class="badge" style="${tokStyle(PHASE_TOK[j.phase]||"idle")}">${esc(phaseName(j)||"—")}</span>${matBadge(j)}
+    ${docsRequired(j)?`<span class="chip" title="Client requirements — change in Workflow options">📋 ${esc(reqList(j))}</span>`:""}<span class="chip">${j.delivery==="client"?"📦 Client collects":"🚚 We deliver"}</span>
     ${oh?`<span class="badge b-hold">⏸ On hold</span>`:""}
     ${j.priority?`<span class="badge" style="${tokStyle(priTok(j.priority))}">${esc(j.priority)}</span>`:""}
     ${j.client?`<span class="chip">${esc(j.client)}</span>`:""}
@@ -4264,7 +4537,7 @@ function openForm(id,table,preset){
   const sch=SCHEMA[formTable];
   let rec=id?DB[formTable].find(r=>r.id===id):Object.assign({},preset||{});
   if(!id&&formTable==="jobs"){const jt=JOB_TYPES[DB.meta.lastJobType]?DB.meta.lastJobType:"Build to client drawing";const cl=(DB.meta.clients||[]).includes(DB.meta.lastClient)?DB.meta.lastClient:"";
-    rec=Object.assign({phase:PH.RFQ,rfqDate:todayISO(),rfqDueDate:addWorkingDays(todayISO(),quoteDays()),leadUnit:"working days",jobType:jt,client:cl,priority:"Medium",jobId:nextJobNo()},JOB_TYPES[jt],rec);}
+    rec=Object.assign({phase:PH.RFQ,rfqDate:todayISO(),rfqDueDate:addWorkingDays(todayISO(),quoteDays()),leadUnit:"working days",jobType:jt,client:cl,priority:"Medium",jobId:nextJobNo(),reqLoad:false,reqWeldMap:false,delivery:DB.meta.lastDelivery==="client"?"client":"us"},JOB_TYPES[jt],rec);}
   document.getElementById("mtitle").textContent=(id?"Edit ":"Add ")+sch.label.replace(/s$/,"");
   if(formTable==="materials"){
     const ess=["jobRef","description","size","grade","qtyReq","unit","notes"];
@@ -4288,19 +4561,25 @@ function jobTypeHTML(rec){
   return `<div class="field full"><label>Project type</label><input type="hidden" data-k="jobType" value="${esc(jt)}"><div class="segbtns">${Object.keys(JOB_TYPES).map(t=>`<button type="button" class="segbtn ${jt===t?"on":""}" data-jt="${esc(t)}" onclick="pickJobType(this.dataset.jt)">${esc(t)}</button>`).join("")}</div></div>`;
 }
 function optsHTML(rec){return `<div class="field full"><label>Workflow options <span class="lblnote">— the project type ticks these; change them per project</span></label><div class="optchks">${Object.keys(OPT_LABEL).map(k=>`<label class="optchk"><input type="checkbox" data-k="${k}" ${rec[k]?"checked":""}><span>${OPT_LABEL[k]}</span></label>`).join("")}</div></div>`;}
+/* client requirements + who moves the units: one compact row on the new-project form, the PO dialog and Workflow options */
+function reqHTML(rec,title){const dv=rec.delivery==="client"?"client":"us",lit=rec.deliverySet||!rec.id;
+  return `<div class="field full"><label>${title||"Client requirements"} <span class="lblnote">— adds the inspection steps and the documents phase</span></label><div class="reqrow"><div class="optchks">${Object.keys(REQ_LABEL).map(k=>`<label class="optchk"><input type="checkbox" data-k="${k}" ${rec[k]?"checked":""}><span>${REQ_LABEL[k]}</span></label>`).join("")}</div>
+    <input type="hidden" data-k="delivery" value="${lit?dv:""}"><div class="segbtns dvbtns">${[["us","🚚 We deliver"],["client","📦 Client collects"]].map(([v,l])=>`<button type="button" class="segbtn ${lit&&dv===v?"on":""}" data-dv="${v}" onclick="pickDelivery(this.dataset.dv)">${l}</button>`).join("")}</div></div></div>`;}
+function pickDelivery(v){const h=document.querySelector('#mbody [data-k="delivery"]');if(h)h.value=v;document.querySelectorAll("#mbody .dvbtns .segbtn").forEach(b=>b.classList.toggle("on",b.dataset.dv===v));}
 function jobFormHTML(rec,isNew){
   const F=k=>SCHEMA.jobs.fields.find(f=>f.k===k),fh=k=>fieldHTML(F(k),rec);
   const dl=rec.rfqDueDate||rfqBaseDue(rec)||"";
   const qd=isNew?quoteDays():0;
   const deadline=`<div class="field"><label>Client's deadline</label><input type="date" data-k="rfqDueDate" value="${esc(dl)}"><div class="qchips">${[3,5,10].map(n=>`<button type="button" class="qchip ${n===qd?"on":""}" data-n="${n}" onclick="pickDeadline(${n})">${n} wd</button>`).join("")}</div></div>`;
-  let html=fh("jobName")+fh("client")+jobTypeHTML(rec)+fh("rfqDate")+deadline;
+  let html=fh("jobName")+fh("client")+jobTypeHTML(rec)+reqHTML(rec)+fh("rfqDate")+deadline;
   if(!isNew){
     if(reached(rec,PH.QUOTED))html+=`<div class="fhead">Quotation</div>`+fh("quoteSentDate")+fh("followUpDate");
     if(reached(rec,PH.PO))html+=`<div class="fhead">Purchase order &amp; lead time</div>`+["poNumber","poDate","leadMin","leadMax","leadUnit","dueOverride"].map(fh).join("");
-    if(rec.phase===PH.DONE)html+=fh("deliveredDate");
+    if(reached(rec,PH.DOCS))html+=fh("deliveredDate");
+    if(rec.phase===PH.DONE&&docsRequired(rec))html+=fh("docsSentDate");
   }
   const fp=folderPath(rec);
-  const start=isNew?`<div class="field full"><label>Already past RFQ? Start at phase…</label><select data-k="_startPhase"><option value="">RFQ Received (new enquiry)</option>${[PH.QUOTED,PH.PO,PH.PROC,PH.PROD].map(p=>`<option>${esc(p)}</option>`).join("")}</select><div class="lblnote">For a project that's already moving — the next dialog asks for its dates.</div></div>`:"";
+  const start=isNew?`<div class="field full"><label>Already past RFQ? Start at phase…</label><select data-k="_startPhase"><option value="">RFQ Received (new enquiry)</option>${[PH.QUOTED,PH.PO,PH.PROD].map(p=>`<option>${esc(p)}</option>`).join("")}</select><div class="lblnote">For a project that's already moving — the next dialog asks for its dates.</div></div>`:"";
   const more=fh("jobId")+fh("priority")+optsHTML(rec)
     +`<div class="field full"><label>File location (folder or link)</label><input type="text" data-k="fileLocation" value="${esc(rec.fileLocation||"")}" placeholder="${esc(fp?fp+"  (filled in for you)":"Set your Projects folder in Settings to fill this in")}"></div>`
     +fh("materialListLoc")+fh("notes")+start;
@@ -4328,11 +4607,11 @@ function pickDeadline(n){
 function openWfOpts(jobId){
   const j=(DB.jobs||[]).find(x=>x.id===jobId);if(!j)return;
   formMode="wfopts";editingId=jobId;
-  openModal("Workflow options — "+jobLabel(j),jobTypeHTML(j)+optsHTML(j)+`<div class="hint full">Saving rebuilds the schedule. Steps you've ticked keep their dates, and dates you've edited by hand are kept.</div>`,{ok:"Save & rebuild"});
+  openModal("Workflow options — "+jobLabel(j),jobTypeHTML(j)+optsHTML(j)+reqHTML(j)+`<div class="hint full">Saving rebuilds the schedule. Steps you've ticked keep their dates, and dates you've edited by hand are kept.</div>`,{ok:"Save & rebuild"});
 }
 function saveWfOpts(){
   const j=(DB.jobs||[]).find(x=>x.id===editingId);if(!j){closeForm();return;}
-  document.querySelectorAll("#mbody [data-k]").forEach(el=>{const k=el.dataset.k;j[k]=el.type==="checkbox"?el.checked:el.value;});
+  document.querySelectorAll("#mbody [data-k]").forEach(el=>{const k=el.dataset.k;if(k==="delivery"){if(el.value){j.delivery=el.value;j.deliverySet=true;}return;}j[k]=el.type==="checkbox"?el.checked:el.value;});
   buildSchedule(j,true);save();closeForm();rerender();toast("Workflow saved — schedule rebuilt");
 }
 function fieldHTML(f,rec){
@@ -4411,7 +4690,8 @@ function saveForm(){
     if(!Array.isArray(rec.holds))rec.holds=[];if(!Array.isArray(rec.phaseLog))rec.phaseLog=[];
     if(!editingId){rec.phase=PH.RFQ;rec.phaseLog.push({phase:PH.RFQ,from:"",date:rec.rfqDate||todayISO(),ts:Date.now()});
       if(!Array.isArray(rec.phaseRedo))rec.phaseRedo=[];if(!rec.qcAuto)rec.qcAuto={};
-      DB.meta.lastClient=rec.client||"";DB.meta.lastJobType=rec.jobType||"";}
+      DB.meta.lastClient=rec.client||"";DB.meta.lastJobType=rec.jobType||"";DB.meta.lastDelivery=rec.delivery||"us";rec.deliverySet=true;}
+    if(rec.delivery==="us"||rec.delivery==="client"){if(wasEditing&&rec.delivery)rec.deliverySet=true;}else rec.delivery="us";   // blank = not chosen yet (old project): keep the default, still ask later
     rec.rfqDays="";   // the deadline date is the one source of truth (it was pre-filled from any old "within N days")
     if(!rec.fileLocation&&!wasEditing)rec.fileLocation=folderPath(rec);
   }

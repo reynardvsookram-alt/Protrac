@@ -40,7 +40,7 @@ async def main():
     steps=await E(f"DB.tasks.filter(t=>t.jobRef==='{nj['id']}'&&t.parentTask).sort((a,b)=>a.order-b.order).map(t=>t.stepKey)")
     ok("site" in steps and "fab" in steps and "concept" not in steps and "assembly" not in steps,f"schedule built from type+options ({len(steps)} steps)")
     ok(await E(f"DB.tasks.filter(t=>t.jobRef==='{nj['id']}'&&t.parentTask).every(t=>t.startDate&&t.endDate)"),"every step has planned dates")
-    ok(await E(f"DB.tasks.filter(t=>t.jobRef==='{nj['id']}'&&t.parentTask&&t.startDate).every(t=>isWorkDay(t.startDate))"),"planned starts fall on working days")
+    ok(await E(f"DB.tasks.filter(t=>t.jobRef==='{nj['id']}'&&t.parentTask&&t.startDate&&t.status!=='Done').every(t=>isWorkDay(t.startDate))"),"planned starts fall on working days (ticked steps keep their real date — the RFQ may arrive on a Saturday)")
     # auto ticks: quote submitted / PO
     await E(f"openJob('{nj['id']}','schedule');openPhaseAction('{nj['id']}','quoted')");await E("saveForm()")
     ok(await E(f"DB.tasks.find(t=>t.jobRef==='{nj['id']}'&&t.stepKey==='quoted').status")=="Done","quote submitted ticks its step")

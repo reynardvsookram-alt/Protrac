@@ -164,7 +164,7 @@ ok(['Attention required', 'Financial overview', 'Project pipeline', 'Upcoming de
 smoke('reminders', 'go("reminders")');
 /* settings uses real DOM — covered in browser suites */
 smoke('jobs grid', 'go("jobs")');
-ok(N.els.content.innerHTML.includes('Due / next action'), 'grid due column');
+ok(N.els.content.innerHTML.includes('Next due'), 'grid due column');
 smoke('jobs kanban', 'setView("kanban")');
 ok(N.els.content.innerHTML.includes('Quoted – Awaiting PO'), 'kanban by phase');
 smoke('jobs calendar', 'setView("calendar")');
@@ -295,21 +295,26 @@ ok(!g('canRedoPhase(U)') && g('U.phaseRedo.length') === 0, 'a new phase change c
 g('undoPhase("u1")');
 ok(g('U.phase') === 'Quoted – Awaiting PO', 'undo works from Lost too');
 ok(g('JSON.parse(localStorage.getItem("protrac_v1")).jobs.find(j=>j.id==="u1").phaseRedo.length') === 1, 'redo stack is saved with the job');
-// auto production (A3)
-g(`setPhase(U,PH.PO);setPhase(U,PH.PROC);DB.materials.push({id:"m1",jobRef:"u1",description:"Plate",qtyReq:2,qtyOrdered:2,qtyReceived:0},{id:"m2",jobRef:"u1",description:"Angle",qtyReq:4,qtyOrdered:4,qtyReceived:0});`);
+// production start (v8): never automatic — when every line is in, the app only offers "Start production"
+g(`setPhase(U,PH.PO);DB.materials.push({id:"m1",jobRef:"u1",description:"Plate",qtyReq:2,qtyOrdered:2,qtyReceived:0},{id:"m2",jobRef:"u1",description:"Angle",qtyReq:4,qtyOrdered:4,qtyReceived:0});`);
 g('receiveMats(["m1"])');
-ok(g('U.phase') === 'Procurement', 'one of two lines received → still Procurement');
-g('DB.materials.find(m=>m.id==="m2").qtyReceived=1;autoProd(["u1"])');
-ok(g('U.phase') === 'Procurement', 'part-received never fires');
-g('receiveMats(["m2"])');
-ok(g('U.phase') === 'In Production' && g('U.prodStartDate') === g('todayISO()'), 'all lines received → In Production, start = last receipt');
-ok(/moved automatically/.test(g('U.updates[U.updates.length-1].text')), 'auto move logged in Updates');
+ok(g('U.phase') === 'PO Received' && g('autoProd(["u1"]).length') === 0, 'one of two lines received → still PO Received, nothing offered');
+g('DB.materials.find(m=>m.id==="m2").qtyReceived=1');
+ok(g('autoProd(["u1"]).length') === 0, 'part-received never offers it');
+g('globalThis.__toasts=[];const _t=toast;toast=(m,a)=>{__toasts.push([m,a&&a.label]);};receiveMats(["m2"]);toast=_t');
+ok(g('U.phase') === 'PO Received' && g('__toasts.some(x=>/Start production/.test(x[0])&&x[1]==="Start production")'), 'all lines in → still PO Received; the toast offers Start production');
+ok(g('autoProd(["u1"]).length') === 0, 'offered once — later saves on the same materials don\'t ask again (B2)');
+g('DB.materials.find(m=>m.id==="m2").qtyReceived=1;autoProd(["u1"]);DB.materials.find(m=>m.id==="m2").qtyReceived=4');
+ok(g('autoProd(["u1"]).map(j=>j.id).join()') === 'u1', 'a line goes back out and comes in again → offered again');
+ok(g('matProgress(U).n') === 2 && g('matProgress(U).all') === true, 'materials badge: 2 of 2 in');
+g('phaseCtx={jobId:"u1",action:"prod",target:""};savePhase()');
+ok(g('U.phase') === 'In Production' && g('U.prodStartDate') === g('todayISO()'), '"Start production" moves it, dated today');
 g('undoPhase("u1")');
-ok(g('U.phase') === 'Procurement', 'auto move can be undone');
-g(`globalThis.V={id:"v1",jobId:"098",jobName:"No mats",phase:PH.PO,holds:[],phaseLog:[],updates:[],phaseRedo:[],qcAuto:{}};DB.jobs.push(V);autoProd(["v1"]);`);
-ok(g('V.phase') === 'PO Received', 'jobs with no material lines are not moved');
-g('U.phase=PH.QUOTED;autoProd(["u1"])');
-ok(g('U.phase') === 'Quoted – Awaiting PO', 'only fires from PO / Procurement');
+ok(g('U.phase') === 'PO Received', 'starting production can be undone');
+g(`globalThis.V={id:"v1",jobId:"098",jobName:"No mats",phase:PH.PO,holds:[],phaseLog:[],updates:[],phaseRedo:[],qcAuto:{}};DB.jobs.push(V);`);
+ok(g('autoProd(["v1"]).length') === 0 && g('matProgress(V)') === null, 'no material list → nothing offered, no badge');
+g('U.phase=PH.QUOTED;delete U.prodOffered');
+ok(g('autoProd(["u1"]).length') === 0, 'only offered from PO Received');
 // auto QC N/A (D4)
 g(`globalThis.R={id:"q1",jobId:"097",jobName:"Repair",jobType:"Repair / blast & paint",optSite:true,optFab:false,optCoat:true,phase:PH.RFQ,rfqDate:todayISO(),holds:[],phaseLog:[],updates:[],qc:{},phaseRedo:[],qcAuto:{}};DB.jobs.push(R);save();`);
 ok(g('R.qc.weld.s') === 'N/A' && g('R.qc.weld.auto') === true && g('!(R.qc.blast&&R.qc.blast.s)') && g('!(R.qc.final&&R.qc.final.s)'), 'excluded QC stage set to N/A; included ones left alone');
@@ -374,6 +379,98 @@ ok(!g('R.qc.weld.s'), 'turning the option back on clears an automatic N/A');
   v(`DB.meta.demoRev=7;DB.jobs.forEach(j=>{if(j.id!=="k1"){j.quotes=[];delete j.costing;delete j.poValue;}});DB.jobs.push({id:"real",jobId:"001x",jobName:"real",phase:PH.QUOTED,holds:[],phaseLog:[],updates:[],quotes:[]});migrate();`);
   ok(v('DB.jobs.find(j=>j.jobId==="006").quotes.length===1&&!!DB.jobs.find(j=>j.jobId==="006").costing'), 'saved demo (rev 7) picks up the demo values');
   ok(v('!DB.jobs.find(j=>j.id==="real").costing&&!DB.jobs.find(j=>j.id==="real").quotes.length'), 'projects outside the demo list are left alone');
+}
+
+// ---- 11. v8 flow: Procurement retired, Documents & handover, client requirements, in-stock lines ----
+{
+  const old = { jobs: [
+    { id: 'p1', jobId: '201', jobName: 'Waiting on steel', phase: 'Procurement', rfqDate: '2026-09-01', quoteSentDate: '2026-09-05', poDate: '2026-09-10', procStartDate: '2026-09-11', leadMax: 20, holds: [], updates: [], qc: {},
+      phaseLog: [{ phase: 'RFQ Received', from: '', date: '2026-09-01', ts: 1 }, { phase: 'Quoted – Awaiting PO', from: 'RFQ Received', date: '2026-09-05', ts: 2 }, { phase: 'PO Received', from: 'Quoted – Awaiting PO', date: '2026-09-10', ts: 3 }, { phase: 'Procurement', from: 'PO Received', date: '2026-09-11', ts: 4 }], phaseRedo: [] },
+    { id: 'p2', jobId: '202', jobName: 'Already welding', phase: 'Procurement', rfqDate: '2026-09-01', poDate: '2026-09-10', procStartDate: '2026-09-11', leadMax: 20, holds: [], updates: [], qc: { weld: { s: 'Pass', date: '2026-09-20' } },
+      phaseLog: [{ phase: 'PO Received', from: 'Quoted – Awaiting PO', date: '2026-09-10', ts: 3 }, { phase: 'Procurement', from: 'PO Received', date: '2026-09-11', ts: 4 }], phaseRedo: [] },
+    { id: 'p3', jobId: '203', jobName: 'Went through procurement', phase: 'In Production', poDate: '2026-09-10', prodStartDate: '2026-09-15', leadMax: 20, holds: [], updates: [], qc: {},
+      phaseLog: [{ phase: 'PO Received', from: 'Quoted – Awaiting PO', date: '2026-09-10', ts: 3 }, { phase: 'Procurement', from: 'PO Received', date: '2026-09-11', ts: 4 }, { phase: 'In Production', from: 'Procurement', date: '2026-09-15', ts: 5 }],
+      phaseRedo: [{ phase: 'Procurement', from: 'PO Received', date: '2026-09-11' }] }],
+    tasks: [], procurement: [], materials: [{ id: 'mx', jobRef: 'p1', description: 'Plate', qtyReq: 1 }], suppliers: [], checklists: [], priceItems: [], priceQuotes: [],
+    meta: { clients: ['Other'], wfSteps: [{ key: 'rfq', name: 'RFQ received', sec: 'quote', days: 0, auto: 'rfq' }, { key: 'fab', name: 'Fab', sec: 'prod', days: 5, when: 'optFab', auto: 'fab' }, { key: 'qcweld', name: 'QC', sec: 'prod', days: 0, auto: 'qcweld' }, { key: 'delivered', name: 'Delivered', sec: 'close', days: 0, auto: 'delivered' }],
+      costLines: [{ key: 'mpi', label: 'MPI / NDT', markup: 0 }] } };
+  const O = makeCtx({ protrac_v1: JSON.stringify(old) });
+  vm.runInContext(appCode, O.ctx);
+  const v = s => run(O.ctx, s);
+  ok(v('DB.jobs.find(j=>j.id==="p1").phase') === 'PO Received', 'v8: Procurement, nothing started → PO Received');
+  ok(v('DB.jobs.find(j=>j.id==="p2").phase') === 'In Production' && v('DB.jobs.find(j=>j.id==="p2").prodStartDate') === '2026-09-11', 'v8: Procurement with welding done → In Production (start = old procurement date)');
+  ok(v('DB.jobs.every(j=>j.phaseLog.every(e=>e.phase!=="Procurement"&&e.from!=="Procurement"))'), 'v8: no "Procurement" left in any project history');
+  ok(v('DB.jobs.find(j=>j.id==="p3").phaseLog.find(e=>e.phase==="In Production").from') === 'PO Received' && v('DB.jobs.find(j=>j.id==="p3").phaseRedo.length') === 0, 'v8: history re-linked (Production came from PO) and stale redo dropped');
+  ok(v('canUndoPhase(DB.jobs.find(j=>j.id==="p3"))') && v('lastPhaseEntry(DB.jobs.find(j=>j.id==="p3")).from') === 'PO Received', 'v8: Undo goes back to PO Received, never to the removed phase');
+  ok(v('DB.jobs.find(j=>j.id==="p1").procStartDate') === '2026-09-11', 'v8: typed dates are kept on the record');
+  ok(v('DB.jobs.every(j=>j.delivery==="us"&&j.reqMPI===false&&j.reqLoad===false&&j.reqWeldMap===false)'), 'v8: existing projects get no requirements and "We deliver"');
+  ok(v('DB.materials[0].inStock') === false && v('DB.meta.docsTarget') === 2 && v('DB.meta.docsMax') === 4, 'v8: in-stock flag and 2 / 4 working-day documents clock');
+  ok(v('DB.meta.wfSteps.map(s=>s.key).join()') === 'rfq,fab,weldmaps,qcweld,mpi,loadtest,mpi2,delivered,docs', 'v8: his edited template gets the new steps in order (' + v('DB.meta.wfSteps.map(s=>s.key).join()') + ')');
+  ok(v('DB.meta.costLines.some(l=>l.key==="load")'), 'v8: saved costing defaults get a Load test line');
+  { const a = v('JSON.stringify(DB)'); v('migrate()'); ok(v('JSON.stringify(DB)') === a, 'v8 migrate() idempotent'); }
+  v(`DB.jobs.push({id:"oldd",jobId:"204",jobName:"Old spelling",phase:"Documents & Handover",deliveredDate:"2026-10-20",holds:[],updates:[],qc:{},phaseLog:[{phase:"In Production",from:"PO Received",date:"2026-10-01",ts:1},{phase:"Documents & Handover",from:"In Production",date:"2026-10-20",ts:2}],phaseRedo:[{phase:"Delivered",from:"Documents & Handover",date:"2026-10-22"}]});migrate();`);
+  ok(v('(()=>{const j=DB.jobs.find(x=>x.id==="oldd");return j.phase===PH.DOCS&&j.phaseLog[1].phase===PH.DOCS&&j.phaseRedo[0].from===PH.DOCS&&canRedoPhase(j)})()'), 'I4: the first "Documents & Handover" spelling is upgraded everywhere (phase, history, redo)');
+  ok(v('DB.jobs.every(j=>!j.deliverySet)') && v('costWarnings(Object.assign({},DB.jobs[0],{reqMPI:false,reqLoad:false})).length') === 0, 'I5: old projects: delivery not chosen → no transport warning yet');
+  v('DB.meta.docsTarget=0;DB.meta.docsMax=4');
+  ok(v('docsDays().target') === 0, 'B3: documents target can be 0 (same day)');
+  v('setDocsDays("docsMax",1)'); ok(v('docsDays().max') === 1 && v('docsDays().target') === 0, 'B3: lowering the overdue limit keeps target ≤ max');
+  v('setDocsDays("docsTarget",3)'); ok(v('docsDays().target') === 3 && v('docsDays().max') === 3, 'B3: raising the target lifts the overdue limit with it');
+  v('DB.meta.docsTarget=2;DB.meta.docsMax=4');
+  ok(v('(()=>{try{go("dashboard");go("jobs");setView("kanban");return true}catch(e){return e.message}})()') === true, 'v8: old data renders on dashboard and board');
+
+  // documents & handover
+  v(`globalThis.D1={id:"d1",jobId:"301",jobName:"Pad-eye skid",jobType:"Build to client drawing",optFab:true,optCoat:true,reqMPI:true,reqLoad:true,reqWeldMap:false,delivery:"client",phase:PH.PROD,rfqDate:"2026-10-01",poDate:"2026-10-05",prodStartDate:"2026-10-06",leadMax:30,holds:[],phaseLog:[{phase:PH.PROD,from:PH.PO,date:"2026-10-06",ts:1}],updates:[],qc:{},phaseRedo:[],qcAuto:{}};DB.jobs.push(D1);buildSchedule(D1);save();`);
+  ok(v('wfStepsFor(D1).map(s=>s.key).filter(k=>["weldmaps","mpi","loadtest","mpi2","docs"].includes(k)).join()') === 'mpi,loadtest,mpi2,docs', 'ticks decide the steps: MPI + load test → MPI, load test, MPI after, documents (no weld maps)');
+  ok(v('D1.qc.mpi&&D1.qc.mpi.s') !== 'N/A' && v('!(D1.qc.load&&D1.qc.load.s)'), 'required inspections are left open (not auto N/A)');
+  v('phaseCtx={jobId:"d1",action:"done",target:""};savePhase()');
+  ok(v('D1.phase') === 'Documents & handover' && v('D1.deliveredDate') === v('todayISO()'), 'collected → Documents & handover, delivery clock stopped');
+  ok(v('jobState(D1).kind') === 'docs' && v('jobState(D1).due') === v('addWorkingDays(todayISO(),4)') && v('jobState(D1).target') === v('addWorkingDays(todayISO(),2)'), 'documents due in 4 working days, target 2');
+  ok(!v('isClosed(D1)') && v('attentionItems().some(a=>/Documents to hand over/.test(a.l1))'), 'documents phase stays open and shows in Attention');
+  ok(v('phaseName(D1)') === 'Documents & handover' && v('doneWord(D1)') === 'Collected', 'client collects → reads "Collected"');
+  v('phaseCtx={jobId:"d1",action:"docs",target:""};savePhase()');
+  ok(v('D1.phase') === 'Delivered' && v('D1.docsSentDate') === v('todayISO()') && v('D1.deliveredDate') === v('todayISO()') && v('isClosed(D1)'), 'documents handed over → closed, delivered date kept');
+  ok(/Collected/.test(v('jobDueMeta(D1).txt')) && /docs/.test(v('jobDueMeta(D1).txt')), 'closed text: "Collected … · docs …"');
+  ok(v('inThisMonth(D1,"delivered")'), 'This month counts it as delivered by the collection date');
+  v('undoPhase("d1")');
+  ok(v('D1.phase') === 'Documents & handover' && v('D1.deliveredDate') === v('todayISO()'), 'undo the hand-over → back to Documents, delivery date untouched');
+  v(`globalThis.D2={id:"d2",jobId:"302",jobName:"Plain repair",jobType:"Repair / blast & paint",reqMPI:false,reqLoad:false,reqWeldMap:false,delivery:"us",phase:PH.PROD,poDate:"2026-10-05",holds:[],phaseLog:[],updates:[],qc:{},phaseRedo:[],qcAuto:{}};DB.jobs.push(D2);`);
+  v('phaseCtx={jobId:"d2",action:"done",target:""};savePhase()');
+  ok(v('D2.phase') === 'Delivered' && v('isClosed(D2)'), 'no requirements → delivered closes the project (no documents phase)');
+
+  // inspection order: fabricate → MPI → load test → MPI on the pad eyes → blast & coat
+  v(`globalThis.D3={id:"d3",jobId:"303",jobName:"Basket",jobType:"Build to client drawing",optFab:true,optCoat:true,reqMPI:true,reqLoad:true,phase:PH.PROD,holds:[],phaseLog:[],updates:[],qc:{},phaseRedo:[],qcAuto:{}};DB.jobs.push(D3);`);
+  ok(v('qcBefore(D3,"load").join()') === 'mpi' && v('qcBefore(D3,"mpi2").join()') === 'mpi,load' && v('qcBefore(D3,"blast").join()') === 'mpi,load,mpi2', 'prerequisites follow his order');
+  v('D3.qc.mpi={s:"Fail",date:todayISO()};qcSet("d3","load","Pass")');
+  ok(!(v('D3.qc.load&&D3.qc.load.s')), 'load test can\'t pass while MPI has failed');
+  v('D3.qc.mpi={s:"Pass",date:todayISO()};qcSet("d3","load","Pass");D3.qc.mpi2={s:"Fail",date:todayISO()};qcSet("d3","blast","Pass")');
+  ok(v('D3.qc.load.s') === 'Pass' && !(v('D3.qc.blast&&D3.qc.blast.s')), 'MPI passed → load test passes; failed pad-eye MPI blocks blasting');
+  ok(v('inspOpen(D3).join()') === 'MPI — pad eyes after load test', 'open inspections listed for the delivery dialog');
+  v(`globalThis.D4={id:"d4",jobId:"304",jobName:"No inspections",jobType:"Repair / blast & paint",optFab:false,optCoat:true,reqMPI:false,reqLoad:false,phase:PH.PROD,rfqDate:todayISO(),holds:[],phaseLog:[],updates:[],qc:{},phaseRedo:[],qcAuto:{}};DB.jobs.push(D4);save();`);
+  ok(v('D4.qc.mpi.s') === 'N/A' && v('D4.qc.load.s') === 'N/A' && v('D4.qc.mpi2.s') === 'N/A' && v('qcBefore(D4,"blast").length') === 0, 'not required → inspections auto N/A and never block blasting');
+  v('D4.reqMPI=true;save()');
+  ok(!(v('D4.qc.mpi&&D4.qc.mpi.s')), 'ticking MPI later clears the auto N/A');
+
+  // in-stock material lines
+  v(`DB.materials.push({id:"s1",jobRef:"d3",description:"Off-cut plate",qtyReq:1,inStock:true},{id:"s2",jobRef:"d3",description:"Angle",qtyReq:2});`);
+  ok(v('matStage(DB.materials.find(m=>m.id==="s1"))') === 'received' && v('matStatus(DB.materials.find(m=>m.id==="s1"))') === 'In stock', 'in-stock line counts as in');
+  ok(v('matProgress(D3).n') === 1 && v('matProgress(D3).total') === 2, 'badge: 1 of 2 in');
+  v('matSel=new Set(["s1"]);openRfqFromMaterials("d3")');
+  ok(v('formMode') !== 'rfqmake', 'an RFQ is never opened for in-stock lines only');
+  v('matSel=new Set(["s1","s2"]);openRfqFromMaterials("d3")');
+  ok(v('impCtx.ids.join()') === 's2', 'mixed selection: only the line to buy goes on the RFQ');
+  v('closeForm()');
+
+  // costing warnings at "Quote submitted"
+  ok(v('costWarnings(D3).length') === 2, 'delivery not chosen yet → MPI + load test warnings only');
+  v('D3.deliverySet=true;D3.delivery="us"');
+  ok(v('costWarnings(D3).length') === 3, 'We deliver chosen: MPI, load test and transport not costed → 3 warnings');
+  v('D3.costing={lines:{mpi:{cost:800},load:{cost:1500},transport:{cost:400}}}');
+  ok(v('costWarnings(D3).length') === 0, 'costed → no warnings');
+  v('D3.delivery="client";D3.costing.lines.transport={}');
+  ok(v('costWarnings(D3).length') === 0, 'client collects → transport not needed');
+  ok(v('costLines().some(l=>l.key==="load")'), 'Load test line on the costing');
+  ok(v('JOB_TYPES["Design & build"].reqMPI') && v('JOB_TYPES["Build to client drawing"].reqMPI') && !v('JOB_TYPES["Repair / blast & paint"].reqMPI'), 'MPI ticked by default for fabrication project types only');
+  ok(v('PHASES.join("|")') === 'RFQ Received|Quoted – Awaiting PO|PO Received|In Production|Documents & handover|Delivered|Lost / Declined', 'phase list: no Procurement, Documents & handover before the closed Delivered');
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -64,6 +64,13 @@ async def desktop(b):
     await E("saveForm()")
     c = await E(f"jobCosting(DB.jobs.find(j=>j.id==='{jid}'))")
     ok(abs(c["cost"] - 11350) < 0.01 and abs(c["sell"] - 13535) < 0.01, f"costing saved: cost {c['cost']} sell {c['sell']}")
+    # "Use the sell total as the quoted value" shows straight away on the Quoted box (his comment), as a draft until the quote is submitted
+    await E(f"openJob('{jid}')")
+    qbox = await E("document.querySelector('.vcell').innerText")
+    ok("13,535" in qbox and "draft" in qbox.lower(), f"Quoted box shows the costing's sell total as a draft ({qbox!r})")
+    await E(f"openPhaseAction('{jid}','quoted')")
+    ok(await E("document.querySelector('#mbody [data-k=qvalue]').value") == "13535", "…and it pre-fills the Quote submitted dialog")
+    await E("closeForm()")
 
     # paste instead of import (replaces the figures)
     await E(f"openCosting('{jid}')"); await pg.locator("#mbody button", has_text="Paste cells").click()
@@ -122,6 +129,13 @@ async def desktop(b):
     ok(await E("(()=>{go('settings');setTab='general';render();return document.querySelector('#content').textContent.includes('Costing defaults')})()"), "Settings: costing defaults (day rates, minimum margin, markups)")
     await E("setCostMarkup(6,25)")
     ok(await E("costLines()[6].markup") == 25, "default markup editable")
+    # a priced material list shows on the Cost box before the rest of the costing is in (his comment)
+    mj = await E("(()=>{const j=DB.jobs.find(j=>!jobCosting(j).has&&(jobCosting(j).lines.find(l=>l.key==='mat')||{}).cost>0);return j&&j.id})()")
+    if mj:
+        await E(f"openJob('{mj}')")
+        cost = await E("[...document.querySelectorAll('.vcell')].find(c=>/Cost/i.test(c.querySelector('label').textContent)).innerText")
+        mc = await E(f"jobCosting(DB.jobs.find(j=>j.id==='{mj}')).lines.find(l=>l.key==='mat').cost")
+        ok(await E(f"money({mc})") in cost and "materials only" in cost, "Cost box shows the material cost before a full costing")
     ok(not errs, "no page errors (desktop): " + "; ".join(errs[:3]))
     await ctx.close()
 
