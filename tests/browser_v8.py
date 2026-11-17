@@ -185,6 +185,9 @@ async def main():
                 ok(await E("document.querySelectorAll('#purbody .pgroup').length") == await E("document.querySelectorAll('#purbody .pline.plhead').length"), f"{st}: every group has Item / Qty column headings")
         sep = await E("(()=>{const g=document.querySelector('#purbody .pgroup'),h=g.querySelector('.pghead'),cs=getComputedStyle(g);return {bl:parseFloat(cs.borderLeftWidth),hb:getComputedStyle(h).backgroundColor,cb:cs.backgroundColor,mb:parseFloat(cs.marginBottom)};})()")
         ok(sep["bl"] >= 4 and sep["hb"] != sep["cb"] and sep["mb"] >= 16, f"project groups: accent edge, tinted heading band, space between ({sep})")
+        await E("purStage='waiting';render()"); await pg.wait_for_timeout(150)
+        rs = await E("(()=>{const g=document.querySelector('#purbody .rfqc');if(!g)return null;const cs=getComputedStyle(g);return {bl:parseFloat(cs.borderLeftWidth),hb:getComputedStyle(g.querySelector('.hd')).backgroundColor,cb:cs.backgroundColor,mb:parseFloat(cs.marginBottom)};})()")
+        ok(rs is None or (rs["bl"] >= 4 and rs["hb"] != rs["cb"] and rs["mb"] >= 16), f"waiting RFQ cards: same separation ({rs})")
 
         # ---- his icon sheet + logo: SVG nav icons, gear app icon, hover / press animation ----
         await E("go('dashboard')"); await pg.wait_for_timeout(100)

@@ -564,9 +564,13 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .pghead .t button:hover{color:var(--weld)}
 .pghead .m{font-size:12px;color:var(--ink-soft)}
 .pghead .sp{flex:1}
-.pline{display:grid;grid-template-columns:24px minmax(0,1fr) 140px 250px;gap:12px 20px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.pline{display:grid;grid-template-columns:24px minmax(240px,1.15fr) 130px minmax(300px,1fr);gap:12px 20px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
 .pline:first-of-type{border-top:0}
-.pline.nocb{grid-template-columns:minmax(0,1fr) 140px 220px}
+.pline.nocb{grid-template-columns:minmax(240px,1.15fr) 130px minmax(260px,1fr)}
+/* price column reads left to right from the qty divider, with room to breathe */
+.pline .q.pc{text-align:left;border-left:1px solid var(--line);padding-left:16px;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.pline .q.pc .pricecell{font-size:13px;line-height:1.5}
+.pline .q.pc .pricecell .ps{font-size:12px;margin-top:2px}
 .pline.plhead{padding-top:7px;padding-bottom:7px;border-top:0;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
 .pline.plhead+.pline{border-top:0}
 .pline.plhead .r{text-align:right}
@@ -577,8 +581,8 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .pline .qty{text-align:left;border-left:1px solid var(--line);padding-left:16px;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
 .pline .a{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 .late{color:var(--bad);font-weight:700}
-.rfqc{border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:12px;overflow:hidden}
-.rfqc .hd{padding:12px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;border-bottom:1px solid var(--line);background:var(--card-alt)}
+.rfqc{border:1px solid var(--line);border-left:4px solid var(--weld-dim);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:20px;overflow:hidden}
+.rfqc .hd{padding:12px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;border-bottom:1px solid color-mix(in srgb,var(--weld-dim) 35%,var(--line));background:color-mix(in srgb,var(--weld-dim) 9%,var(--card))}
 .rfqc .no{font-family:var(--mono);font-weight:800;color:var(--weld)}
 .rfqc .jb{font-weight:700}
 .rfqc .jb button{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
@@ -613,7 +617,7 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
   .pline.nocb{grid-template-columns:minmax(0,1fr)}
   .pline .q,.pline .a{grid-column:2/-1;text-align:left;justify-content:flex-start}
   .pline.plhead{display:none}
-  .pline .qty{border-left:0;padding-left:0}
+  .pline .qty,.pline .q.pc{border-left:0;padding-left:0}
   .pline.nocb .q,.pline.nocb .a{grid-column:1/-1}
   .srow{grid-template-columns:minmax(0,1fr) auto}
   .srow .a{grid-column:1/-1}
@@ -2773,8 +2777,8 @@ function renderPurBody(){
       const all=ms.every(m=>purSel.has(m.id));
       const cost=matTotals(ms);
       return `<div class="pgroup">${jobHead(j,`<span class="m">${ms.length} line${ms.length>1?"s":""} · ${money(cost.cost)}</span><label class="m" style="display:flex;gap:6px;align-items:center"><input type="checkbox" class="cbx" ${all?"checked":""} onchange="purSelMany('${j?j.id:""}',this.checked)"> all</label>`)}
-        <div class="pline plhead"><span></span><span>Item</span><span class="qh">Qty</span><span class="r">Supplier price</span></div>
-        ${ms.map(m=>`<div class="pline"><input type="checkbox" class="cbx" ${purSel.has(m.id)?"checked":""} onchange="purToggle('${m.id}',this.checked)"><div>${desc(m)}</div><div class="q qty">${qty(m)}</div><div class="q">${priceCell(m)}</div></div>`).join("")}</div>`;}).join("")
+        <div class="pline plhead"><span></span><span>Item</span><span class="qh">Qty</span><span class="qh">Supplier price</span></div>
+        ${ms.map(m=>`<div class="pline"><input type="checkbox" class="cbx" ${purSel.has(m.id)?"checked":""} onchange="purToggle('${m.id}',this.checked)"><div>${desc(m)}</div><div class="q qty">${qty(m)}</div><div class="q pc">${priceCell(m)}</div></div>`).join("")}</div>`;}).join("")
       :empty(purQ?"No lines match that filter.":"Nothing to order. Add a material list to a project (📋 Paste from Excel) and its lines appear here.");
     const sel=ms.filter(m=>purSel.has(m.id)&&matStage(m)==="toorder");
     if(sel.length)html+=`<div class="bulkbar"><b>${sel.length} selected</b><span style="flex:1"></span><button class="btn primary" onclick="purRfq()">✉️ Send RFQ to suppliers</button><button class="btn" onclick="openOrderModal()">Ordered direct (no RFQ)</button><button class="btn" onclick="purSel=new Set();renderPurBody()">✕</button></div>`;
