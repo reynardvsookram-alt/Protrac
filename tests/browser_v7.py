@@ -150,6 +150,11 @@ async def phone(b):
     await E("openCosting(DB.jobs.find(j=>j.jobId==='005').id)"); await pg.wait_for_timeout(150)
     ok(await E("(()=>{const r=document.querySelector('.costtab [data-cs=paintTop]').getBoundingClientRect();return r.right<=390&&r.width>0})()"), "phone costing: sell column visible without scrolling")
     await pg.screenshot(path=os.path.join(OUT, "v7_phone_costing.png"))
+    # margin dialog spells out the sum and what a small gap to the costing means (his question: "how is 6415 $3 below 7,830?")
+    await E("openMarginInfo(DB.jobs.find(x=>x.jobId==='006').id)"); await pg.wait_for_timeout(150)
+    note = await E("document.getElementById('mbody').innerText")
+    ok("Margin = PO value − cost" in note and "sell total" in note and "bottom of the Sell column" in note, "margin dialog: formula line + which figure the gap is measured against")
+    await E("closeForm()")
     ok(not errs, "no page errors (phone): " + "; ".join(errs[:3]))
     await ctx.close()
 

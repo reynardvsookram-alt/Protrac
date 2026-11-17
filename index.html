@@ -7,12 +7,13 @@
 <style>
 :root{
   --steel-900:#16202e; --steel-800:#1d2a3a; --steel-700:#27384c; --steel-600:#34495f;
-  --weld:#ff7a18; --weld-dim:#f59e0b; --weld-soft:#fff1e3;
+  /* light theme: every text colour reads at WCAG AA (≥ 4.5:1) on white and on its own tinted badge (his request: light mode was hard to read) */
+  --weld:#b5490a; --weld-dim:#e8641b; --weld-soft:#fff1e3;
   --paper:#eef1f5; --card:#ffffff; --card-alt:#fafbfc; --hover:#f4f6f9;
-  --ink:#1b2531; --ink-soft:#5b6675; --line:#dde3ea;
-  --ok:#1f9d5b; --ok-bg:#e6f6ed; --warn:#c9820a; --warn-bg:#fdf3e0;
-  --bad:#d23b3b; --bad-bg:#fbe9e9; --info:#2f6fd1; --info-bg:#e8f0fc;
-  --idle:#6b7686; --idle-bg:#eef0f3; --hold:#8455c7; --hold-bg:#f1eafb;
+  --ink:#1b2531; --ink-soft:#56616f; --line:#d3dae3;
+  --ok:#147540; --ok-bg:#e6f6ed; --warn:#965a00; --warn-bg:#fdf3e0;
+  --bad:#c02d2d; --bad-bg:#fbe9e9; --info:#2862c0; --info-bg:#e8f0fc;
+  --idle:#5f6a79; --idle-bg:#eef0f3; --hold:#7646bc; --hold-bg:#f1eafb;
   --grid-month:#cfd6df; --grid-week:#e7ebf1; --dep:#9aa6b5; --gjobrow:#f6f8fa;
   --emboss-hi:rgba(255,255,255,.8); --emboss-lo:rgba(20,30,45,.16);
   --raise:0 1px 2px rgba(20,30,45,.08),0 2px 6px rgba(20,30,45,.05);
@@ -108,6 +109,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .btn:active{box-shadow:inset 0 2px 4px var(--emboss-lo);transform:translateY(.5px)}
 .btn.primary{background:linear-gradient(180deg,#ff9440,#ef6d0c);border-color:#e0670b;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 9px rgba(255,122,24,.45)}
 .btn.primary:hover{filter:brightness(1.04)}
+[data-theme="light"] .btn.primary{background:linear-gradient(180deg,#bd4c08,#a14006);border-color:#9c3e07;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 8px rgba(168,67,8,.3)}
 .btn.sm{padding:6px 11px;font-size:12px;border-radius:8px}
 .viewtabs{display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:3px;box-shadow:inset 0 1px 3px var(--emboss-lo)}
 .viewtabs button{border:0;background:none;padding:6px 13px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--ink-soft)}
@@ -554,23 +556,42 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .stagecard:last-child .arr{display:none}
 .st-toorder{border-top-color:var(--warn)} .st-waiting{border-top-color:var(--hold)} .st-ordered{border-top-color:var(--info)} .st-received{border-top-color:var(--ok)}
 .stagehelp{font-size:13px;color:var(--ink-soft);margin:-4px 0 12px}
-.pgroup{border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:12px;overflow:hidden}
-.pghead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:11px 14px;background:var(--card-alt);border-bottom:1px solid var(--line)}
+.pgroup{border:1px solid var(--line);border-left:4px solid var(--weld-dim);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:20px;overflow:hidden}
+/* each project / supplier block reads as its own unit: orange edge + tinted heading band */
+.pghead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 14px;background:color-mix(in srgb,var(--weld-dim) 9%,var(--card));border-bottom:1px solid color-mix(in srgb,var(--weld-dim) 35%,var(--line))}
 .pghead .t{font-weight:800;font-size:14px}
 .pghead .t button{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
 .pghead .t button:hover{color:var(--weld)}
 .pghead .m{font-size:12px;color:var(--ink-soft)}
 .pghead .sp{flex:1}
-.pline{display:grid;grid-template-columns:24px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.pline{display:grid;grid-template-columns:24px minmax(240px,1.15fr) 130px minmax(300px,1fr);gap:12px 20px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
 .pline:first-of-type{border-top:0}
-.pline.nocb{grid-template-columns:minmax(0,1fr) auto auto}
+.pline.nocb{grid-template-columns:minmax(240px,1.15fr) 130px minmax(260px,1fr)}
+/* To order: price spread over its own columns — unit price · line total · supplier */
+.pline.pl6{grid-template-columns:24px minmax(220px,1.4fr) 120px 150px 120px minmax(170px,.9fr)}
+.pline .q.num{text-align:right}
+.pline .q.num .u{color:var(--ink-soft);font-size:12px}
+.pline .q.tot b{font-size:13.5px}
+.pline .sup{font-size:13px;line-height:1.4}
+.pline .sup .ps{display:block;font-size:12px;color:var(--ink-soft)}
+.pline.plhead .sh{padding-left:16px}
+@media(max-width:1200px){.pline.pl6{grid-template-columns:24px minmax(150px,1.4fr) 100px 120px 100px minmax(110px,.9fr);column-gap:12px}}
+/* price column reads left to right from the qty divider, with room to breathe */
+.pline .q.pc{text-align:left;border-left:1px solid var(--line);padding-left:16px;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.pline .q.pc .pricecell{font-size:13px;line-height:1.5}
+.pline .q.pc .pricecell .ps{font-size:12px;margin-top:2px}
+.pline.plhead{padding-top:7px;padding-bottom:7px;border-top:0;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.pline.plhead+.pline{border-top:0}
+.pline.plhead .r{text-align:right}
+.pline.plhead .qh{padding-left:17px}
 .pline .d{font-weight:700;font-size:13.5px}
 .pline .x{font-size:12px;color:var(--ink-soft);margin-top:2px}
 .pline .q{font-family:var(--mono);font-size:13px;white-space:nowrap;text-align:right}
+.pline .qty{text-align:left;border-left:1px solid var(--line);padding-left:16px;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
 .pline .a{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 .late{color:var(--bad);font-weight:700}
-.rfqc{border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:12px;overflow:hidden}
-.rfqc .hd{padding:12px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;border-bottom:1px solid var(--line);background:var(--card-alt)}
+.rfqc{border:1px solid var(--line);border-left:4px solid var(--weld-dim);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:20px;overflow:hidden}
+.rfqc .hd{padding:12px 14px;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;border-bottom:1px solid color-mix(in srgb,var(--weld-dim) 35%,var(--line));background:color-mix(in srgb,var(--weld-dim) 9%,var(--card))}
 .rfqc .no{font-family:var(--mono);font-weight:800;color:var(--weld)}
 .rfqc .jb{font-weight:700}
 .rfqc .jb button{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
@@ -604,6 +625,11 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
   .pline{grid-template-columns:24px minmax(0,1fr);row-gap:6px}
   .pline.nocb{grid-template-columns:minmax(0,1fr)}
   .pline .q,.pline .a{grid-column:2/-1;text-align:left;justify-content:flex-start}
+  .pline.plhead{display:none}
+  .pline .qty,.pline .q.pc,.pline .sup{border-left:0;padding-left:0}
+  .pline.pl6{grid-template-columns:24px minmax(0,1fr)}
+  .pline.pl6 .q.num{text-align:left}
+  .pline.pl6 .sup{grid-column:2/-1}
   .pline.nocb .q,.pline.nocb .a{grid-column:1/-1}
   .srow{grid-template-columns:minmax(0,1fr) auto}
   .srow .a{grid-column:1/-1}
@@ -1092,6 +1118,15 @@ svg.ic{width:18px;height:18px;flex:0 0 18px}
 .matbadge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;background:var(--info-bg);color:var(--info);white-space:nowrap}.matbadge.all{background:var(--ok-bg);color:var(--ok)}
 .kc-mat{margin:6px 0 2px}
 @media(max-width:760px){.reqrow{gap:8px}.reqrow .optchks{flex-basis:100%}.dvbtns{display:flex;flex:1 1 100%;gap:6px}.dvbtns .segbtn{flex:1;padding:7px 6px}label .lblnote{display:none}}.kc-mat .matbadge{font-size:10.5px;padding:2px 8px}
+/* light theme checkboxes (his request): transparent inside, dark outline; ticked = orange fill with a white tick. Dark theme keeps the native look he signed off. */
+html[data-theme="light"] input[type=checkbox]{-webkit-appearance:none;appearance:none;width:17px;height:17px;min-width:17px;flex:0 0 17px;margin:0;padding:0;border:1.75px solid #3d4756;border-radius:4px;background:transparent;box-shadow:none;display:inline-grid;place-content:center;vertical-align:middle;cursor:pointer;transition:background-color .12s,border-color .12s}
+html[data-theme="light"] input[type=checkbox]::before{content:"";width:8px;height:4.5px;border:2px solid #fff;border-top:0;border-right:0;transform:translate(0,-1px) rotate(-45deg) scale(0);transition:transform .12s ease}
+html[data-theme="light"] input[type=checkbox]:hover{border-color:var(--weld)}
+html[data-theme="light"] input[type=checkbox]:checked{background:var(--weld);border-color:var(--weld)}
+html[data-theme="light"] input[type=checkbox]:checked::before{transform:translate(0,-1px) rotate(-45deg) scale(1)}
+html[data-theme="light"] input[type=checkbox]:focus-visible{outline:2px solid var(--weld);outline-offset:2px}
+html[data-theme="light"] input[type=checkbox]:disabled{opacity:.45;cursor:default}
+@media (prefers-reduced-motion:reduce){html[data-theme="light"] input[type=checkbox],html[data-theme="light"] input[type=checkbox]::before{transition:none}}
 /* phone order (≤760px): the two card grids dissolve into one column so each card can be placed */
 @media(max-width:760px){
   .dash3{display:flex;flex-direction:column;gap:12px}.dash3>*{margin:0!important}.dash3 .dg3{display:contents}
@@ -2131,6 +2166,15 @@ function matPrice(m){
   const it=m.priceItemRef&&priceItem(m.priceItemRef);if(!it)return null;
   const b=bestPrice(it);return b?{price:b.price,src:b.supplier,uom:it.uom,item:it,date:b.date}:{price:null,src:"",uom:it.uom,item:it};
 }
+/* Purchasing → To order: the price spread over three columns (unit · line total · supplier) */
+function purPriceCols(m){
+  const p=matPrice(m);
+  const chg=`<button class="linkbtn" onclick="event.stopPropagation();openMatch('${m.id}')">${p&&p.item?"change":"💲 Find price"}</button>`;
+  if(!p)return `<div class="q num"></div><div class="q num tot"></div><div class="sup">${chg}</div>`;
+  if(p.price==null)return `<div class="q num">no price</div><div class="q num tot"></div><div class="sup" title="${esc(p.item?p.item.description:"")}">${esc(p.item?p.item.description:"")}<span class="ps">${p.item?chg:""}</span></div>`;
+  const qty=+m.qtyReq||0;
+  return `<div class="q num" title="${esc(p.item?p.item.description:"")}">${money(p.price)}${p.uom?`<span class="u">/${esc(p.uom.toLowerCase())}</span>`:""}</div><div class="q num tot">${qty?`<b>${money(p.price*qty)}</b>`:""}</div><div class="sup qty">${p.src==="manual"?"Manual price":esc(p.src)}${p.item?`<span class="ps">${chg}</span>`:""}</div>`;
+}
 function priceCell(m){
   const p=matPrice(m);
   if(!p)return `<button class="linkbtn" onclick="event.stopPropagation();openMatch('${m.id}')">💲 Find price</button>`;
@@ -2746,7 +2790,7 @@ function renderPurBody(){
   const jobsOf=list=>{const g={};list.forEach(m=>{(g[m.jobRef||""]=g[m.jobRef||""]||[]).push(m);});return Object.keys(g).map(id=>({j:(DB.jobs||[]).find(x=>x.id===id),ms:g[id]})).sort((a,b)=>{const da=a.j?(jobState(a.j).due||"9999"):"9999",db=b.j?(jobState(b.j).due||"9999"):"9999";return da<db?-1:da>db?1:0;});};
   const empty=t=>`<div class="empty"><div class="big">✓</div>${t}</div>`;
   const desc=m=>`<div class="d">${esc(m.description||"")}${m.size?" "+esc(m.size):""}</div><div class="x">${esc([m.grade,m.length&&"L "+m.length,m.notes].filter(Boolean).join(" · "))}</div>`;
-  const qty=m=>`<b>${esc(m.qtyReq??"")}</b> ${esc(m.unit||"")}`;
+  const qty=m=>`<span><b>${esc(m.qtyReq??"")}</b> ${esc(m.unit||"")}</span>`;
   let html="";
   if(purStage==="toorder"){
     const groups=jobsOf(ms.filter(m=>matStage(m)==="toorder"));
@@ -2754,7 +2798,8 @@ function renderPurBody(){
       const all=ms.every(m=>purSel.has(m.id));
       const cost=matTotals(ms);
       return `<div class="pgroup">${jobHead(j,`<span class="m">${ms.length} line${ms.length>1?"s":""} · ${money(cost.cost)}</span><label class="m" style="display:flex;gap:6px;align-items:center"><input type="checkbox" class="cbx" ${all?"checked":""} onchange="purSelMany('${j?j.id:""}',this.checked)"> all</label>`)}
-        ${ms.map(m=>`<div class="pline"><input type="checkbox" class="cbx" ${purSel.has(m.id)?"checked":""} onchange="purToggle('${m.id}',this.checked)"><div>${desc(m)}</div><div class="q">${qty(m)}</div><div class="q">${priceCell(m)}</div></div>`).join("")}</div>`;}).join("")
+        <div class="pline pl6 plhead"><span></span><span>Item</span><span class="qh">Qty</span><span class="r">Unit price</span><span class="r">Line total</span><span class="sh">Supplier</span></div>
+        ${ms.map(m=>`<div class="pline pl6"><input type="checkbox" class="cbx" ${purSel.has(m.id)?"checked":""} onchange="purToggle('${m.id}',this.checked)"><div>${desc(m)}</div><div class="q qty">${qty(m)}</div>${purPriceCols(m)}</div>`).join("")}</div>`;}).join("")
       :empty(purQ?"No lines match that filter.":"Nothing to order. Add a material list to a project (📋 Paste from Excel) and its lines appear here.");
     const sel=ms.filter(m=>purSel.has(m.id)&&matStage(m)==="toorder");
     if(sel.length)html+=`<div class="bulkbar"><b>${sel.length} selected</b><span style="flex:1"></span><button class="btn primary" onclick="purRfq()">✉️ Send RFQ to suppliers</button><button class="btn" onclick="openOrderModal()">Ordered direct (no RFQ)</button><button class="btn" onclick="purSel=new Set();renderPurBody()">✕</button></div>`;
@@ -2771,14 +2816,16 @@ function renderPurBody(){
     const keys=Object.keys(g).sort((a,b)=>(refName("suppliers",a)||"~").localeCompare(refName("suppliers",b)||"~"));
     html=keys.length?keys.map(k=>{const L=g[k];const late=L.filter(m=>m.eta&&m.eta<todayISO()).length;
       return `<div class="pgroup"><div class="pghead"><span class="t">${esc(refName("suppliers",k)||"Supplier not set")}</span><span class="m">${L.length} line${L.length>1?"s":""}${late?` · <span class="late">${late} late</span>`:""}</span><span class="sp"></span><button class="btn sm primary" onclick="receiveMats(${esc(JSON.stringify(L.map(m=>m.id)))})">✓ All received</button></div>
-        ${L.map(m=>{const etaTxt=m.eta?`ETA ${fmtShort(m.eta)}`:"no ETA";return `<div class="pline nocb"><div>${desc(m)}<div class="x">🔗 ${esc(refName("jobs",m.jobRef)||"")}${m.orderedDate?" · ordered "+esc(fmtShort(m.orderedDate)):""}${m.poRef?" · "+esc(m.poRef):""}</div></div><div class="q">${qty(m)}<div class="x ${m.eta&&m.eta<todayISO()?"late":""}">${esc(etaTxt)}</div></div><div class="a"><button class="btn sm" onclick="setEta('${m.id}')">ETA</button><button class="btn sm primary" onclick="receiveMats(['${m.id}'])">✓ Received</button></div></div>`;}).join("")}</div>`;}).join("")
+        <div class="pline nocb plhead"><span>Item</span><span class="qh">Qty · ETA</span><span class="r">Delivery</span></div>
+        ${L.map(m=>{const etaTxt=m.eta?`ETA ${fmtShort(m.eta)}`:"no ETA";return `<div class="pline nocb"><div>${desc(m)}<div class="x">🔗 ${esc(refName("jobs",m.jobRef)||"")}${m.orderedDate?" · ordered "+esc(fmtShort(m.orderedDate)):""}${m.poRef?" · "+esc(m.poRef):""}</div></div><div class="q qty"><div>${qty(m)}</div><div class="x ${m.eta&&m.eta<todayISO()?"late":""}">${esc(etaTxt)}</div></div><div class="a"><button class="btn sm" onclick="setEta('${m.id}')">ETA</button><button class="btn sm primary" onclick="receiveMats(['${m.id}'])">✓ Received</button></div></div>`;}).join("")}</div>`;}).join("")
       :empty(purQ?"No lines match that filter.":"Nothing on order.");
   }
   else{
     const list=purCounts()._rec.filter(purMatch);
     const groups=jobsOf(list);
     html=groups.length?groups.map(({j,ms})=>`<div class="pgroup">${jobHead(j,`<span class="m">${ms.filter(m=>m.mtr).length}/${ms.length} MTRs</span>`)}
-      ${ms.map(m=>`<div class="pline nocb"><div>${desc(m)}<div class="x">${esc(refName("suppliers",m.supplierRef)||"")}${m.receivedDate?" · received "+esc(fmtShort(m.receivedDate)):""}${m.heatNo?" · heat "+esc(m.heatNo):""}</div></div><div class="q">${qty(m)}</div><div class="a"><button class="mchip" style="${tokStyle(m.mtr?"ok":"bad")}" onclick="toggleMTR('${m.id}')">${m.mtr?"MTR ✓":"MTR missing"}</button><button class="btn sm" onclick='openForm("${m.id}","materials")'>Heat no.</button></div></div>`).join("")}</div>`).join("")
+      <div class="pline nocb plhead"><span>Item</span><span class="qh">Qty</span><span class="r">MTR · heat no.</span></div>
+      ${ms.map(m=>`<div class="pline nocb"><div>${desc(m)}<div class="x">${esc(refName("suppliers",m.supplierRef)||"")}${m.receivedDate?" · received "+esc(fmtShort(m.receivedDate)):""}${m.heatNo?" · heat "+esc(m.heatNo):""}</div></div><div class="q qty">${qty(m)}</div><div class="a"><button class="mchip" style="${tokStyle(m.mtr?"ok":"bad")}" onclick="toggleMTR('${m.id}')">${m.mtr?"MTR ✓":"MTR missing"}</button><button class="btn sm" onclick='openForm("${m.id}","materials")'>Heat no.</button></div></div>`).join("")}</div>`).join("")
       :empty("Nothing received yet for open projects.");
   }
   el.innerHTML=html;
@@ -3889,7 +3936,7 @@ const GANTT_LEGEND=`<div class="glegend"><span>◆ milestone</span><span>▭ sec
 /* ---- dashboard v3: card layout; every number comes from the data and every card / row opens what's behind it ---- */
 const DI={ // small inline icon set (stroke icons, currentColor)
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c.6-3.3 3-5 6-5s5.4 1.7 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c2.4.2 4.3 1.8 5 4.8"/>',
-  wrench:'<path d="M14.7 6.3a4 4 0 0 0 5 5L12 19l-3.5.5L9 16l7.7-7.7"/><path d="M14.7 6.3 17 4"/>',pause:'<circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/>',
+  wrench:'<g transform="rotate(45 12 12)"><path d="M9.2 2.6A3.5 3.5 0 1 0 14.8 2.6"/><path d="M12 8.6v7"/><circle cx="12" cy="18.3" r="2.6"/></g>',pause:'<circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/>',
   doc:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M10 13h6M10 17h6"/>',alert:'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17.5v.5"/>',
   chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',flow:'<rect x="3" y="3" width="6" height="6" rx="1.5"/><rect x="15" y="15" width="6" height="6" rx="1.5"/><path d="M9 6h4a3 3 0 0 1 3 3v6"/>',
   cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',check:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="m8 12 3 3 5-6"/>',
@@ -4391,7 +4438,9 @@ function openMarginInfo(jobId){
       <tfoot><tr><th>Costing total</th><th class="num">${mv(C.cost)}</th><th></th><th class="num">${mv(C.sell)}</th><th class="num">${mv(C.sell-C.cost)}</th></tr></tfoot></table></div>
     <div class="full msum"><div class="m"><b>${v!=null?mv(v):"—"}</b>${reached(j,PH.PO)&&poValue(j)!=null?"PO value":"quoted value"+(quoteRev(j)?" (Rev "+quoteRev(j)+")":"")}</div><div class="m"><b>${mv(C.cost)}</b>cost</div><div class="m"><b class="${low?"late":"ontime"}">${m!=null?mv(m)+" · "+pct(mp):"—"}</b>margin${low?" — below your "+minMargin()+"% minimum":""}</div></div>
     ${stockValue(jobMats(j.id))>0?`<div class="full impnote">Materials include ${mv(stockValue(jobMats(j.id)))} of in-house stock (off-cuts / yard stock), costed at the supplier price — no purchase needed for those lines.</div>`:""}
-    ${v!=null&&Math.abs(v-C.sell)>1?`<div class="full impnote">The ${reached(j,PH.PO)&&poValue(j)!=null?"PO":"quote"} is ${mv(Math.abs(v-C.sell))} ${v<C.sell?"below":"above"} the costing's sell total (${mv(C.sell)})${quoteRev(j)?" — after "+quoteRev(j)+" re-quote"+(quoteRev(j)>1?"s":""):""}.</div>`:""}
+    ${m!=null?`<div class="full impnote">Margin = ${reached(j,PH.PO)&&poValue(j)!=null?"PO value":"quoted value"} − cost = ${mv(v)} − ${mv(C.cost)} = <b>${mv(m)}</b> (${pct(mp)} of ${mv(v)}).</div>`:""}
+    ${v!=null&&Math.abs(v-C.sell)>1?(()=>{const w=reached(j,PH.PO)&&poValue(j)!=null?"PO":"quote",gap=Math.abs(v-C.sell),small=gap<=Math.max(10,C.sell*0.005);
+      return `<div class="full impnote">The ${w} (${mv(v)}) is ${mv(gap)} ${v<C.sell?"below":"above"} the costing's sell total (${mv(C.sell)}, bottom of the Sell column)${quoteRev(j)?" — after "+quoteRev(j)+" re-quote"+(quoteRev(j)>1?"s":""):small?" — the figure was rounded":""}, so the margin is ${mv(gap)} ${v<C.sell?"less":"more"} than the costing's ${mv(C.sell-C.cost)}.</div>`;})():""}
     <div class="full" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" onclick="closeForm();openCosting('${j.id}')">Edit costing</button><button class="btn" onclick="closeForm();openQuotesEdit('${j.id}')">Quote &amp; revisions</button><button class="btn" onclick="closeForm()">Done</button></div>`,{wide:true,noFooter:true});
 }
 function openRequote(jobId){
