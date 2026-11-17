@@ -556,19 +556,25 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .stagecard:last-child .arr{display:none}
 .st-toorder{border-top-color:var(--warn)} .st-waiting{border-top-color:var(--hold)} .st-ordered{border-top-color:var(--info)} .st-received{border-top-color:var(--ok)}
 .stagehelp{font-size:13px;color:var(--ink-soft);margin:-4px 0 12px}
-.pgroup{border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:12px;overflow:hidden}
-.pghead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:11px 14px;background:var(--card-alt);border-bottom:1px solid var(--line)}
+.pgroup{border:1px solid var(--line);border-left:4px solid var(--weld-dim);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:20px;overflow:hidden}
+/* each project / supplier block reads as its own unit: orange edge + tinted heading band */
+.pghead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 14px;background:color-mix(in srgb,var(--weld-dim) 9%,var(--card));border-bottom:1px solid color-mix(in srgb,var(--weld-dim) 35%,var(--line))}
 .pghead .t{font-weight:800;font-size:14px}
 .pghead .t button{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
 .pghead .t button:hover{color:var(--weld)}
 .pghead .m{font-size:12px;color:var(--ink-soft)}
 .pghead .sp{flex:1}
-.pline{display:grid;grid-template-columns:24px minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
+.pline{display:grid;grid-template-columns:24px minmax(0,1fr) 140px 250px;gap:12px 20px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
 .pline:first-of-type{border-top:0}
-.pline.nocb{grid-template-columns:minmax(0,1fr) auto auto}
+.pline.nocb{grid-template-columns:minmax(0,1fr) 140px 220px}
+.pline.plhead{padding-top:7px;padding-bottom:7px;border-top:0;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.pline.plhead+.pline{border-top:0}
+.pline.plhead .r{text-align:right}
+.pline.plhead .qh{padding-left:17px}
 .pline .d{font-weight:700;font-size:13.5px}
 .pline .x{font-size:12px;color:var(--ink-soft);margin-top:2px}
 .pline .q{font-family:var(--mono);font-size:13px;white-space:nowrap;text-align:right}
+.pline .qty{text-align:left;border-left:1px solid var(--line);padding-left:16px;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
 .pline .a{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
 .late{color:var(--bad);font-weight:700}
 .rfqc{border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:var(--raise);margin-bottom:12px;overflow:hidden}
@@ -606,6 +612,8 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
   .pline{grid-template-columns:24px minmax(0,1fr);row-gap:6px}
   .pline.nocb{grid-template-columns:minmax(0,1fr)}
   .pline .q,.pline .a{grid-column:2/-1;text-align:left;justify-content:flex-start}
+  .pline.plhead{display:none}
+  .pline .qty{border-left:0;padding-left:0}
   .pline.nocb .q,.pline.nocb .a{grid-column:1/-1}
   .srow{grid-template-columns:minmax(0,1fr) auto}
   .srow .a{grid-column:1/-1}
@@ -2757,7 +2765,7 @@ function renderPurBody(){
   const jobsOf=list=>{const g={};list.forEach(m=>{(g[m.jobRef||""]=g[m.jobRef||""]||[]).push(m);});return Object.keys(g).map(id=>({j:(DB.jobs||[]).find(x=>x.id===id),ms:g[id]})).sort((a,b)=>{const da=a.j?(jobState(a.j).due||"9999"):"9999",db=b.j?(jobState(b.j).due||"9999"):"9999";return da<db?-1:da>db?1:0;});};
   const empty=t=>`<div class="empty"><div class="big">✓</div>${t}</div>`;
   const desc=m=>`<div class="d">${esc(m.description||"")}${m.size?" "+esc(m.size):""}</div><div class="x">${esc([m.grade,m.length&&"L "+m.length,m.notes].filter(Boolean).join(" · "))}</div>`;
-  const qty=m=>`<b>${esc(m.qtyReq??"")}</b> ${esc(m.unit||"")}`;
+  const qty=m=>`<span><b>${esc(m.qtyReq??"")}</b> ${esc(m.unit||"")}</span>`;
   let html="";
   if(purStage==="toorder"){
     const groups=jobsOf(ms.filter(m=>matStage(m)==="toorder"));
@@ -2765,7 +2773,8 @@ function renderPurBody(){
       const all=ms.every(m=>purSel.has(m.id));
       const cost=matTotals(ms);
       return `<div class="pgroup">${jobHead(j,`<span class="m">${ms.length} line${ms.length>1?"s":""} · ${money(cost.cost)}</span><label class="m" style="display:flex;gap:6px;align-items:center"><input type="checkbox" class="cbx" ${all?"checked":""} onchange="purSelMany('${j?j.id:""}',this.checked)"> all</label>`)}
-        ${ms.map(m=>`<div class="pline"><input type="checkbox" class="cbx" ${purSel.has(m.id)?"checked":""} onchange="purToggle('${m.id}',this.checked)"><div>${desc(m)}</div><div class="q">${qty(m)}</div><div class="q">${priceCell(m)}</div></div>`).join("")}</div>`;}).join("")
+        <div class="pline plhead"><span></span><span>Item</span><span class="qh">Qty</span><span class="r">Supplier price</span></div>
+        ${ms.map(m=>`<div class="pline"><input type="checkbox" class="cbx" ${purSel.has(m.id)?"checked":""} onchange="purToggle('${m.id}',this.checked)"><div>${desc(m)}</div><div class="q qty">${qty(m)}</div><div class="q">${priceCell(m)}</div></div>`).join("")}</div>`;}).join("")
       :empty(purQ?"No lines match that filter.":"Nothing to order. Add a material list to a project (📋 Paste from Excel) and its lines appear here.");
     const sel=ms.filter(m=>purSel.has(m.id)&&matStage(m)==="toorder");
     if(sel.length)html+=`<div class="bulkbar"><b>${sel.length} selected</b><span style="flex:1"></span><button class="btn primary" onclick="purRfq()">✉️ Send RFQ to suppliers</button><button class="btn" onclick="openOrderModal()">Ordered direct (no RFQ)</button><button class="btn" onclick="purSel=new Set();renderPurBody()">✕</button></div>`;
@@ -2782,14 +2791,16 @@ function renderPurBody(){
     const keys=Object.keys(g).sort((a,b)=>(refName("suppliers",a)||"~").localeCompare(refName("suppliers",b)||"~"));
     html=keys.length?keys.map(k=>{const L=g[k];const late=L.filter(m=>m.eta&&m.eta<todayISO()).length;
       return `<div class="pgroup"><div class="pghead"><span class="t">${esc(refName("suppliers",k)||"Supplier not set")}</span><span class="m">${L.length} line${L.length>1?"s":""}${late?` · <span class="late">${late} late</span>`:""}</span><span class="sp"></span><button class="btn sm primary" onclick="receiveMats(${esc(JSON.stringify(L.map(m=>m.id)))})">✓ All received</button></div>
-        ${L.map(m=>{const etaTxt=m.eta?`ETA ${fmtShort(m.eta)}`:"no ETA";return `<div class="pline nocb"><div>${desc(m)}<div class="x">🔗 ${esc(refName("jobs",m.jobRef)||"")}${m.orderedDate?" · ordered "+esc(fmtShort(m.orderedDate)):""}${m.poRef?" · "+esc(m.poRef):""}</div></div><div class="q">${qty(m)}<div class="x ${m.eta&&m.eta<todayISO()?"late":""}">${esc(etaTxt)}</div></div><div class="a"><button class="btn sm" onclick="setEta('${m.id}')">ETA</button><button class="btn sm primary" onclick="receiveMats(['${m.id}'])">✓ Received</button></div></div>`;}).join("")}</div>`;}).join("")
+        <div class="pline nocb plhead"><span>Item</span><span class="qh">Qty · ETA</span><span class="r">Delivery</span></div>
+        ${L.map(m=>{const etaTxt=m.eta?`ETA ${fmtShort(m.eta)}`:"no ETA";return `<div class="pline nocb"><div>${desc(m)}<div class="x">🔗 ${esc(refName("jobs",m.jobRef)||"")}${m.orderedDate?" · ordered "+esc(fmtShort(m.orderedDate)):""}${m.poRef?" · "+esc(m.poRef):""}</div></div><div class="q qty"><div>${qty(m)}</div><div class="x ${m.eta&&m.eta<todayISO()?"late":""}">${esc(etaTxt)}</div></div><div class="a"><button class="btn sm" onclick="setEta('${m.id}')">ETA</button><button class="btn sm primary" onclick="receiveMats(['${m.id}'])">✓ Received</button></div></div>`;}).join("")}</div>`;}).join("")
       :empty(purQ?"No lines match that filter.":"Nothing on order.");
   }
   else{
     const list=purCounts()._rec.filter(purMatch);
     const groups=jobsOf(list);
     html=groups.length?groups.map(({j,ms})=>`<div class="pgroup">${jobHead(j,`<span class="m">${ms.filter(m=>m.mtr).length}/${ms.length} MTRs</span>`)}
-      ${ms.map(m=>`<div class="pline nocb"><div>${desc(m)}<div class="x">${esc(refName("suppliers",m.supplierRef)||"")}${m.receivedDate?" · received "+esc(fmtShort(m.receivedDate)):""}${m.heatNo?" · heat "+esc(m.heatNo):""}</div></div><div class="q">${qty(m)}</div><div class="a"><button class="mchip" style="${tokStyle(m.mtr?"ok":"bad")}" onclick="toggleMTR('${m.id}')">${m.mtr?"MTR ✓":"MTR missing"}</button><button class="btn sm" onclick='openForm("${m.id}","materials")'>Heat no.</button></div></div>`).join("")}</div>`).join("")
+      <div class="pline nocb plhead"><span>Item</span><span class="qh">Qty</span><span class="r">MTR · heat no.</span></div>
+      ${ms.map(m=>`<div class="pline nocb"><div>${desc(m)}<div class="x">${esc(refName("suppliers",m.supplierRef)||"")}${m.receivedDate?" · received "+esc(fmtShort(m.receivedDate)):""}${m.heatNo?" · heat "+esc(m.heatNo):""}</div></div><div class="q qty">${qty(m)}</div><div class="a"><button class="mchip" style="${tokStyle(m.mtr?"ok":"bad")}" onclick="toggleMTR('${m.id}')">${m.mtr?"MTR ✓":"MTR missing"}</button><button class="btn sm" onclick='openForm("${m.id}","materials")'>Heat no.</button></div></div>`).join("")}</div>`).join("")
       :empty("Nothing received yet for open projects.");
   }
   el.innerHTML=html;
