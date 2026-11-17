@@ -7,12 +7,13 @@
 <style>
 :root{
   --steel-900:#16202e; --steel-800:#1d2a3a; --steel-700:#27384c; --steel-600:#34495f;
-  --weld:#ff7a18; --weld-dim:#f59e0b; --weld-soft:#fff1e3;
+  /* light theme: every text colour reads at WCAG AA (≥ 4.5:1) on white and on its own tinted badge (his request: light mode was hard to read) */
+  --weld:#b5490a; --weld-dim:#e8641b; --weld-soft:#fff1e3;
   --paper:#eef1f5; --card:#ffffff; --card-alt:#fafbfc; --hover:#f4f6f9;
-  --ink:#1b2531; --ink-soft:#5b6675; --line:#dde3ea;
-  --ok:#1f9d5b; --ok-bg:#e6f6ed; --warn:#c9820a; --warn-bg:#fdf3e0;
-  --bad:#d23b3b; --bad-bg:#fbe9e9; --info:#2f6fd1; --info-bg:#e8f0fc;
-  --idle:#6b7686; --idle-bg:#eef0f3; --hold:#8455c7; --hold-bg:#f1eafb;
+  --ink:#1b2531; --ink-soft:#56616f; --line:#d3dae3;
+  --ok:#147540; --ok-bg:#e6f6ed; --warn:#965a00; --warn-bg:#fdf3e0;
+  --bad:#c02d2d; --bad-bg:#fbe9e9; --info:#2862c0; --info-bg:#e8f0fc;
+  --idle:#5f6a79; --idle-bg:#eef0f3; --hold:#7646bc; --hold-bg:#f1eafb;
   --grid-month:#cfd6df; --grid-week:#e7ebf1; --dep:#9aa6b5; --gjobrow:#f6f8fa;
   --emboss-hi:rgba(255,255,255,.8); --emboss-lo:rgba(20,30,45,.16);
   --raise:0 1px 2px rgba(20,30,45,.08),0 2px 6px rgba(20,30,45,.05);
@@ -108,6 +109,7 @@ button{font-family:inherit;cursor:pointer;color:inherit}
 .btn:active{box-shadow:inset 0 2px 4px var(--emboss-lo);transform:translateY(.5px)}
 .btn.primary{background:linear-gradient(180deg,#ff9440,#ef6d0c);border-color:#e0670b;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 2px 9px rgba(255,122,24,.45)}
 .btn.primary:hover{filter:brightness(1.04)}
+[data-theme="light"] .btn.primary{background:linear-gradient(180deg,#bd4c08,#a14006);border-color:#9c3e07;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 8px rgba(168,67,8,.3)}
 .btn.sm{padding:6px 11px;font-size:12px;border-radius:8px}
 .viewtabs{display:flex;gap:4px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:3px;box-shadow:inset 0 1px 3px var(--emboss-lo)}
 .viewtabs button{border:0;background:none;padding:6px 13px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--ink-soft)}
