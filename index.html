@@ -1094,6 +1094,15 @@ svg.ic{width:18px;height:18px;flex:0 0 18px}
 .matbadge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:700;background:var(--info-bg);color:var(--info);white-space:nowrap}.matbadge.all{background:var(--ok-bg);color:var(--ok)}
 .kc-mat{margin:6px 0 2px}
 @media(max-width:760px){.reqrow{gap:8px}.reqrow .optchks{flex-basis:100%}.dvbtns{display:flex;flex:1 1 100%;gap:6px}.dvbtns .segbtn{flex:1;padding:7px 6px}label .lblnote{display:none}}.kc-mat .matbadge{font-size:10.5px;padding:2px 8px}
+/* light theme checkboxes (his request): transparent inside, dark outline; ticked = orange fill with a white tick. Dark theme keeps the native look he signed off. */
+html[data-theme="light"] input[type=checkbox]{-webkit-appearance:none;appearance:none;width:17px;height:17px;min-width:17px;flex:0 0 17px;margin:0;padding:0;border:1.75px solid #3d4756;border-radius:4px;background:transparent;box-shadow:none;display:inline-grid;place-content:center;vertical-align:middle;cursor:pointer;transition:background-color .12s,border-color .12s}
+html[data-theme="light"] input[type=checkbox]::before{content:"";width:8px;height:4.5px;border:2px solid #fff;border-top:0;border-right:0;transform:translate(0,-1px) rotate(-45deg) scale(0);transition:transform .12s ease}
+html[data-theme="light"] input[type=checkbox]:hover{border-color:var(--weld)}
+html[data-theme="light"] input[type=checkbox]:checked{background:var(--weld);border-color:var(--weld)}
+html[data-theme="light"] input[type=checkbox]:checked::before{transform:translate(0,-1px) rotate(-45deg) scale(1)}
+html[data-theme="light"] input[type=checkbox]:focus-visible{outline:2px solid var(--weld);outline-offset:2px}
+html[data-theme="light"] input[type=checkbox]:disabled{opacity:.45;cursor:default}
+@media (prefers-reduced-motion:reduce){html[data-theme="light"] input[type=checkbox],html[data-theme="light"] input[type=checkbox]::before{transition:none}}
 /* phone order (≤760px): the two card grids dissolve into one column so each card can be placed */
 @media(max-width:760px){
   .dash3{display:flex;flex-direction:column;gap:12px}.dash3>*{margin:0!important}.dash3 .dg3{display:contents}
