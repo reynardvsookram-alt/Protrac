@@ -567,6 +567,15 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .pline{display:grid;grid-template-columns:24px minmax(240px,1.15fr) 130px minmax(300px,1fr);gap:12px 20px;align-items:center;padding:10px 14px;border-top:1px solid var(--line)}
 .pline:first-of-type{border-top:0}
 .pline.nocb{grid-template-columns:minmax(240px,1.15fr) 130px minmax(260px,1fr)}
+/* To order: price spread over its own columns — unit price · line total · supplier */
+.pline.pl6{grid-template-columns:24px minmax(220px,1.4fr) 120px 150px 120px minmax(170px,.9fr)}
+.pline .q.num{text-align:right}
+.pline .q.num .u{color:var(--ink-soft);font-size:12px}
+.pline .q.tot b{font-size:13.5px}
+.pline .sup{font-size:13px;line-height:1.4}
+.pline .sup .ps{display:block;font-size:12px;color:var(--ink-soft)}
+.pline.plhead .sh{padding-left:16px}
+@media(max-width:1200px){.pline.pl6{grid-template-columns:24px minmax(150px,1.4fr) 100px 120px 100px minmax(110px,.9fr);column-gap:12px}}
 /* price column reads left to right from the qty divider, with room to breathe */
 .pline .q.pc{text-align:left;border-left:1px solid var(--line);padding-left:16px;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
 .pline .q.pc .pricecell{font-size:13px;line-height:1.5}
@@ -617,7 +626,10 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
   .pline.nocb{grid-template-columns:minmax(0,1fr)}
   .pline .q,.pline .a{grid-column:2/-1;text-align:left;justify-content:flex-start}
   .pline.plhead{display:none}
-  .pline .qty,.pline .q.pc{border-left:0;padding-left:0}
+  .pline .qty,.pline .q.pc,.pline .sup{border-left:0;padding-left:0}
+  .pline.pl6{grid-template-columns:24px minmax(0,1fr)}
+  .pline.pl6 .q.num{text-align:left}
+  .pline.pl6 .sup{grid-column:2/-1}
   .pline.nocb .q,.pline.nocb .a{grid-column:1/-1}
   .srow{grid-template-columns:minmax(0,1fr) auto}
   .srow .a{grid-column:1/-1}
@@ -2154,6 +2166,15 @@ function matPrice(m){
   const it=m.priceItemRef&&priceItem(m.priceItemRef);if(!it)return null;
   const b=bestPrice(it);return b?{price:b.price,src:b.supplier,uom:it.uom,item:it,date:b.date}:{price:null,src:"",uom:it.uom,item:it};
 }
+/* Purchasing → To order: the price spread over three columns (unit · line total · supplier) */
+function purPriceCols(m){
+  const p=matPrice(m);
+  const chg=`<button class="linkbtn" onclick="event.stopPropagation();openMatch('${m.id}')">${p&&p.item?"change":"💲 Find price"}</button>`;
+  if(!p)return `<div class="q num"></div><div class="q num tot"></div><div class="sup">${chg}</div>`;
+  if(p.price==null)return `<div class="q num">no price</div><div class="q num tot"></div><div class="sup" title="${esc(p.item?p.item.description:"")}">${esc(p.item?p.item.description:"")}<span class="ps">${p.item?chg:""}</span></div>`;
+  const qty=+m.qtyReq||0;
+  return `<div class="q num" title="${esc(p.item?p.item.description:"")}">${money(p.price)}${p.uom?`<span class="u">/${esc(p.uom.toLowerCase())}</span>`:""}</div><div class="q num tot">${qty?`<b>${money(p.price*qty)}</b>`:""}</div><div class="sup qty">${p.src==="manual"?"Manual price":esc(p.src)}${p.item?`<span class="ps">${chg}</span>`:""}</div>`;
+}
 function priceCell(m){
   const p=matPrice(m);
   if(!p)return `<button class="linkbtn" onclick="event.stopPropagation();openMatch('${m.id}')">💲 Find price</button>`;
@@ -2777,8 +2798,8 @@ function renderPurBody(){
       const all=ms.every(m=>purSel.has(m.id));
       const cost=matTotals(ms);
       return `<div class="pgroup">${jobHead(j,`<span class="m">${ms.length} line${ms.length>1?"s":""} · ${money(cost.cost)}</span><label class="m" style="display:flex;gap:6px;align-items:center"><input type="checkbox" class="cbx" ${all?"checked":""} onchange="purSelMany('${j?j.id:""}',this.checked)"> all</label>`)}
-        <div class="pline plhead"><span></span><span>Item</span><span class="qh">Qty</span><span class="qh">Supplier price</span></div>
-        ${ms.map(m=>`<div class="pline"><input type="checkbox" class="cbx" ${purSel.has(m.id)?"checked":""} onchange="purToggle('${m.id}',this.checked)"><div>${desc(m)}</div><div class="q qty">${qty(m)}</div><div class="q pc">${priceCell(m)}</div></div>`).join("")}</div>`;}).join("")
+        <div class="pline pl6 plhead"><span></span><span>Item</span><span class="qh">Qty</span><span class="r">Unit price</span><span class="r">Line total</span><span class="sh">Supplier</span></div>
+        ${ms.map(m=>`<div class="pline pl6"><input type="checkbox" class="cbx" ${purSel.has(m.id)?"checked":""} onchange="purToggle('${m.id}',this.checked)"><div>${desc(m)}</div><div class="q qty">${qty(m)}</div>${purPriceCols(m)}</div>`).join("")}</div>`;}).join("")
       :empty(purQ?"No lines match that filter.":"Nothing to order. Add a material list to a project (📋 Paste from Excel) and its lines appear here.");
     const sel=ms.filter(m=>purSel.has(m.id)&&matStage(m)==="toorder");
     if(sel.length)html+=`<div class="bulkbar"><b>${sel.length} selected</b><span style="flex:1"></span><button class="btn primary" onclick="purRfq()">✉️ Send RFQ to suppliers</button><button class="btn" onclick="openOrderModal()">Ordered direct (no RFQ)</button><button class="btn" onclick="purSel=new Set();renderPurBody()">✕</button></div>`;

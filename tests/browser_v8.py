@@ -183,6 +183,9 @@ async def main():
             if geo:
                 ok(all(g["gapL"] >= 12 and g["gapR"] >= 12 for g in geo) and len({g["qx"] for g in geo}) == 1 and all(g["oneLine"] for g in geo), f"{st}: qty is its own aligned column between item and price ({len(geo)} lines)")
                 ok(await E("document.querySelectorAll('#purbody .pgroup').length") == await E("document.querySelectorAll('#purbody .pline.plhead').length"), f"{st}: every group has Item / Qty column headings")
+                if st == "toorder":
+                    hd = await E("[...document.querySelector('#purbody .pline.plhead').children].map(e=>e.textContent.trim().toLowerCase())")
+                    ok(hd[2:] == ["qty", "unit price", "line total", "supplier"], f"to order: price spread over Unit price / Line total / Supplier columns ({hd})")
         sep = await E("(()=>{const g=document.querySelector('#purbody .pgroup'),h=g.querySelector('.pghead'),cs=getComputedStyle(g);return {bl:parseFloat(cs.borderLeftWidth),hb:getComputedStyle(h).backgroundColor,cb:cs.backgroundColor,mb:parseFloat(cs.marginBottom)};})()")
         ok(sep["bl"] >= 4 and sep["hb"] != sep["cb"] and sep["mb"] >= 16, f"project groups: accent edge, tinted heading band, space between ({sep})")
         await E("purStage='waiting';render()"); await pg.wait_for_timeout(150)
