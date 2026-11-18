@@ -575,6 +575,12 @@ tr:hover .rowact,.tnode:hover .rowact{opacity:1}
 .pline .sup{font-size:13px;line-height:1.4}
 .pline .sup .ps{display:block;font-size:12px;color:var(--ink-soft)}
 .pline.plhead .sh{padding-left:16px}
+/* project page: Edit project as a round icon button (his request) */
+.editround{flex:none;width:38px;height:38px;border-radius:50%;display:inline-grid;place-items:center;padding:0;border:1px solid var(--line);background:var(--card);color:var(--ink);box-shadow:var(--raise);cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .12s}
+.editround .ac{stroke:var(--weld-dim)}
+.editround:hover{border-color:var(--weld-dim);color:var(--weld);background:var(--hover)}
+.editround:active{transform:scale(.92)}
+.editround:focus-visible{outline:2px solid var(--weld);outline-offset:2px}
 @media(max-width:1200px){.pline.pl6{grid-template-columns:24px minmax(150px,1.4fr) 100px 120px 100px minmax(110px,.9fr);column-gap:12px}}
 /* price column reads left to right from the qty divider, with room to breathe */
 .pline .q.pc{text-align:left;border-left:1px solid var(--line);padding-left:16px;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
@@ -4498,7 +4504,7 @@ function renderDetail(){
     <button class="chipbtn" title="Copy “${esc(folderName(j))}” for the project folder" onclick="copyFolderName('${j.id}')">⧉ Copy folder name</button>`;
   const head=`<button class="backbtn" onclick="go('jobs')">← Back to Projects</button>
     <div class="dhead">
-      <div class="dtoprow"><div class="dt">${esc(jobLabel(j))}</div><button class="btn sm" onclick="openForm('${j.id}','jobs')">Edit project</button></div>
+      <div class="dtoprow"><div class="dt">${esc(jobLabel(j))}</div><button class="iconbtn editround" title="Edit project" aria-label="Edit project" onclick="openForm('${j.id}','jobs')"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path class="ac" d="M13.5 6.5l4 4"/></svg></button></div>
       <div class="dmeta">${meta}</div>
       ${phaseStepper(j)}
       <div class="phacts">${phaseActions(j)}${isClosed(j)?"":`<button class="btn sm" onclick="toggleHold('${j.id}')">${oh?"▶ Resume (restart clock)":"⏸ Put on hold"}</button>`}${undoRedoBtns(j)}</div>

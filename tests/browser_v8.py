@@ -192,6 +192,14 @@ async def main():
         rs = await E("(()=>{const g=document.querySelector('#purbody .rfqc');if(!g)return null;const cs=getComputedStyle(g);return {bl:parseFloat(cs.borderLeftWidth),hb:getComputedStyle(g.querySelector('.hd')).backgroundColor,cb:cs.backgroundColor,mb:parseFloat(cs.marginBottom)};})()")
         ok(rs is None or (rs["bl"] >= 4 and rs["hb"] != rs["cb"] and rs["mb"] >= 16), f"waiting RFQ cards: same separation ({rs})")
 
+        # ---- project page: Edit project is a round icon button (his request) ----
+        await E("openJob(DB.jobs.find(x=>x.jobId==='010').id)"); await pg.wait_for_timeout(150)
+        eb = await E("(()=>{const b=document.querySelector('.dtoprow .editround');if(!b)return null;const r=b.getBoundingClientRect(),cs=getComputedStyle(b);return {w:Math.round(r.width),h:Math.round(r.height),br:cs.borderRadius,lbl:b.getAttribute('aria-label'),svg:!!b.querySelector('svg')};})()")
+        ok(eb and eb["w"] == eb["h"] and eb["br"] == "50%" and eb["lbl"] == "Edit project" and eb["svg"], f"Edit project is a round pencil button ({eb})")
+        await pg.click(".dtoprow .editround"); await pg.wait_for_timeout(150)
+        ok(await E("(()=>{const f=document.querySelector('#mbody [data-k]');return !!f&&f.offsetParent!==null;})()"), "round button opens the project form")
+        await E("closeForm()")
+
         # ---- his icon sheet + logo: SVG nav icons, gear app icon, hover / press animation ----
         await E("go('dashboard')"); await pg.wait_for_timeout(100)
         ok(await E("document.querySelectorAll('.nav button svg.nic').length") == 8 and await E("![...document.querySelectorAll('.nav button .ic')].some(e=>/\\p{Extended_Pictographic}/u.test(e.textContent))"), "8 SVG nav icons, no emoji left in the sidebar")
